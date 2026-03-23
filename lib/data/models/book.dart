@@ -18,6 +18,9 @@ class Book extends Equatable {
     this.dateAdded,
     this.lastPlayedAt,
     this.isDownloaded = false,
+    this.isFinished = false,
+    this.isFavorite = false,
+    this.userRating,
   });
 
   final String id;
@@ -35,6 +38,9 @@ class Book extends Equatable {
   final DateTime? dateAdded;
   final DateTime? lastPlayedAt;
   final bool isDownloaded;
+  final bool isFinished;
+  final bool isFavorite;
+  final double? userRating; // 0.0 to 1.0 normalized
 
   Book copyWith({
     String? id,
@@ -52,6 +58,9 @@ class Book extends Equatable {
     DateTime? dateAdded,
     DateTime? lastPlayedAt,
     bool? isDownloaded,
+    bool? isFinished,
+    bool? isFavorite,
+    double? userRating,
   }) {
     return Book(
       id: id ?? this.id,
@@ -69,6 +78,9 @@ class Book extends Equatable {
       dateAdded: dateAdded ?? this.dateAdded,
       lastPlayedAt: lastPlayedAt ?? this.lastPlayedAt,
       isDownloaded: isDownloaded ?? this.isDownloaded,
+      isFinished: isFinished ?? this.isFinished,
+      isFavorite: isFavorite ?? this.isFavorite,
+      userRating: userRating ?? this.userRating,
     );
   }
 

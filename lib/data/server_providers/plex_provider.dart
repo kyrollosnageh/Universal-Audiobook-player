@@ -436,6 +436,77 @@ class PlexProvider implements ServerProvider {
     }
   }
 
+  // ── Finished Status ──────────────────────────────────────────
+
+  @override
+  Future<void> reportFinished(String bookId, bool isFinished) async {
+    _requireAuth();
+    try {
+      if (isFinished) {
+        await _dio.get('/:/scrobble', queryParameters: {
+          'identifier': 'com.plexapp.plugins.library',
+          'key': '/library/metadata/$bookId',
+        });
+      } else {
+        await _dio.get('/:/unscrobble', queryParameters: {
+          'identifier': 'com.plexapp.plugins.library',
+          'key': '/library/metadata/$bookId',
+        });
+      }
+    } on DioException {
+      // Non-critical
+    }
+  }
+
+  @override
+  Future<bool?> getServerFinished(String bookId) async {
+    _requireAuth();
+    try {
+      final response = await _dio.get(PlexApiPaths.metadata(bookId));
+      final data = response.data as Map<String, dynamic>;
+      final mc = data['MediaContainer'] as Map<String, dynamic>? ?? {};
+      final items = mc['Metadata'] as List? ?? [];
+      if (items.isEmpty) return null;
+      final item = items.first as Map<String, dynamic>;
+      final viewCount = item['viewCount'] as int?;
+      return viewCount != null && viewCount > 0;
+    } on DioException {
+      return null;
+    }
+  }
+
+  // ── Favorites ──────────────────────────────────────────────────
+
+  @override
+  Future<void> setFavorite(String bookId, bool isFavorite) async {
+    _requireAuth();
+    try {
+      // Plex uses rating=10 as "loved"
+      await _dio.put('/:/rate', queryParameters: {
+        'key': '/library/metadata/$bookId',
+        'identifier': 'com.plexapp.plugins.library',
+        'rating': isFavorite ? 10 : 0,
+      });
+    } on DioException {
+      // Non-critical
+    }
+  }
+
+  @override
+  Future<void> setRating(String bookId, double rating) async {
+    _requireAuth();
+    try {
+      // Plex uses 0-10 scale, we normalize from 0.0-1.0
+      await _dio.put('/:/rate', queryParameters: {
+        'key': '/library/metadata/$bookId',
+        'identifier': 'com.plexapp.plugins.library',
+        'rating': (rating * 10).round(),
+      });
+    } on DioException {
+      // Non-critical
+    }
+  }
+
   // ── Series (via Collections) ──────────────────────────────────
 
   @override
