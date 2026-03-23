@@ -280,7 +280,8 @@ class BookDetailScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: 12),
                           Semantics(
-                            label: 'Download ${book.title} for offline. Coming soon.',
+                            label:
+                                'Download ${book.title} for offline. Coming soon.',
                             child: OutlinedButton.icon(
                               onPressed: null,
                               icon: const Icon(Icons.download),
