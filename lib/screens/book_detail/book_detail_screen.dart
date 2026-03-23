@@ -100,6 +100,16 @@ class BookDetailScreen extends ConsumerWidget {
                       ref
                           .read(libraryNotifierProvider.notifier)
                           .toggleFavorite(book);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            book.isFavorite
+                                ? 'Removed from favorites'
+                                : 'Added to favorites',
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
                     },
                     icon: Icon(
                       book.isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -118,6 +128,16 @@ class BookDetailScreen extends ConsumerWidget {
                         ref
                             .read(libraryNotifierProvider.notifier)
                             .toggleFinished(book);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              book.isFinished
+                                  ? 'Marked as unfinished'
+                                  : 'Marked as finished',
+                            ),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
                       }
                     },
                     itemBuilder: (context) => [
@@ -321,9 +341,12 @@ class BookDetailScreen extends ConsumerWidget {
                       ],
 
                       // Action buttons
-                      Row(
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
                         children: [
-                          Expanded(
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(minWidth: 140),
                             child: Semantics(
                               label: book.isFinished
                                   ? 'Listen again to ${book.title}'
@@ -364,19 +387,6 @@ class BookDetailScreen extends ConsumerWidget {
                                       ? 'Resume'
                                       : 'Play',
                                 ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Semantics(
-                            label:
-                                'Download ${book.title} for offline. Coming soon.',
-                            child: OutlinedButton.icon(
-                              onPressed: null,
-                              icon: const Icon(Icons.download),
-                              label: const Text('Download'),
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size(48, 48),
                               ),
                             ),
                           ),

@@ -94,12 +94,6 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               ),
             ],
           ),
-          // Settings / server management (coming soon)
-          const IconButton(
-            icon: Icon(Icons.settings),
-            tooltip: 'Settings (coming soon)',
-            onPressed: null,
-          ),
         ],
       ),
       body: RefreshIndicator(
@@ -148,9 +142,12 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: Text(
-                    'Continue Listening',
-                    style: theme.textTheme.titleLarge,
+                  child: Semantics(
+                    header: true,
+                    child: Text(
+                      'Continue Listening',
+                      style: theme.textTheme.titleLarge,
+                    ),
                   ),
                 ),
               ),
@@ -232,7 +229,42 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                   ),
                 ),
               )
-            // Empty state
+            // Empty state — search vs general
+            else if (libraryState.books.isEmpty &&
+                libraryState.searchQuery != null &&
+                libraryState.searchQuery!.isNotEmpty)
+              SliverFillRemaining(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.search_off,
+                        size: 48,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "No books matching '${libraryState.searchQuery}'",
+                        style: theme.textTheme.bodyLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton.icon(
+                        onPressed: () {
+                          _searchController.clear();
+                          ref
+                              .read(libraryNotifierProvider.notifier)
+                              .search('');
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.clear),
+                        label: const Text('Clear search'),
+                      ),
+                    ],
+                  ),
+                ),
+              )
             else if (libraryState.books.isEmpty)
               const SliverFillRemaining(
                 child: Center(child: Text('No audiobooks found')),
@@ -289,9 +321,28 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                 ),
               ),
 
+            // Pagination loading indicator
+            if (libraryState.isLoadingMore && libraryState.books.isNotEmpty)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
+              ),
+
             // Bottom padding for mini-player
             if (playerState.hasBook)
-              const SliverToBoxAdapter(child: SizedBox(height: 80)),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: (72 * textScale).clamp(72, 96).toDouble(),
+                ),
+              ),
           ],
         ),
       ),
@@ -450,7 +501,7 @@ class _MiniPlayer extends ConsumerWidget {
           '${playerState.isPlaying ? "Playing" : "Paused"}. '
           'Tap for full player.',
       child: Container(
-        height: 72,
+        height: (72 * MediaQuery.textScalerOf(context).scale(1)).clamp(72, 96),
         decoration: const BoxDecoration(
           color: LibrettoTheme.cardColor,
           border: Border(top: BorderSide(color: LibrettoTheme.divider)),

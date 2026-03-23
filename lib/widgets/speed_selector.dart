@@ -46,14 +46,30 @@ class SpeedSelector extends StatelessWidget {
           ),
         ),
         itemBuilder: (context) => _presets.map((speed) {
+          final isSelected = speed == currentSpeed;
           return PopupMenuItem<double>(
             value: speed,
-            child: Text(
-              '${speed}x',
-              style: TextStyle(
-                fontWeight: speed == currentSpeed ? FontWeight.bold : null,
-                color: speed == currentSpeed ? LibrettoTheme.primary : null,
-              ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 24,
+                  child: isSelected
+                      ? const Icon(
+                          Icons.check,
+                          size: 18,
+                          color: LibrettoTheme.primary,
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${speed}x',
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : null,
+                    color: isSelected ? LibrettoTheme.primary : null,
+                  ),
+                ),
+              ],
             ),
           );
         }).toList(),

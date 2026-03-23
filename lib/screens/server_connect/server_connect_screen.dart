@@ -176,7 +176,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                     focusNode: _urlFocusNode,
                     decoration: InputDecoration(
                       labelText: 'Server URL',
-                      hintText: 'https://your-server.com:8096',
+                      hintText: 'e.g., http://your-server:port',
                       suffixIcon: _isDetecting
                           ? const Padding(
                               padding: EdgeInsets.all(12),
@@ -204,7 +204,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                       }
                       final uri = Uri.tryParse(value.trim());
                       if (uri == null || !uri.hasScheme) {
-                        return 'Please enter a valid URL (e.g., https://server:8096)';
+                        return 'Please enter a valid URL (e.g., http://your-server:port)';
                       }
                       return null;
                     },

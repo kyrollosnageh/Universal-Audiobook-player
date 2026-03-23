@@ -35,7 +35,7 @@ class PlaybackControls extends StatelessWidget {
               'Skip back ${AppConstants.skipBackwardDuration.inSeconds} seconds',
           child: IconButton(
             icon: const Icon(Icons.replay_10),
-            iconSize: 32,
+            iconSize: 32, // Secondary control icon size
             onPressed: onSkipBackward,
             tooltip: 'Skip back',
           ),
@@ -46,7 +46,7 @@ class PlaybackControls extends StatelessWidget {
           label: 'Previous chapter',
           child: IconButton(
             icon: const Icon(Icons.skip_previous),
-            iconSize: 36,
+            iconSize: 36, // Chapter navigation icon size
             onPressed: onPreviousChapter,
             tooltip: 'Previous chapter',
           ),
@@ -56,19 +56,20 @@ class PlaybackControls extends StatelessWidget {
         const SizedBox(width: 8),
         Semantics(
           label: isPlaying ? 'Pause' : 'Play',
-          child: Container(
-            decoration: const BoxDecoration(
-              color: LibrettoTheme.primary,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: Icon(
-                isPlaying ? Icons.pause : Icons.play_arrow,
-                color: LibrettoTheme.onPrimary,
+          child: Material(
+            color: LibrettoTheme.primary,
+            shape: const CircleBorder(),
+            child: InkWell(
+              onTap: onPlayPause,
+              customBorder: const CircleBorder(),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Icon(
+                  isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: LibrettoTheme.onPrimary,
+                  size: 48, // Primary play/pause icon size
+                ),
               ),
-              iconSize: 48,
-              onPressed: onPlayPause,
-              tooltip: isPlaying ? 'Pause' : 'Play',
             ),
           ),
         ),
@@ -79,7 +80,7 @@ class PlaybackControls extends StatelessWidget {
           label: 'Next chapter',
           child: IconButton(
             icon: const Icon(Icons.skip_next),
-            iconSize: 36,
+            iconSize: 36, // Chapter navigation icon size
             onPressed: onNextChapter,
             tooltip: 'Next chapter',
           ),
@@ -91,7 +92,7 @@ class PlaybackControls extends StatelessWidget {
               'Skip forward ${AppConstants.skipForwardDuration.inSeconds} seconds',
           child: IconButton(
             icon: const Icon(Icons.forward_30),
-            iconSize: 32,
+            iconSize: 32, // Secondary control icon size
             onPressed: onSkipForward,
             tooltip: 'Skip forward',
           ),

@@ -98,6 +98,7 @@ class SeriesViewScreen extends ConsumerWidget {
                       // Stats row
                       Wrap(
                         spacing: 16,
+                        runSpacing: 8,
                         children: [
                           if (stats.totalDuration > Duration.zero)
                             _StatChip(
@@ -123,7 +124,10 @@ class SeriesViewScreen extends ConsumerWidget {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('Up Next', style: theme.textTheme.titleMedium),
+                    child: Semantics(
+                      header: true,
+                      child: Text('Up Next', style: theme.textTheme.titleMedium),
+                    ),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -174,6 +178,7 @@ class SeriesViewScreen extends ConsumerWidget {
                   return _SeriesBookTile(
                     seriesBook: sb,
                     index: index,
+                    totalBooks: books.length,
                     isUpNext: upNext != null && sb.book.id == upNext.book.id,
                     onTap: () => context.push('/book/${sb.book.id}'),
                   );
@@ -217,12 +222,14 @@ class _SeriesBookTile extends StatelessWidget {
   const _SeriesBookTile({
     required this.seriesBook,
     required this.index,
+    required this.totalBooks,
     required this.isUpNext,
     required this.onTap,
   });
 
   final SeriesBook seriesBook;
   final int index;
+  final int totalBooks;
   final bool isUpNext;
   final VoidCallback onTap;
 
@@ -269,6 +276,11 @@ class _SeriesBookTile extends StatelessWidget {
           children: [
             Icon(statusIcon, size: 14, color: statusColor),
             const SizedBox(width: 4),
+            Text(
+              'Book ${index + 1} of $totalBooks',
+              style: theme.textTheme.bodySmall,
+            ),
+            const Text(' · '),
             Text(
               _statusLabel(seriesBook.status),
               style: theme.textTheme.bodySmall,
