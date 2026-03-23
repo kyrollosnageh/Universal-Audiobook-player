@@ -11,6 +11,7 @@ import '../../state/library_provider.dart';
 import '../../state/player_provider.dart';
 import '../../widgets/book_cover.dart';
 import '../../widgets/chapter_list.dart';
+import '../player/player_screen.dart';
 
 /// Chapter service provider.
 final chapterServiceProvider = Provider<ChapterService>((ref) {
@@ -236,13 +237,34 @@ class BookDetailScreen extends ConsumerWidget {
                                   ? 'Resume ${book.title}'
                                   : 'Play ${book.title}',
                               child: ElevatedButton.icon(
-                                onPressed: () {
-                                  // Phase 2: start playback
+                                onPressed: () async {
                                   final chapters =
                                       chaptersAsync.valueOrNull ?? [];
-                                  ref
-                                      .read(playerNotifierProvider.notifier)
-                                      .setBook(book, chapters);
+                                  final provider =
+                                      ref.read(activeServerProvider);
+                                  if (provider == null) return;
+
+                                  // Resolve position (local vs server)
+                                  final syncService =
+                                      ref.read(chapterServiceProvider);
+
+                                  final notifier = ref.read(
+                                      playerNotifierProvider.notifier);
+                                  await notifier.playBook(
+                                    book: book,
+                                    chapters: chapters,
+                                    provider: provider,
+                                  );
+
+                                  if (context.mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const PlayerScreen(),
+                                      ),
+                                    );
+                                  }
                                 },
                                 icon: const Icon(Icons.play_arrow),
                                 label: Text(

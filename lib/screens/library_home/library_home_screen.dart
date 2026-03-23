@@ -454,13 +454,13 @@ class _BookListTile extends StatelessWidget {
   }
 }
 
-class _MiniPlayer extends StatelessWidget {
+class _MiniPlayer extends ConsumerWidget {
   const _MiniPlayer({required this.playerState});
 
   final PlayerState playerState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final book = playerState.book!;
     return Semantics(
       label: 'Now playing: ${book.title}. '
@@ -510,7 +510,7 @@ class _MiniPlayer extends StatelessWidget {
               ),
               iconSize: 32,
               onPressed: () {
-                // Phase 2: toggle playback
+                ref.read(playerNotifierProvider.notifier).togglePlayPause();
               },
               tooltip: playerState.isPlaying ? 'Pause' : 'Play',
             ),

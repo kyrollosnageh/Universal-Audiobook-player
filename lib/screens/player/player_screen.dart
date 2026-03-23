@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/extensions.dart';
 import '../../core/theme.dart';
 import '../../state/player_provider.dart';
 import '../../widgets/book_cover.dart';
+import '../../widgets/chapter_list.dart';
 import '../../widgets/playback_controls.dart';
 import '../../widgets/scrubber.dart';
+import '../../widgets/sleep_timer_sheet.dart';
 import '../../widgets/speed_selector.dart';
 
-/// Full-screen player screen — playback integration in Phase 2.
+/// Full-screen player screen with playback controls.
 class PlayerScreen extends ConsumerWidget {
   const PlayerScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(playerNotifierProvider);
+    final notifier = ref.read(playerNotifierProvider.notifier);
     final theme = Theme.of(context);
 
     if (!state.hasBook) {
@@ -79,14 +83,20 @@ class PlayerScreen extends ConsumerWidget {
 
               const SizedBox(height: 24),
 
+              // Buffering indicator
+              if (state.isBuffering)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: LinearProgressIndicator(),
+                ),
+
               // Scrubber
               Scrubber(
                 position: state.position,
                 duration: state.duration,
                 chapters: state.chapters,
-                onSeek: (position) {
-                  // Phase 2: seek to position
-                },
+                bufferedPosition: state.bufferedPosition,
+                onSeek: (position) => notifier.seek(position),
               ),
 
               const SizedBox(height: 16),
@@ -94,16 +104,25 @@ class PlayerScreen extends ConsumerWidget {
               // Controls
               PlaybackControls(
                 isPlaying: state.isPlaying,
-                onPlayPause: () {
-                  // Phase 2: toggle playback
-                },
-                onSkipForward: () {},
-                onSkipBackward: () {},
-                onNextChapter: () {},
-                onPreviousChapter: () {},
+                onPlayPause: () => notifier.togglePlayPause(),
+                onSkipForward: () => notifier.skipForward(),
+                onSkipBackward: () => notifier.skipBackward(),
+                onNextChapter: () => notifier.nextChapter(),
+                onPreviousChapter: () => notifier.previousChapter(),
               ),
 
               const SizedBox(height: 24),
+
+              // Error message
+              if (state.error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    state.error!,
+                    style: TextStyle(color: theme.colorScheme.error),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
 
               // Bottom row: speed, sleep timer, bookmarks, chapter list
               Row(
@@ -111,46 +130,133 @@ class PlayerScreen extends ConsumerWidget {
                 children: [
                   SpeedSelector(
                     currentSpeed: state.speed,
-                    onChanged: (speed) {
-                      // Phase 2: set speed
-                    },
+                    onChanged: (speed) => notifier.setSpeed(speed),
                   ),
+                  // Sleep timer
                   Semantics(
-                    label: 'Sleep timer',
+                    label: state.sleepTimerRemaining != null
+                        ? 'Sleep timer: ${state.sleepTimerRemaining!.toHms()} remaining'
+                        : 'Sleep timer',
                     child: IconButton(
-                      icon: const Icon(Icons.bedtime_outlined),
-                      onPressed: () {
-                        // Show sleep timer sheet
-                      },
+                      icon: Icon(
+                        state.sleepTimerRemaining != null
+                            ? Icons.bedtime
+                            : Icons.bedtime_outlined,
+                        color: state.sleepTimerRemaining != null
+                            ? LibrettoTheme.primary
+                            : null,
+                      ),
+                      onPressed: () => _showSleepTimer(context, notifier, state),
                       tooltip: 'Sleep timer',
                     ),
                   ),
+                  // Bookmarks
                   Semantics(
                     label: 'Bookmarks',
                     child: IconButton(
                       icon: const Icon(Icons.bookmark_outline),
                       onPressed: () {
-                        // Phase 2: bookmarks
+                        // Bookmark current position
                       },
                       tooltip: 'Bookmarks',
                     ),
                   ),
+                  // Chapter list
                   Semantics(
                     label: 'Chapter list',
                     child: IconButton(
                       icon: const Icon(Icons.list),
-                      onPressed: () {
-                        // Show chapter list overlay
-                      },
+                      onPressed: () =>
+                          _showChapterList(context, ref, state, notifier),
                       tooltip: 'Chapters',
                     ),
                   ),
                 ],
               ),
 
+              // Sleep timer remaining display
+              if (state.sleepTimerRemaining != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Sleep in ${state.sleepTimerRemaining!.toHms()}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: LibrettoTheme.primary,
+                    ),
+                  ),
+                ),
+
               const Spacer(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showSleepTimer(
+    BuildContext context,
+    PlayerNotifier notifier,
+    PlayerState state,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SleepTimerSheet(
+        currentTimer: state.sleepTimerRemaining,
+        onSelect: (duration) {
+          if (duration == null) {
+            notifier.cancelSleepTimer();
+          } else {
+            notifier.setSleepTimer(duration);
+          }
+        },
+      ),
+    );
+  }
+
+  void _showChapterList(
+    BuildContext context,
+    WidgetRef ref,
+    PlayerState state,
+    PlayerNotifier notifier,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Chapters',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                controller: scrollController,
+                itemCount: state.chapters.length,
+                itemBuilder: (context, index) => ChapterListTile(
+                  chapter: state.chapters[index],
+                  index: index,
+                  isCurrentChapter:
+                      state.chapters[index] == state.currentChapter,
+                  onTap: () {
+                    notifier.seekToChapter(index);
+                    Navigator.pop(context);
+                    SemanticsService.announce(
+                      'Now playing: ${state.chapters[index].title}',
+                      TextDirection.ltr,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

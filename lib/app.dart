@@ -6,6 +6,7 @@ import 'core/theme.dart';
 import 'screens/server_connect/server_connect_screen.dart';
 import 'screens/library_home/library_home_screen.dart';
 import 'screens/book_detail/book_detail_screen.dart';
+import 'screens/player/player_screen.dart';
 import 'state/auth_provider.dart';
 
 /// Root application widget with routing and theme.
@@ -32,6 +33,10 @@ class LibrettoApp extends ConsumerWidget {
           builder: (context, state) => BookDetailScreen(
             bookId: state.pathParameters['bookId']!,
           ),
+        ),
+        GoRoute(
+          path: '/player',
+          builder: (context, state) => const PlayerScreen(),
         ),
       ],
       redirect: (context, state) {
