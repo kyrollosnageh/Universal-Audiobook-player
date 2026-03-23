@@ -131,7 +131,8 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
         // Allow welcome, hub, and settings without auth
         if (location == '/welcome' ||
             location == '/hub' ||
-            location == '/settings') return null;
+            location == '/settings')
+          return null;
 
         // Require auth for everything else
         if (!isAuth) return '/hub';

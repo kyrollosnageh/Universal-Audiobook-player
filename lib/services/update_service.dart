@@ -83,9 +83,8 @@ class UpdateService {
         tagName: tagName,
         changelog: data['body'] as String? ?? 'No changelog available.',
         apkDownloadUrl: apkUrl,
-        publishedAt: DateTime.tryParse(
-              data['published_at'] as String? ?? '',
-            ) ??
+        publishedAt:
+            DateTime.tryParse(data['published_at'] as String? ?? '') ??
             DateTime.now(),
       );
 

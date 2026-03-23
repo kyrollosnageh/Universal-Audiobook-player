@@ -162,9 +162,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await channel.invokeMethod('installApk', {'path': filePath});
     } on MissingPluginException {
       // Platform channel not implemented yet — open file directly
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('APK downloaded to: $filePath')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('APK downloaded to: $filePath')));
     }
   }
 
@@ -245,9 +245,9 @@ class _SectionHeader extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: LibrettoTheme.primary,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(color: LibrettoTheme.primary),
       ),
     );
   }
