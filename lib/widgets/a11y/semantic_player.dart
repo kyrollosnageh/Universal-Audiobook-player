@@ -82,7 +82,10 @@ class SemanticPlayer {
   static void announceSleepTimer(BuildContext context, Duration? remaining) {
     if (remaining == null) {
       SemanticsService.sendAnnouncement(
-        const AnnounceSemanticsEvent('Sleep timer cancelled', TextDirection.ltr),
+        const AnnounceSemanticsEvent(
+          'Sleep timer cancelled',
+          TextDirection.ltr,
+        ),
       );
     } else if (remaining.isNegative) {
       SemanticsService.sendAnnouncement(
