@@ -49,12 +49,10 @@ class LibrettoTheme {
           fontWeight: FontWeight.w600,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: cardColor,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -64,10 +62,7 @@ class LibrettoTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
@@ -90,7 +85,7 @@ class LibrettoTheme {
           horizontal: 16,
           vertical: 14,
         ),
-        hintStyle: TextStyle(color: onSurfaceVariant),
+        hintStyle: const TextStyle(color: onSurfaceVariant),
       ),
       textTheme: TextTheme(
         headlineLarge: TextStyle(
@@ -113,18 +108,9 @@ class LibrettoTheme {
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
-        bodyLarge: TextStyle(
-          color: textOnSurface,
-          fontSize: 16,
-        ),
-        bodyMedium: TextStyle(
-          color: textOnSurface,
-          fontSize: 14,
-        ),
-        bodySmall: TextStyle(
-          color: onSurfaceVariant,
-          fontSize: 12,
-        ),
+        bodyLarge: TextStyle(color: textOnSurface, fontSize: 16),
+        bodyMedium: TextStyle(color: textOnSurface, fontSize: 14),
+        bodySmall: const TextStyle(color: onSurfaceVariant, fontSize: 12),
         labelLarge: TextStyle(
           color: textOnSurface,
           fontSize: 14,
@@ -134,12 +120,10 @@ class LibrettoTheme {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: cardColor,
         contentTextStyle: TextStyle(color: textOnSurface),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         behavior: SnackBarBehavior.floating,
       ),
-      bottomSheetTheme: BottomSheetThemeData(
+      bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: surface,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -149,7 +133,7 @@ class LibrettoTheme {
         activeTrackColor: primary,
         inactiveTrackColor: divider,
         thumbColor: primary,
-        overlayColor: primary.withOpacity(0.2),
+        overlayColor: primary.withValues(alpha: 0.2),
         trackHeight: 4,
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(

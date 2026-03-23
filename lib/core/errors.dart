@@ -11,38 +11,37 @@ abstract class LibrettoException implements Exception {
 
 /// Server authentication failed or token expired.
 class AuthenticationException extends LibrettoException {
-  const AuthenticationException([String message = 'Authentication failed'])
-      : super(message);
+  const AuthenticationException([super.message = 'Authentication failed']);
 }
 
 /// Token has expired or been revoked (HTTP 401).
 class TokenExpiredException extends AuthenticationException {
   const TokenExpiredException()
-      : super('Token expired or revoked. Please log in again.');
+    : super('Token expired or revoked. Please log in again.');
 }
 
 /// Server is unreachable.
 class ServerUnreachableException extends LibrettoException {
   const ServerUnreachableException(String serverUrl)
-      : super('Cannot reach server: $serverUrl');
+    : super('Cannot reach server: $serverUrl');
 }
 
 /// Server type could not be detected from the URL.
 class ServerDetectionException extends LibrettoException {
   const ServerDetectionException(String url)
-      : super('Could not detect server type at: $url');
+    : super('Could not detect server type at: $url');
 }
 
 /// HTTPS is required but HTTP was provided without explicit acknowledgment.
 class InsecureConnectionException extends LibrettoException {
   const InsecureConnectionException()
-      : super('HTTPS is required. HTTP is only allowed for localhost/LAN.');
+    : super('HTTPS is required. HTTP is only allowed for localhost/LAN.');
 }
 
 /// Certificate validation failed (self-signed cert not yet trusted).
 class CertificateException extends LibrettoException {
   const CertificateException(String fingerprint)
-      : super('Untrusted certificate with fingerprint: $fingerprint');
+    : super('Untrusted certificate with fingerprint: $fingerprint');
 }
 
 /// An audio playback error.
@@ -53,7 +52,7 @@ class PlaybackException extends LibrettoException {
 /// Unsupported audio format.
 class UnsupportedFormatException extends PlaybackException {
   const UnsupportedFormatException(String format)
-      : super('Unsupported audio format: $format');
+    : super('Unsupported audio format: $format');
 }
 
 /// Chapter data is malformed or invalid.
@@ -80,8 +79,8 @@ class SyncConflictException extends LibrettoException {
 /// Storage limit exceeded for downloads.
 class StorageLimitException extends LibrettoException {
   const StorageLimitException(int bytesNeeded, int bytesAvailable)
-      : super(
-          'Insufficient storage: need $bytesNeeded bytes, '
-          'have $bytesAvailable bytes',
-        );
+    : super(
+        'Insufficient storage: need $bytesNeeded bytes, '
+        'have $bytesAvailable bytes',
+      );
 }

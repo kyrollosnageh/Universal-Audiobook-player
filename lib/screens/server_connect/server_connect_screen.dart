@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants.dart';
 import '../../core/errors.dart';
 import '../../core/extensions.dart';
-import '../../data/models/server_config.dart';
+import '../../core/theme.dart';
 import '../../data/server_providers/server_detector.dart';
 import '../../state/auth_provider.dart';
 
@@ -54,9 +56,12 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
     // Validate HTTPS
     final authService = ref.read(authServiceProvider);
     try {
-      _urlWarning = authService.validateUrl(url, httpAcknowledged: _httpAcknowledged);
+      _urlWarning = authService.validateUrl(
+        url,
+        httpAcknowledged: _httpAcknowledged,
+      );
     } on InsecureConnectionException {
-      _showHttpWarningDialog(url);
+      unawaited(_showHttpWarningDialog(url));
       return;
     }
 
@@ -88,11 +93,11 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
         content: Text(
           url.isLocalNetwork
               ? 'You are connecting via HTTP. Your credentials will be sent '
-                  'unencrypted. This is acceptable for local network connections '
-                  'but not recommended.'
+                    'unencrypted. This is acceptable for local network connections '
+                    'but not recommended.'
               : 'WARNING: You are connecting to a public server via HTTP. '
-                  'Your username and password will be sent in plain text and '
-                  'can be intercepted. Use HTTPS instead if possible.',
+                    'Your username and password will be sent in plain text and '
+                    'can be intercepted. Use HTTPS instead if possible.',
         ),
         actions: [
           TextButton(
@@ -109,7 +114,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
 
     if (confirmed == true) {
       setState(() => _httpAcknowledged = true);
-      _detectServer();
+      unawaited(_detectServer());
     }
   }
 
@@ -117,13 +122,15 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_detectedServer == null) return;
 
-    await ref.read(authNotifierProvider.notifier).login(
-      url: _urlController.text.trim(),
-      username: _usernameController.text.trim(),
-      password: _passwordController.text,
-      serverType: _detectedServer!.type,
-      serverName: _detectedServer!.serverName,
-    );
+    await ref
+        .read(authNotifierProvider.notifier)
+        .login(
+          url: _urlController.text.trim(),
+          username: _usernameController.text.trim(),
+          password: _passwordController.text,
+          serverType: _detectedServer!.type,
+          serverName: _detectedServer!.serverName,
+        );
 
     final authState = ref.read(authNotifierProvider);
     if (authState.isAuthenticated && mounted) {
@@ -211,7 +218,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                   Text(
                     _urlWarning!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.orange,
+                      color: LibrettoTheme.secondary,
                     ),
                   ),
                 ],
@@ -298,12 +305,12 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                           ? null
                           : _login,
                       child: authState.isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: theme.colorScheme.onPrimary,
                               ),
                             )
                           : const Text('Connect'),
@@ -324,53 +331,55 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                           style: theme.textTheme.titleMedium,
                         ),
                         const SizedBox(height: 12),
-                        ...servers.map((server) => Dismissible(
-                              key: ValueKey(server.id),
-                              direction: DismissDirection.endToStart,
-                              background: Container(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.only(right: 16),
-                                color: theme.colorScheme.error,
-                                child: const Icon(
-                                  Icons.delete,
-                                  color: Colors.white,
-                                ),
+                        ...servers.map(
+                          (server) => Dismissible(
+                            key: ValueKey(server.id),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 16),
+                              color: theme.colorScheme.error,
+                              child: Icon(
+                                Icons.delete,
+                                color: theme.colorScheme.onPrimary,
                               ),
-                              onDismissed: (_) {
-                                ref
-                                    .read(authServiceProvider)
-                                    .removeServer(server.id, server.url);
-                                ref.invalidate(savedServersProvider);
-                              },
-                              child: Semantics(
-                                label:
-                                    '${server.name}, ${server.type} server. '
-                                    'Swipe to delete.',
-                                child: ListTile(
-                                  leading: Icon(
-                                    _serverTypeIcon(server.type),
-                                    color: LibrettoTheme.primary,
-                                  ),
-                                  title: Text(server.name),
-                                  subtitle: Text(server.url),
-                                  trailing: server.isActive
-                                      ? const Icon(
-                                          Icons.check_circle,
-                                          color: Colors.green,
-                                        )
-                                      : null,
-                                  onTap: () {
-                                    _urlController.text = server.url;
-                                    _detectServer();
-                                  },
+                            ),
+                            onDismissed: (_) {
+                              ref
+                                  .read(authServiceProvider)
+                                  .removeServer(server.id, server.url);
+                              ref.invalidate(savedServersProvider);
+                            },
+                            child: Semantics(
+                              label:
+                                  '${server.name}, ${server.type} server. '
+                                  'Swipe to delete.',
+                              child: ListTile(
+                                leading: Icon(
+                                  _serverTypeIcon(server.type),
+                                  color: LibrettoTheme.primary,
                                 ),
+                                title: Text(server.name),
+                                subtitle: Text(server.url),
+                                trailing: server.isActive
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        color: LibrettoTheme.primary,
+                                      )
+                                    : null,
+                                onTap: () {
+                                  _urlController.text = server.url;
+                                  _detectServer();
+                                },
                               ),
-                            )),
+                            ),
+                          ),
+                        ),
                       ],
                     );
                   },
                   loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                 ),
               ],
             ),
@@ -410,13 +419,15 @@ class _ServerTypeBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: LibrettoTheme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: LibrettoTheme.primary.withOpacity(0.5)),
+          border: Border.all(
+            color: LibrettoTheme.primary.withValues(alpha: 0.5),
+          ),
         ),
         child: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.check_circle,
-              color: Colors.green,
+              color: LibrettoTheme.primary,
               size: 20,
             ),
             const SizedBox(width: 12),

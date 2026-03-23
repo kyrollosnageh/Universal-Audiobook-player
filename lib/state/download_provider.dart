@@ -57,8 +57,7 @@ class DownloadState {
 }
 
 class DownloadNotifier extends StateNotifier<DownloadState> {
-  DownloadNotifier(this._downloadService)
-      : super(const DownloadState()) {
+  DownloadNotifier(this._downloadService) : super(const DownloadState()) {
     _subscription = _downloadService.progressStream.listen(_onProgress);
   }
 
@@ -90,10 +89,7 @@ class DownloadNotifier extends StateNotifier<DownloadState> {
         active.remove(progress.bookId);
         final errors = Map<String, String>.from(state.errors);
         errors[progress.bookId] = progress.error ?? 'Unknown error';
-        state = state.copyWith(
-          activeDownloads: active,
-          errors: errors,
-        );
+        state = state.copyWith(activeDownloads: active, errors: errors);
         break;
 
       case DownloadStatus.cancelled:
@@ -123,15 +119,13 @@ class DownloadNotifier extends StateNotifier<DownloadState> {
     );
   }
 
-  @override
   void dispose() {
     _subscription?.cancel();
-    super.dispose();
   }
 }
 
 final downloadNotifierProvider =
     StateNotifierProvider<DownloadNotifier, DownloadState>((ref) {
-  final service = ref.watch(downloadServiceProvider);
-  return DownloadNotifier(service);
-});
+      final service = ref.watch(downloadServiceProvider);
+      return DownloadNotifier(service);
+    });

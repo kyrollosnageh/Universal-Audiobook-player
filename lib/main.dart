@@ -7,17 +7,20 @@ import 'app.dart';
 import 'services/crash_reporting_service.dart';
 
 void main() {
-  runZonedGuarded(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-    // Initialize crash reporting (PII-stripped)
-    final crashReporting = CrashReportingService();
-    await crashReporting.initialize();
+      // Initialize crash reporting (PII-stripped)
+      final crashReporting = CrashReportingService();
+      await crashReporting.initialize();
 
-    runApp(const ProviderScope(child: LibrettoApp()));
-  }, (error, stackTrace) {
-    // Catch uncaught errors and report them
-    debugPrint('Uncaught error: $error');
-    debugPrint('Stack trace: $stackTrace');
-  });
+      runApp(const ProviderScope(child: LibrettoApp()));
+    },
+    (error, stackTrace) {
+      // Catch uncaught errors and report them
+      debugPrint('Uncaught error: $error');
+      debugPrint('Stack trace: $stackTrace');
+    },
+  );
 }

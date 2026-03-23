@@ -6,7 +6,6 @@ import '../core/errors.dart';
 import '../core/extensions.dart';
 import '../data/database/app_database.dart';
 import '../data/database/daos/server_dao.dart';
-import '../data/models/auth_result.dart';
 import '../data/models/server_config.dart';
 import '../data/server_providers/server_detector.dart';
 import '../data/server_providers/server_provider.dart';
@@ -29,9 +28,9 @@ class AuthService {
     required AppDatabase database,
     FlutterSecureStorage? secureStorage,
     ServerDetector? detector,
-  })  : _serverDao = database.serverDao,
-        _secureStorage = secureStorage ?? const FlutterSecureStorage(),
-        _detector = detector ?? ServerDetector();
+  }) : _serverDao = database.serverDao,
+       _secureStorage = secureStorage ?? const FlutterSecureStorage(),
+       _detector = detector ?? ServerDetector();
 
   final ServerDao _serverDao;
   final FlutterSecureStorage _secureStorage;
@@ -121,16 +120,18 @@ class AuthService {
       );
 
       // Persist to database
-      await _serverDao.upsertServer(ServerEntry(
-        id: config.id,
-        name: config.name,
-        url: config.url,
-        type: config.type.name,
-        userId: config.userId,
-        isActive: true,
-        trustedCertFingerprint: null,
-        addedAt: config.addedAt ?? DateTime.now(),
-      ));
+      await _serverDao.upsertServer(
+        ServerEntry(
+          id: config.id,
+          name: config.name,
+          url: config.url,
+          type: config.type.name,
+          userId: config.userId,
+          isActive: true,
+          trustedCertFingerprint: null,
+          addedAt: config.addedAt ?? DateTime.now(),
+        ),
+      );
       await _serverDao.setActiveServer(config.id);
 
       // Cache the provider

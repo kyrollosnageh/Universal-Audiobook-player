@@ -38,25 +38,16 @@ class BookCover extends StatelessWidget {
                 height: height,
                 animate: !disableAnimations,
               ),
-              errorWidget: (context, url, error) => _FallbackCover(
-                width: width,
-                height: height,
-              ),
+              errorWidget: (context, url, error) =>
+                  _FallbackCover(width: width, height: height),
             )
-          : _FallbackCover(
-              width: width,
-              height: height,
-            ),
+          : _FallbackCover(width: width, height: height),
     );
   }
 }
 
 class _Placeholder extends StatefulWidget {
-  const _Placeholder({
-    this.width,
-    this.height,
-    this.animate = true,
-  });
+  const _Placeholder({this.width, this.height, this.animate = true});
 
   final double? width;
   final double? height;
@@ -78,9 +69,10 @@ class _PlaceholderState extends State<_Placeholder>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    _animation = Tween<double>(begin: 0.3, end: 0.6).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.3,
+      end: 0.6,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     if (widget.animate) {
       _controller.repeat(reverse: true);
@@ -109,7 +101,7 @@ class _PlaceholderState extends State<_Placeholder>
         return Container(
           width: widget.width,
           height: widget.height,
-          color: LibrettoTheme.cardColor.withOpacity(_animation.value),
+          color: LibrettoTheme.cardColor.withValues(alpha: _animation.value),
         );
       },
     );

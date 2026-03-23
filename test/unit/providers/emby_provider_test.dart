@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:libretto/core/extensions.dart';
@@ -22,8 +21,7 @@ void main() {
     });
 
     test('serverUrl strips trailing slash', () {
-      final p =
-          EmbyProvider(serverUrl: 'https://emby.example.com:8096/');
+      final p = EmbyProvider(serverUrl: 'https://emby.example.com:8096/');
       expect(p.serverUrl, 'https://emby.example.com:8096');
       p.dispose();
     });
@@ -45,10 +43,7 @@ void main() {
     });
 
     test('getStreamUrl generates correct URL', () {
-      provider.restoreSession(
-        token: 'abc123',
-        userId: 'user1',
-      );
+      provider.restoreSession(token: 'abc123', userId: 'user1');
 
       final url = provider.getStreamUrl('item42');
       expect(url.toString(), contains('/Audio/item42/stream'));
@@ -59,10 +54,7 @@ void main() {
     test('getStreamUrl with transcode sets correct params', () {
       provider.restoreSession(token: 'abc123', userId: 'user1');
 
-      final url = provider.getStreamUrl(
-        'item42',
-        transcode: AudioFormat.aac,
-      );
+      final url = provider.getStreamUrl('item42', transcode: AudioFormat.aac);
       expect(url.toString(), contains('Static=false'));
       expect(url.toString(), contains('AudioCodec=aac'));
     });
@@ -77,10 +69,7 @@ void main() {
     });
 
     test('logout clears auth state', () async {
-      provider.restoreSession(
-        token: 'test-token',
-        userId: 'test-user',
-      );
+      provider.restoreSession(token: 'test-token', userId: 'test-user');
       expect(provider.isAuthenticated, true);
 
       await provider.logout();
@@ -88,10 +77,7 @@ void main() {
     });
 
     test('requireAuth throws when not authenticated', () {
-      expect(
-        () => provider.fetchLibrary(),
-        throwsA(isA<Exception>()),
-      );
+      expect(() => provider.fetchLibrary(), throwsA(isA<Exception>()));
     });
   });
 
@@ -105,8 +91,7 @@ void main() {
     });
 
     test('typical audiobook position (2h 15m 30s)', () {
-      const position =
-          Duration(hours: 2, minutes: 15, seconds: 30);
+      const position = Duration(hours: 2, minutes: 15, seconds: 30);
       final ticks = position.toTicks();
       expect(ticks, 81300000000);
       expect(ticks.ticksToDuration(), position);

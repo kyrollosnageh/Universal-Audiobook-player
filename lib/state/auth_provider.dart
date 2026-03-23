@@ -27,19 +27,17 @@ final activeServerProvider = StateProvider<ServerProvider?>((ref) {
 });
 
 /// Saved servers list.
-final savedServersProvider =
-    FutureProvider<List<ServerEntry>>((ref) async {
+final savedServersProvider = FutureProvider<List<ServerEntry>>((ref) async {
   final auth = ref.watch(authServiceProvider);
   return auth.getSavedServers();
 });
 
 /// Server detection state.
 final serverDetectionProvider =
-    FutureProvider.family<ServerDetectionResult, String>(
-        (ref, url) async {
-  final auth = ref.watch(authServiceProvider);
-  return auth.detectServer(url);
-});
+    FutureProvider.family<ServerDetectionResult, String>((ref, url) async {
+      final auth = ref.watch(authServiceProvider);
+      return auth.detectServer(url);
+    });
 
 /// Authentication state notifier.
 class AuthState {
@@ -93,15 +91,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         serverName: serverName,
       );
 
-      state = AuthState(
-        isAuthenticated: true,
-        activeServer: config,
-      );
+      state = AuthState(isAuthenticated: true, activeServer: config);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -129,10 +121,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
         final provider = await _authService.restoreSession(config);
         if (provider != null) {
-          state = AuthState(
-            isAuthenticated: true,
-            activeServer: config,
-          );
+          state = AuthState(isAuthenticated: true, activeServer: config);
           return;
         }
       }
@@ -144,8 +133,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 }
 
-final authNotifierProvider =
-    StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((
+  ref,
+) {
   final authService = ref.watch(authServiceProvider);
   return AuthNotifier(authService);
 });

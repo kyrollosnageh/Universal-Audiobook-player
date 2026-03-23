@@ -15,10 +15,7 @@ import 'car_audio_handler.dart';
 ///
 /// Each book → Play (starts/resumes playback)
 class MediaBrowseTree {
-  MediaBrowseTree({
-    required this.libraryService,
-    required this.carHandler,
-  });
+  MediaBrowseTree({required this.libraryService, required this.carHandler});
 
   final LibraryService libraryService;
   final CarAudioHandler carHandler;
@@ -60,10 +57,7 @@ class MediaBrowseTree {
   }
 
   /// Get children for a specific parent ID.
-  Future<List<MediaItem>> getChildren(
-    String parentId,
-    String serverId,
-  ) async {
+  Future<List<MediaItem>> getChildren(String parentId, String serverId) async {
     switch (parentId) {
       case rootId:
         return getRootItems();
@@ -73,20 +67,14 @@ class MediaBrowseTree {
         return books.take(5).map((b) => carHandler.bookToMediaItem(b)).toList();
 
       case recentlyAddedId:
-        final books = await libraryService.getCachedBooks(
-          serverId,
-          limit: 20,
-        );
+        final books = await libraryService.getCachedBooks(serverId, limit: 20);
         return books.map((b) => carHandler.bookToMediaItem(b)).toList();
 
       case authorsId:
         return _getAuthorsList(serverId);
 
       case libraryId:
-        final books = await libraryService.getCachedBooks(
-          serverId,
-          limit: 50,
-        );
+        final books = await libraryService.getCachedBooks(serverId, limit: 50);
         return books.map((b) => carHandler.bookToMediaItem(b)).toList();
 
       default:
@@ -100,10 +88,7 @@ class MediaBrowseTree {
   }
 
   Future<List<MediaItem>> _getAuthorsList(String serverId) async {
-    final books = await libraryService.getCachedBooks(
-      serverId,
-      limit: 200,
-    );
+    final books = await libraryService.getCachedBooks(serverId, limit: 200);
 
     // Group by author
     final authors = <String>{};
@@ -113,26 +98,25 @@ class MediaBrowseTree {
       }
     }
 
-    return authors.toList()
-      ..sort()
-      ..map((author) => MediaItem(
+    final sorted = authors.toList()..sort();
+    return sorted
+        .map(
+          (author) => MediaItem(
             id: 'author:$author',
             title: author,
             playable: false,
             extras: const {'browsable': true},
-          ))
-          .toList();
+          ),
+        )
+        .toList();
   }
 
   Future<List<MediaItem>> _getBooksByAuthor(
     String serverId,
-    String author,
+    String authorName,
   ) async {
-    final books = await libraryService.getCachedBooks(
-      serverId,
-      limit: 100,
-      author: author,
-    );
+    final allBooks = await libraryService.getCachedBooks(serverId, limit: 200);
+    final books = allBooks.where((b) => b.author == authorName).toList();
 
     return books.map((b) => carHandler.bookToMediaItem(b)).toList();
   }

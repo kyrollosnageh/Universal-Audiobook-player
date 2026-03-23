@@ -20,12 +20,9 @@ class BooksTable extends Table {
   IntColumn get year => integer().nullable()();
   DateTimeColumn get dateAdded => dateTime().nullable()();
   DateTimeColumn get lastPlayedAt => dateTime().nullable()();
-  BoolColumn get isDownloaded =>
-      boolean().withDefault(const Constant(false))();
-  BoolColumn get isFinished =>
-      boolean().withDefault(const Constant(false))();
-  BoolColumn get isFavorite =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isDownloaded => boolean().withDefault(const Constant(false))();
+  BoolColumn get isFinished => boolean().withDefault(const Constant(false))();
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
   RealColumn get userRating => real().nullable()();
   DateTimeColumn get cachedAt => dateTime()();
 

@@ -27,12 +27,7 @@ part 'app_database.g.dart';
     SeriesTableDef,
     DownloadsTable,
   ],
-  daos: [
-    BookDao,
-    ChapterDao,
-    PositionDao,
-    ServerDao,
-  ],
+  daos: [BookDao, ChapterDao, PositionDao, ServerDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());

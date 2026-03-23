@@ -106,7 +106,7 @@ class ServerDetector {
       '$baseUrl${PlexApiPaths.identity}',
       options: Options(
         receiveTimeout: const Duration(seconds: 5),
-        validateStatus: (status) => status != null && status < 500),
+        validateStatus: (status) => status != null && status < 500,
       ),
     );
 
@@ -125,7 +125,7 @@ class ServerDetector {
 
       // Try string-based detection for XML responses
       if (data is String && data.contains('MediaContainer')) {
-        return ServerDetectionResult(
+        return const ServerDetectionResult(
           type: ServerType.plex,
           serverName: 'Plex Server',
         );

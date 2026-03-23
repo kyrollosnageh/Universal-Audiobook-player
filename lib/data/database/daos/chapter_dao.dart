@@ -6,8 +6,7 @@ import '../tables/chapters_table.dart';
 part 'chapter_dao.g.dart';
 
 @DriftAccessor(tables: [ChaptersTable])
-class ChapterDao extends DatabaseAccessor<AppDatabase>
-    with _$ChapterDaoMixin {
+class ChapterDao extends DatabaseAccessor<AppDatabase> with _$ChapterDaoMixin {
   ChapterDao(super.db);
 
   /// Insert or update a chapter.
@@ -25,8 +24,7 @@ class ChapterDao extends DatabaseAccessor<AppDatabase>
   /// Get all chapters for a book, ordered by start offset.
   Future<List<ChapterEntry>> getChapters(String bookId, String serverId) {
     return (select(chaptersTable)
-          ..where(
-              (t) => t.bookId.equals(bookId) & t.serverId.equals(serverId))
+          ..where((t) => t.bookId.equals(bookId) & t.serverId.equals(serverId))
           ..orderBy([(t) => OrderingTerm.asc(t.startOffsetMs)]))
         .get();
   }
@@ -34,8 +32,7 @@ class ChapterDao extends DatabaseAccessor<AppDatabase>
   /// Delete all chapters for a book.
   Future<int> clearBookChapters(String bookId, String serverId) {
     return (delete(chaptersTable)
-          ..where(
-              (t) => t.bookId.equals(bookId) & t.serverId.equals(serverId)))
+          ..where((t) => t.bookId.equals(bookId) & t.serverId.equals(serverId)))
         .go();
   }
 }

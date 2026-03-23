@@ -38,6 +38,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -56,7 +57,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
     final playerState = ref.watch(playerNotifierProvider);
     final authState = ref.watch(authNotifierProvider);
     final theme = Theme.of(context);
-    final textScale = MediaQuery.textScaleFactorOf(context);
+    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
     final useListLayout = textScale > AppConstants.highTextScaleThreshold;
 
     return Scaffold(
@@ -93,13 +94,11 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               ),
             ],
           ),
-          // Settings / server management
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
-            onPressed: () {
-              // Settings screen — future phase
-            },
+          // Settings / server management (coming soon)
+          const IconButton(
+            icon: Icon(Icons.settings),
+            tooltip: 'Settings (coming soon)',
+            onPressed: null,
           ),
         ],
       ),
@@ -134,10 +133,9 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                           : null,
                     ),
                     onChanged: (query) {
-                      ref
-                          .read(libraryNotifierProvider.notifier)
-                          .search(query);
-                      setState(() {}); // Update clear button visibility
+                      ref.read(libraryNotifierProvider.notifier).search(query);
+                      // Trigger rebuild for clear button visibility
+                      setState(() {});
                     },
                   ),
                 ),
@@ -188,9 +186,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                 child: Row(
                   children: [
                     Text(
-                      libraryState.searchQuery != null
-                          ? 'Results'
-                          : 'Library',
+                      libraryState.searchQuery != null ? 'Results' : 'Library',
                       style: theme.textTheme.titleLarge,
                     ),
                     const Spacer(),
@@ -210,15 +206,17 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                 child: Center(child: CircularProgressIndicator()),
               )
             // Error state
-            else if (libraryState.error != null &&
-                libraryState.books.isEmpty)
+            else if (libraryState.error != null && libraryState.books.isEmpty)
               SliverFillRemaining(
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline,
-                          size: 48, color: theme.colorScheme.error),
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: theme.colorScheme.error,
+                      ),
                       const SizedBox(height: 16),
                       Text(libraryState.error!),
                       const SizedBox(height: 16),
@@ -237,9 +235,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
             // Empty state
             else if (libraryState.books.isEmpty)
               const SliverFillRemaining(
-                child: Center(
-                  child: Text('No audiobooks found'),
-                ),
+                child: Center(child: Text('No audiobooks found')),
               )
             // Book grid/list
             else if (useListLayout)
@@ -260,7 +256,8 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                       onTap: () => context.push('/book/${book.id}'),
                     );
                   },
-                  childCount: libraryState.books.length +
+                  childCount:
+                      libraryState.books.length +
                       (libraryState.isLoadingMore ? 1 : 0),
                 ),
               )
@@ -268,8 +265,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverGrid(
-                  gridDelegate:
-                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 180,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
@@ -278,9 +274,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       if (index >= libraryState.books.length) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return const Center(child: CircularProgressIndicator());
                       }
                       final book = libraryState.books[index];
                       return _BookGridCard(
@@ -288,7 +282,8 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                         onTap: () => context.push('/book/${book.id}'),
                       );
                     },
-                    childCount: libraryState.books.length +
+                    childCount:
+                        libraryState.books.length +
                         (libraryState.isLoadingMore ? 1 : 0),
                   ),
                 ),
@@ -296,9 +291,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
 
             // Bottom padding for mini-player
             if (playerState.hasBook)
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 80),
-              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         ),
       ),
@@ -312,10 +305,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
 }
 
 class _ContinueListeningCard extends StatelessWidget {
-  const _ContinueListeningCard({
-    required this.book,
-    required this.onTap,
-  });
+  const _ContinueListeningCard({required this.book, required this.onTap});
 
   final Book book;
   final VoidCallback onTap;
@@ -323,11 +313,13 @@ class _ContinueListeningCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: '${book.title} by ${book.author ?? "unknown author"}, '
+      label:
+          '${book.title} by ${book.author ?? "Unknown Author"}, '
           '${((book.progress ?? 0) * 100).toInt()}% complete. '
           'Tap to continue listening.',
-      child: GestureDetector(
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
         child: SizedBox(
           width: 130,
           child: Column(
@@ -336,11 +328,7 @@ class _ContinueListeningCard extends StatelessWidget {
               Expanded(
                 child: Stack(
                   children: [
-                    BookCover(
-                      imageUrl: book.coverUrl,
-                      width: 130,
-                      height: 130,
-                    ),
+                    BookCover(imageUrl: book.coverUrl, width: 130, height: 130),
                     if (book.progress != null)
                       Positioned(
                         bottom: 0,
@@ -359,9 +347,9 @@ class _ContinueListeningCard extends StatelessWidget {
                 book.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -372,10 +360,7 @@ class _ContinueListeningCard extends StatelessWidget {
 }
 
 class _BookGridCard extends StatelessWidget {
-  const _BookGridCard({
-    required this.book,
-    required this.onTap,
-  });
+  const _BookGridCard({required this.book, required this.onTap});
 
   final Book book;
   final VoidCallback onTap;
@@ -383,28 +368,27 @@ class _BookGridCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: '${book.title} by ${book.author ?? "unknown"}. '
+      label:
+          '${book.title} by ${book.author ?? "Unknown Author"}. '
           '${book.duration?.toHumanReadable() ?? "unknown duration"}. '
           'Tap for details.',
-      child: GestureDetector(
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: BookCover(
-                imageUrl: book.coverUrl,
-                borderRadius: 8,
-              ),
+              child: BookCover(imageUrl: book.coverUrl, borderRadius: 8),
             ),
             const SizedBox(height: 6),
             Text(
               book.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             if (book.author != null)
               Text(
@@ -421,10 +405,7 @@ class _BookGridCard extends StatelessWidget {
 }
 
 class _BookListTile extends StatelessWidget {
-  const _BookListTile({
-    required this.book,
-    required this.onTap,
-  });
+  const _BookListTile({required this.book, required this.onTap});
 
   final Book book;
   final VoidCallback onTap;
@@ -432,7 +413,8 @@ class _BookListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: '${book.title} by ${book.author ?? "unknown"}. '
+      label:
+          '${book.title} by ${book.author ?? "Unknown Author"}. '
           '${book.duration?.toHumanReadable() ?? "unknown duration"}.',
       child: ListTile(
         leading: SizedBox(
@@ -441,7 +423,7 @@ class _BookListTile extends StatelessWidget {
           child: BookCover(imageUrl: book.coverUrl),
         ),
         title: Text(book.title),
-        subtitle: Text(book.author ?? ''),
+        subtitle: Text(book.author ?? 'Unknown Author'),
         trailing: book.duration != null
             ? Text(
                 book.duration!.toHumanReadable(),
@@ -463,16 +445,15 @@ class _MiniPlayer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final book = playerState.book!;
     return Semantics(
-      label: 'Now playing: ${book.title}. '
+      label:
+          'Now playing: ${book.title}. '
           '${playerState.isPlaying ? "Playing" : "Paused"}. '
           'Tap for full player.',
       child: Container(
         height: 72,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: LibrettoTheme.cardColor,
-          border: const Border(
-            top: BorderSide(color: LibrettoTheme.divider),
-          ),
+          border: Border(top: BorderSide(color: LibrettoTheme.divider)),
         ),
         child: Row(
           children: [
@@ -509,6 +490,7 @@ class _MiniPlayer extends ConsumerWidget {
                 playerState.isPlaying ? Icons.pause : Icons.play_arrow,
               ),
               iconSize: 32,
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               onPressed: () {
                 ref.read(playerNotifierProvider.notifier).togglePlayPause();
               },

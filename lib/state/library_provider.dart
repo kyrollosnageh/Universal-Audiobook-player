@@ -109,8 +109,9 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       // Show cached data instantly
       final serverId = provider.serverUrl;
       final cached = await _libraryService.getCachedBooks(serverId);
-      final continueListening =
-          await _libraryService.getContinueListening(serverId);
+      final continueListening = await _libraryService.getContinueListening(
+        serverId,
+      );
 
       if (cached.isNotEmpty) {
         state = state.copyWith(
@@ -136,8 +137,9 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
       );
 
       // Refresh shelves
-      final freshContinue =
-          await _libraryService.getContinueListening(serverId);
+      final freshContinue = await _libraryService.getContinueListening(
+        serverId,
+      );
       final favorites = await _libraryService.getFavoriteBooks(serverId);
       final finished = await _libraryService.getFinishedBooks(serverId);
       state = state.copyWith(
@@ -146,10 +148,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         finishedBooks: finished,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -206,10 +205,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     final provider = _ref.read(activeServerProvider);
     if (provider == null) return;
 
-    final local = await _libraryService.searchLocal(
-      query,
-      provider.serverUrl,
-    );
+    final local = await _libraryService.searchLocal(query, provider.serverUrl);
 
     if (state.searchQuery == query) {
       state = state.copyWith(books: local);
@@ -221,8 +217,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     if (provider == null) return;
 
     try {
-      final serverResult =
-          await _libraryService.searchServer(provider, query);
+      final serverResult = await _libraryService.searchServer(provider, query);
 
       // Merge with current local results
       if (state.searchQuery == query) {
@@ -320,15 +315,13 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     loadLibrary();
   }
 
-  @override
   void dispose() {
     _searchDebounce?.cancel();
-    super.dispose();
   }
 }
 
 final libraryNotifierProvider =
     StateNotifierProvider<LibraryNotifier, LibraryState>((ref) {
-  final libraryService = ref.watch(libraryServiceProvider);
-  return LibraryNotifier(libraryService, ref);
-});
+      final libraryService = ref.watch(libraryServiceProvider);
+      return LibraryNotifier(libraryService, ref);
+    });

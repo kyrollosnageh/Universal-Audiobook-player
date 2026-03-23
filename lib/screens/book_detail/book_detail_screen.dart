@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,7 +13,7 @@ import '../../state/library_provider.dart';
 import '../../state/player_provider.dart';
 import '../../widgets/book_cover.dart';
 import '../../widgets/chapter_list.dart';
-import '../player/player_screen.dart';
+import 'package:go_router/go_router.dart';
 
 /// Chapter service provider.
 final chapterServiceProvider = Provider<ChapterService>((ref) {
@@ -20,17 +22,20 @@ final chapterServiceProvider = Provider<ChapterService>((ref) {
 });
 
 /// Book detail provider — fetches on demand.
-final bookDetailProvider =
-    FutureProvider.family<BookDetail?, String>((ref, bookId) async {
+final bookDetailProvider = FutureProvider.family<BookDetail?, String>((
+  ref,
+  bookId,
+) async {
   final provider = ref.watch(activeServerProvider);
   if (provider == null) return null;
   return provider.getBookDetail(bookId);
 });
 
 /// Chapters provider — fetches on demand.
-final chaptersProvider =
-    FutureProvider.family<List<UnifiedChapter>, String>(
-        (ref, bookId) async {
+final chaptersProvider = FutureProvider.family<List<UnifiedChapter>, String>((
+  ref,
+  bookId,
+) async {
   final provider = ref.watch(activeServerProvider);
   if (provider == null) return [];
   final chapterService = ref.watch(chapterServiceProvider);
@@ -41,10 +46,7 @@ final chaptersProvider =
 ///
 /// Shows cover art, metadata, chapter list, play/download buttons.
 class BookDetailScreen extends ConsumerWidget {
-  const BookDetailScreen({
-    super.key,
-    required this.bookId,
-  });
+  const BookDetailScreen({super.key, required this.bookId});
 
   final String bookId;
 
@@ -61,10 +63,13 @@ class BookDetailScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline,
-                  size: 48, color: theme.colorScheme.error),
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: theme.colorScheme.error,
+              ),
               const SizedBox(height: 16),
-              Text('Failed to load book details'),
+              const Text('Failed to load book details'),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () => ref.invalidate(bookDetailProvider(bookId)),
@@ -147,7 +152,7 @@ class BookDetailScreen extends ConsumerWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          LibrettoTheme.primary.withOpacity(0.3),
+                          LibrettoTheme.primary.withValues(alpha: 0.3),
                           LibrettoTheme.background,
                         ],
                       ),
@@ -214,9 +219,11 @@ class BookDetailScreen extends ConsumerWidget {
                       Row(
                         children: [
                           if (book.duration != null) ...[
-                            Icon(Icons.schedule,
-                                size: 16,
-                                color: LibrettoTheme.onSurfaceVariant),
+                            const Icon(
+                              Icons.schedule,
+                              size: 16,
+                              color: LibrettoTheme.onSurfaceVariant,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               book.duration!.toHumanReadable(),
@@ -224,11 +231,12 @@ class BookDetailScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 16),
                           ],
-                          if (book.progress != null &&
-                              book.progress! > 0) ...[
-                            Icon(Icons.play_circle_outline,
-                                size: 16,
-                                color: LibrettoTheme.onSurfaceVariant),
+                          if (book.progress != null && book.progress! > 0) ...[
+                            const Icon(
+                              Icons.play_circle_outline,
+                              size: 16,
+                              color: LibrettoTheme.onSurfaceVariant,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               '${(book.progress! * 100).toInt()}% complete',
@@ -282,7 +290,8 @@ class BookDetailScreen extends ConsumerWidget {
                       // Series info
                       if (book.seriesName != null) ...[
                         Semantics(
-                          label: 'Part of series: ${book.seriesName}'
+                          label:
+                              'Part of series: ${book.seriesName}'
                               '${book.seriesIndex != null ? ', book ${book.seriesIndex}' : ''}',
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -325,16 +334,19 @@ class BookDetailScreen extends ConsumerWidget {
                                 onPressed: () async {
                                   final chapters =
                                       chaptersAsync.valueOrNull ?? [];
-                                  final provider =
-                                      ref.read(activeServerProvider);
+                                  final provider = ref.read(
+                                    activeServerProvider,
+                                  );
                                   if (provider == null) return;
 
                                   // Resolve position (local vs server)
-                                  final syncService =
-                                      ref.read(chapterServiceProvider);
+                                  final syncService = ref.read(
+                                    chapterServiceProvider,
+                                  );
 
                                   final notifier = ref.read(
-                                      playerNotifierProvider.notifier);
+                                    playerNotifierProvider.notifier,
+                                  );
                                   await notifier.playBook(
                                     book: book,
                                     chapters: chapters,
@@ -342,13 +354,7 @@ class BookDetailScreen extends ConsumerWidget {
                                   );
 
                                   if (context.mounted) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            const PlayerScreen(),
-                                      ),
-                                    );
+                                    unawaited(context.push('/player'));
                                   }
                                 },
                                 icon: Icon(book.isFinished
@@ -367,11 +373,10 @@ class BookDetailScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: 12),
                           Semantics(
-                            label: 'Download ${book.title} for offline',
+                            label:
+                                'Download ${book.title} for offline. Coming soon.',
                             child: OutlinedButton.icon(
-                              onPressed: () {
-                                // Phase 4: download
-                              },
+                              onPressed: null,
                               icon: const Icon(Icons.download),
                               label: const Text('Download'),
                               style: OutlinedButton.styleFrom(
@@ -385,10 +390,7 @@ class BookDetailScreen extends ConsumerWidget {
                       // Description
                       if (detail.description != null) ...[
                         const SizedBox(height: 24),
-                        Text(
-                          'About',
-                          style: theme.textTheme.titleMedium,
-                        ),
+                        Text('About', style: theme.textTheme.titleMedium),
                         const SizedBox(height: 8),
                         Text(
                           detail.description!,
@@ -413,10 +415,7 @@ class BookDetailScreen extends ConsumerWidget {
                       ],
 
                       const SizedBox(height: 24),
-                      Text(
-                        'Chapters',
-                        style: theme.textTheme.titleMedium,
-                      ),
+                      Text('Chapters', style: theme.textTheme.titleMedium),
                       const SizedBox(height: 8),
                     ],
                   ),
@@ -433,33 +432,26 @@ class BookDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                error: (_, __) => const SliverToBoxAdapter(
+                error: (_, _) => const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(16),
                     child: Text('Failed to load chapters'),
                   ),
                 ),
                 data: (chapters) => SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      return ChapterListTile(
-                        chapter: chapters[index],
-                        index: index,
-                        isCurrentChapter: false,
-                        onTap: () {
-                          // Phase 2: seek to chapter
-                        },
-                      );
-                    },
-                    childCount: chapters.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    return ChapterListTile(
+                      chapter: chapters[index],
+                      index: index,
+                      isCurrentChapter: false,
+                      onTap: null,
+                    );
+                  }, childCount: chapters.length),
                 ),
               ),
 
               // Bottom padding
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 80),
-              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           );
         },

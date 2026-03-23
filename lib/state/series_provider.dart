@@ -37,8 +37,7 @@ class SeriesState {
 }
 
 class SeriesNotifier extends StateNotifier<SeriesState> {
-  SeriesNotifier(this._seriesService, this._ref)
-      : super(const SeriesState());
+  SeriesNotifier(this._seriesService, this._ref) : super(const SeriesState());
 
   final SeriesService _seriesService;
   final Ref _ref;
@@ -60,14 +59,15 @@ class SeriesNotifier extends StateNotifier<SeriesState> {
 
 final seriesNotifierProvider =
     StateNotifierProvider<SeriesNotifier, SeriesState>((ref) {
-  final service = ref.watch(seriesServiceProvider);
-  return SeriesNotifier(service, ref);
-});
+      final service = ref.watch(seriesServiceProvider);
+      return SeriesNotifier(service, ref);
+    });
 
 /// Series detail: books within a series.
-final seriesBooksProvider =
-    FutureProvider.family<List<SeriesBook>, String>(
-        (ref, seriesId) async {
+final seriesBooksProvider = FutureProvider.family<List<SeriesBook>, String>((
+  ref,
+  seriesId,
+) async {
   final provider = ref.watch(activeServerProvider);
   if (provider == null) return [];
   final service = ref.watch(seriesServiceProvider);

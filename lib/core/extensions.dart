@@ -1,4 +1,5 @@
 /// Extension methods used throughout Libretto.
+library;
 
 /// Emby/Jellyfin use "ticks" (1 tick = 100 nanoseconds).
 /// 10,000,000 ticks = 1 second.

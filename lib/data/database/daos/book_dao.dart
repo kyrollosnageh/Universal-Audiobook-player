@@ -32,11 +32,13 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
   Future<List<BookEntry>> searchBooks(String query, String serverId) {
     final pattern = '%$query%';
     return (select(booksTable)
-          ..where((t) =>
-              t.serverId.equals(serverId) &
-              (t.title.like(pattern) |
-                  t.author.like(pattern) |
-                  t.narrator.like(pattern)))
+          ..where(
+            (t) =>
+                t.serverId.equals(serverId) &
+                (t.title.like(pattern) |
+                    t.author.like(pattern) |
+                    t.narrator.like(pattern)),
+          )
           ..limit(50))
         .get();
   }
@@ -69,11 +71,13 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
   /// Get books currently in progress (have a non-zero progress).
   Future<List<BookEntry>> getContinueListening(String serverId) {
     return (select(booksTable)
-          ..where((t) =>
-              t.serverId.equals(serverId) &
-              t.progress.isBiggerThanValue(0.0) &
-              t.progress.isSmallerThanValue(1.0) &
-              t.isFinished.equals(false))
+          ..where(
+            (t) =>
+                t.serverId.equals(serverId) &
+                t.progress.isBiggerThanValue(0.0) &
+                t.progress.isSmallerThanValue(1.0) &
+                t.isFinished.equals(false),
+          )
           ..orderBy([(t) => OrderingTerm.desc(t.lastPlayedAt)])
           ..limit(20))
         .get();
@@ -131,8 +135,6 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
 
   /// Delete all cached books for a server.
   Future<int> clearServerBooks(String serverId) {
-    return (delete(booksTable)
-          ..where((t) => t.serverId.equals(serverId)))
-        .go();
+    return (delete(booksTable)..where((t) => t.serverId.equals(serverId))).go();
   }
 }

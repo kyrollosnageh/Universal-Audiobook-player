@@ -128,7 +128,7 @@ class PlaybackService {
   ///
   /// Sets up the audio source based on chapter format:
   /// - Single file (M4B): loads the file, seeks to resume position
-  /// - MP3-per-chapter: builds a ConcatenatingAudioSource playlist
+  /// - MP3-per-chapter: builds a concatenated audio source playlist
   Future<void> loadBook({
     required Book book,
     required List<UnifiedChapter> chapters,
@@ -180,13 +180,10 @@ class PlaybackService {
   ) async {
     final sources = chapters.map((ch) {
       final url = provider.getStreamUrl(ch.trackItemId);
-      return AudioSource.uri(
-        Uri.parse(url.toString()),
-        tag: ch.id,
-      );
+      return AudioSource.uri(Uri.parse(url.toString()), tag: ch.id);
     }).toList();
 
-    final playlist = ConcatenatingAudioSource(
+    final playlist = AudioSource.concatenation(
       useLazyPreparation: true,
       children: sources,
     );
@@ -195,8 +192,10 @@ class PlaybackService {
 
     // Seek to the correct track and position
     if (startPosition > Duration.zero) {
-      final (trackIndex, trackPosition) =
-          _resolvePlaylistPosition(chapters, startPosition);
+      final (trackIndex, trackPosition) = _resolvePlaylistPosition(
+        chapters,
+        startPosition,
+      );
       await _player!.seek(trackPosition, index: trackIndex);
     }
   }
@@ -236,8 +235,10 @@ class PlaybackService {
     _ensureInitialized();
 
     if (_hasSeparateTracks(_chapters)) {
-      final (trackIndex, trackPosition) =
-          _resolvePlaylistPosition(_chapters, position);
+      final (trackIndex, trackPosition) = _resolvePlaylistPosition(
+        _chapters,
+        position,
+      );
       await _player!.seek(trackPosition, index: trackIndex);
     } else {
       await _player!.seek(position);
@@ -407,7 +408,7 @@ class PlaybackService {
         await play();
         _retryCount = 0;
       } catch (_) {
-        retryAfterError(); // Try again with longer delay
+        unawaited(retryAfterError()); // Try again with longer delay
       }
     });
   }

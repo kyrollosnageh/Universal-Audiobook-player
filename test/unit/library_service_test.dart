@@ -7,11 +7,10 @@ void main() {
   group('PaginatedResult', () {
     test('hasMore is true when more items available', () {
       final result = PaginatedResult<Book>(
-        items: List.generate(50, (i) => Book(
-          id: 'book_$i',
-          serverId: 'server1',
-          title: 'Book $i',
-        )),
+        items: List.generate(
+          50,
+          (i) => Book(id: 'book_$i', serverId: 'server1', title: 'Book $i'),
+        ),
         totalCount: 200,
         offset: 0,
         limit: 50,
@@ -23,11 +22,10 @@ void main() {
 
     test('hasMore is false at end of list', () {
       final result = PaginatedResult<Book>(
-        items: List.generate(10, (i) => Book(
-          id: 'book_$i',
-          serverId: 'server1',
-          title: 'Book $i',
-        )),
+        items: List.generate(
+          10,
+          (i) => Book(id: 'book_$i', serverId: 'server1', title: 'Book $i'),
+        ),
         totalCount: 60,
         offset: 50,
         limit: 50,
@@ -72,8 +70,7 @@ void main() {
 
       expect(merged.length, 3);
       // b2 should be the server version
-      expect(merged.firstWhere((b) => b.id == 'b2').title,
-          'Server Book 2');
+      expect(merged.firstWhere((b) => b.id == 'b2').title, 'Server Book 2');
     });
   });
 

@@ -5,8 +5,6 @@ import 'package:libretto/data/server_providers/audiobookshelf_provider.dart';
 import 'package:libretto/data/server_providers/jellyfin_provider.dart';
 import 'package:libretto/data/server_providers/plex_provider.dart';
 import 'package:libretto/data/server_providers/server_detector.dart';
-import 'package:libretto/data/models/auth_result.dart';
-import 'package:libretto/data/models/server_config.dart';
 import 'package:libretto/core/extensions.dart';
 
 void main() {
@@ -91,17 +89,13 @@ void main() {
 
   group('JellyfinProvider Integration', () {
     test('providerName is Jellyfin', () {
-      final provider = JellyfinProvider(
-        serverUrl: 'https://jf.test:8096',
-      );
+      final provider = JellyfinProvider(serverUrl: 'https://jf.test:8096');
       expect(provider.providerName, 'Jellyfin');
       provider.dispose();
     });
 
     test('inherits EmbyProvider stream URL format', () {
-      final provider = JellyfinProvider(
-        serverUrl: 'https://jf.test:8096',
-      );
+      final provider = JellyfinProvider(serverUrl: 'https://jf.test:8096');
       provider.restoreSession(token: 'jf-tok', userId: 'uid');
 
       final url = provider.getStreamUrl('item-1');
@@ -113,9 +107,7 @@ void main() {
 
   group('PlexProvider Integration', () {
     test('stream URL uses parts endpoint', () {
-      final provider = PlexProvider(
-        serverUrl: 'https://plex.test:32400',
-      );
+      final provider = PlexProvider(serverUrl: 'https://plex.test:32400');
       provider.restoreSession(token: 'plex-tok', userId: 'u1');
 
       final url = provider.getStreamUrl('part-42');

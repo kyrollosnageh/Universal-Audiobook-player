@@ -15,11 +15,7 @@ import '../../widgets/book_cover.dart';
 /// book list with individual status, "Up Next" highlight,
 /// and estimated time to complete.
 class SeriesViewScreen extends ConsumerWidget {
-  const SeriesViewScreen({
-    super.key,
-    required this.seriesId,
-    this.seriesName,
-  });
+  const SeriesViewScreen({super.key, required this.seriesId, this.seriesName});
 
   final String seriesId;
   final String? seriesName;
@@ -31,23 +27,23 @@ class SeriesViewScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(seriesName ?? 'Series'),
-      ),
+      appBar: AppBar(title: Text(seriesName ?? 'Series')),
       body: booksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline,
-                  size: 48, color: theme.colorScheme.error),
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: theme.colorScheme.error,
+              ),
               const SizedBox(height: 16),
-              Text('Failed to load series'),
+              const Text('Failed to load series'),
               const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: () =>
-                    ref.invalidate(seriesBooksProvider(seriesId)),
+                onPressed: () => ref.invalidate(seriesBooksProvider(seriesId)),
                 child: const Text('Retry'),
               ),
             ],
@@ -72,7 +68,8 @@ class SeriesViewScreen extends ConsumerWidget {
                     children: [
                       // Progress bar
                       Semantics(
-                        label: '${stats.completedBooks} of ${stats.totalBooks} '
+                        label:
+                            '${stats.completedBooks} of ${stats.totalBooks} '
                             'books completed',
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,27 +123,23 @@ class SeriesViewScreen extends ConsumerWidget {
               if (upNext != null) ...[
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'Up Next',
-                      style: theme.textTheme.titleMedium,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('Up Next', style: theme.textTheme.titleMedium),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Semantics(
-                      label: 'Up next: ${upNext.book.title}. '
+                      label:
+                          'Up next: ${upNext.book.title}. '
                           'Tap to start.',
                       child: Card(
                         child: ListTile(
                           leading: SizedBox(
                             width: 48,
                             height: 48,
-                            child: BookCover(
-                                imageUrl: upNext.book.coverUrl),
+                            child: BookCover(imageUrl: upNext.book.coverUrl),
                           ),
                           title: Text(upNext.book.title),
                           subtitle: Text(
@@ -157,8 +150,7 @@ class SeriesViewScreen extends ConsumerWidget {
                             color: LibrettoTheme.primary,
                             size: 36,
                           ),
-                          onTap: () =>
-                              context.push('/book/${upNext.book.id}'),
+                          onTap: () => context.push('/book/${upNext.book.id}'),
                         ),
                       ),
                     ),
@@ -172,30 +164,21 @@ class SeriesViewScreen extends ConsumerWidget {
               // All books in series
               SliverToBoxAdapter(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: Text(
-                    'All Books',
-                    style: theme.textTheme.titleMedium,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: Text('All Books', style: theme.textTheme.titleMedium),
                 ),
               ),
 
               SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final sb = books[index];
-                    return _SeriesBookTile(
-                      seriesBook: sb,
-                      index: index,
-                      isUpNext: upNext != null &&
-                          sb.book.id == upNext.book.id,
-                      onTap: () =>
-                          context.push('/book/${sb.book.id}'),
-                    );
-                  },
-                  childCount: books.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final sb = books[index];
+                  return _SeriesBookTile(
+                    seriesBook: sb,
+                    index: index,
+                    isUpNext: upNext != null && sb.book.id == upNext.book.id,
+                    onTap: () => context.push('/book/${sb.book.id}'),
+                  );
+                }, childCount: books.length),
               ),
             ],
           );
@@ -224,10 +207,7 @@ class _StatChip extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: LibrettoTheme.onSurfaceVariant),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
     );
@@ -257,7 +237,7 @@ class _SeriesBookTile extends StatelessWidget {
     switch (seriesBook.status) {
       case BookStatus.completed:
         statusIcon = Icons.check_circle;
-        statusColor = Colors.green;
+        statusColor = const Color(0xFF4CAF50);
         break;
       case BookStatus.inProgress:
         statusIcon = Icons.play_circle;
@@ -270,7 +250,8 @@ class _SeriesBookTile extends StatelessWidget {
     }
 
     return Semantics(
-      label: '${book.title}, '
+      label:
+          '${book.title}, '
           '${seriesBook.status.name.replaceAll(RegExp(r'(?=[A-Z])'), ' ').trim()}. '
           '${book.duration?.toHumanReadable() ?? ""}',
       child: ListTile(

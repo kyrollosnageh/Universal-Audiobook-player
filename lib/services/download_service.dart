@@ -8,7 +8,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../core/constants.dart';
 import '../core/errors.dart';
 import '../data/database/app_database.dart';
-import '../data/database/daos/book_dao.dart';
 import '../data/models/book.dart';
 import '../data/models/unified_chapter.dart';
 import '../data/server_providers/server_provider.dart';
@@ -23,13 +22,9 @@ import '../data/server_providers/server_provider.dart';
 /// - Smart prefetch: buffer next 2-3 chapters on WiFi
 /// - Progress tracking per-book and total
 class DownloadService {
-  DownloadService({
-    required AppDatabase database,
-    Dio? dio,
-  })  : _bookDao = database.bookDao,
-        _dio = dio ?? Dio();
+  DownloadService({required AppDatabase database, Dio? dio})
+    : _dio = dio ?? Dio();
 
-  final BookDao _bookDao;
   final Dio _dio;
 
   final Map<String, _DownloadTask> _activeTasks = {};
@@ -39,8 +34,7 @@ class DownloadService {
   StreamSubscription? _connectivitySub;
 
   /// Stream of download progress updates.
-  final _progressController =
-      StreamController<DownloadProgress>.broadcast();
+  final _progressController = StreamController<DownloadProgress>.broadcast();
   Stream<DownloadProgress> get progressStream => _progressController.stream;
 
   /// Current active downloads.
@@ -77,16 +71,18 @@ class DownloadService {
     }
 
     for (final trackId in trackIds) {
-      _enqueue(_QueuedDownload(
-        bookId: book.id,
-        trackId: trackId,
-        url: provider.getStreamUrl(trackId),
-        title: book.title,
-        serverId: provider.serverUrl,
-      ));
+      _enqueue(
+        _QueuedDownload(
+          bookId: book.id,
+          trackId: trackId,
+          url: provider.getStreamUrl(trackId),
+          title: book.title,
+          serverId: provider.serverUrl,
+        ),
+      );
     }
 
-    _processQueue();
+    await _processQueue();
   }
 
   /// Cancel a download.
@@ -98,10 +94,9 @@ class DownloadService {
     // Remove from queue
     _queue.removeWhere((q) => q.bookId == bookId);
 
-    _progressController.add(DownloadProgress(
-      bookId: bookId,
-      status: DownloadStatus.cancelled,
-    ));
+    _progressController.add(
+      DownloadProgress(bookId: bookId, status: DownloadStatus.cancelled),
+    );
   }
 
   /// Delete downloaded files for a book.
@@ -145,8 +140,10 @@ class DownloadService {
     final connectivity = await Connectivity().checkConnectivity();
     if (!connectivity.contains(ConnectivityResult.wifi)) return;
 
-    final endIndex = (currentIndex + AppConstants.prefetchChaptersAhead)
-        .clamp(0, chapters.length);
+    final endIndex = (currentIndex + AppConstants.prefetchChaptersAhead).clamp(
+      0,
+      chapters.length,
+    );
 
     for (var i = currentIndex + 1; i < endIndex; i++) {
       final ch = chapters[i];
@@ -155,29 +152,31 @@ class DownloadService {
       final localPath = await getLocalPath(bookId, ch.trackItemId);
       if (localPath != null) continue; // Already downloaded
 
-      _enqueue(_QueuedDownload(
-        bookId: bookId,
-        trackId: ch.trackItemId,
-        url: provider.getStreamUrl(ch.trackItemId),
-        title: ch.title,
-        serverId: provider.serverUrl,
-        isPrefetch: true,
-      ));
+      _enqueue(
+        _QueuedDownload(
+          bookId: bookId,
+          trackId: ch.trackItemId,
+          url: provider.getStreamUrl(ch.trackItemId),
+          title: ch.title,
+          serverId: provider.serverUrl,
+          isPrefetch: true,
+        ),
+      );
     }
 
-    _processQueue();
+    await _processQueue();
   }
 
   // ── Queue Management ──────────────────────────────────────────
 
   void _enqueue(_QueuedDownload download) {
     // Don't enqueue duplicates
-    if (_queue.any((q) =>
-        q.bookId == download.bookId && q.trackId == download.trackId)) {
+    if (_queue.any(
+      (q) => q.bookId == download.bookId && q.trackId == download.trackId,
+    )) {
       return;
     }
-    if (_activeTasks.containsKey(
-        '${download.bookId}/${download.trackId}')) {
+    if (_activeTasks.containsKey('${download.bookId}/${download.trackId}')) {
       return;
     }
     _queue.add(download);
@@ -220,12 +219,14 @@ class DownloadService {
 
     _activeTasks[taskKey] = task;
 
-    _progressController.add(DownloadProgress(
-      bookId: queued.bookId,
-      trackId: queued.trackId,
-      status: DownloadStatus.downloading,
-      progress: 0,
-    ));
+    _progressController.add(
+      DownloadProgress(
+        bookId: queued.bookId,
+        trackId: queued.trackId,
+        status: DownloadStatus.downloading,
+        progress: 0,
+      ),
+    );
 
     try {
       await _dio.download(
@@ -246,14 +247,16 @@ class DownloadService {
             task.progress = currentProgress;
             task.totalBytes = totalWithExisting;
 
-            _progressController.add(DownloadProgress(
-              bookId: queued.bookId,
-              trackId: queued.trackId,
-              status: DownloadStatus.downloading,
-              progress: currentProgress,
-              downloadedBytes: received + downloadedBytes,
-              totalBytes: totalWithExisting,
-            ));
+            _progressController.add(
+              DownloadProgress(
+                bookId: queued.bookId,
+                trackId: queued.trackId,
+                status: DownloadStatus.downloading,
+                progress: currentProgress,
+                downloadedBytes: received + downloadedBytes,
+                totalBytes: totalWithExisting,
+              ),
+            );
           }
         },
       );
@@ -263,16 +266,18 @@ class DownloadService {
       final fileSize = await File(filePath).length();
       _totalStorageUsed += fileSize;
 
-      _progressController.add(DownloadProgress(
-        bookId: queued.bookId,
-        trackId: queued.trackId,
-        status: DownloadStatus.complete,
-        progress: 1.0,
-        totalBytes: fileSize,
-      ));
+      _progressController.add(
+        DownloadProgress(
+          bookId: queued.bookId,
+          trackId: queued.trackId,
+          status: DownloadStatus.complete,
+          progress: 1.0,
+          totalBytes: fileSize,
+        ),
+      );
 
       // Process next in queue
-      _processQueue();
+      unawaited(_processQueue());
     } on DioException catch (e) {
       _activeTasks.remove(taskKey);
 
@@ -280,12 +285,14 @@ class DownloadService {
         return; // User cancelled
       }
 
-      _progressController.add(DownloadProgress(
-        bookId: queued.bookId,
-        trackId: queued.trackId,
-        status: DownloadStatus.error,
-        error: e.message ?? 'Download failed',
-      ));
+      _progressController.add(
+        DownloadProgress(
+          bookId: queued.bookId,
+          trackId: queued.trackId,
+          status: DownloadStatus.error,
+          error: e.message ?? 'Download failed',
+        ),
+      );
 
       // Re-queue for retry if network error
       if (e.type == DioExceptionType.connectionError ||
@@ -299,21 +306,21 @@ class DownloadService {
 
   /// Start monitoring connectivity for download resume.
   void startConnectivityMonitoring() {
-    _connectivitySub = Connectivity()
-        .onConnectivityChanged
-        .listen((results) {
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       if (results.any((r) => r != ConnectivityResult.none)) {
         // Connection restored — process pending queue
         _processQueue();
       } else {
         // Connection lost — pause downloads gracefully
         for (final task in _activeTasks.values) {
-          _progressController.add(DownloadProgress(
-            bookId: task.bookId,
-            trackId: task.trackId,
-            status: DownloadStatus.paused,
-            progress: task.progress,
-          ));
+          _progressController.add(
+            DownloadProgress(
+              bookId: task.bookId,
+              trackId: task.trackId,
+              status: DownloadStatus.paused,
+              progress: task.progress,
+            ),
+          );
         }
       }
     });
@@ -412,11 +419,4 @@ class DownloadProgress {
   final String? error;
 }
 
-enum DownloadStatus {
-  queued,
-  downloading,
-  paused,
-  complete,
-  error,
-  cancelled,
-}
+enum DownloadStatus { queued, downloading, paused, complete, error, cancelled }

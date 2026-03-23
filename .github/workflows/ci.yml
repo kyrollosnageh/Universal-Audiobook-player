@@ -11,10 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 env:
-  FLUTTER_VERSION: "3.29.0"
   JAVA_VERSION: "17"
 
 jobs:
@@ -25,18 +24,38 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify formatting
-        run: dart format --set-exit-if-changed .
+      - name: Run code generation (Drift, Freezed, etc.)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Auto-format code
+        run: dart format .
+
+      - name: Check for formatting changes
+        run: |
+          if [ -n "$(git diff --name-only)" ]; then
+            echo "::notice::Auto-formatted files:"
+            git diff --name-only
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "style: auto-format for Dart $(dart --version 2>&1 | grep -oP '\d+\.\d+\.\d+')"
+            git push
+            echo "::warning::Pushed formatting fixes. Workflow will re-run."
+            exit 1
+          fi
+          echo "All files correctly formatted."
 
       - name: Run analyzer
         run: dart analyze --fatal-infos --fatal-warnings
@@ -61,7 +80,6 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
@@ -114,7 +132,6 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
@@ -143,7 +160,6 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
@@ -172,7 +188,6 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
@@ -194,7 +209,6 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 

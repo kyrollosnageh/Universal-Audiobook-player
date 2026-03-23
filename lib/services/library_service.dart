@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 
 import '../core/constants.dart';
@@ -15,9 +17,7 @@ import '../data/server_providers/server_provider.dart';
 /// - On first launch, prefetches library in background batches of 200
 /// - Deduplicates search results (local + server)
 class LibraryService {
-  LibraryService({
-    required AppDatabase database,
-  }) : _bookDao = database.bookDao;
+  LibraryService({required AppDatabase database}) : _bookDao = database.bookDao;
 
   final BookDao _bookDao;
 
@@ -49,7 +49,7 @@ class LibraryService {
     );
 
     // Cache results in background
-    _cacheBooks(result.items, provider.serverUrl);
+    unawaited(_cacheBooks(result.items, provider.serverUrl));
 
     return result;
   }
@@ -83,7 +83,7 @@ class LibraryService {
     );
 
     // Cache new results
-    _cacheBooks(result.items, provider.serverUrl);
+    unawaited(_cacheBooks(result.items, provider.serverUrl));
 
     return result;
   }
@@ -171,7 +171,7 @@ class LibraryService {
       );
 
       totalCount ??= result.totalCount;
-      _cacheBooks(result.items, provider.serverUrl);
+      unawaited(_cacheBooks(result.items, provider.serverUrl));
 
       offset += result.items.length;
       yield (offset, totalCount);

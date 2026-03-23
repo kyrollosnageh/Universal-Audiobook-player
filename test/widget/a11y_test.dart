@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:libretto/widgets/a11y/semantic_player.dart';
-import 'package:libretto/widgets/a11y/focus_manager.dart';
 import 'package:libretto/data/models/book.dart';
 import 'package:libretto/data/models/unified_chapter.dart';
 
@@ -40,11 +39,7 @@ void main() {
     });
 
     test('play button label — no author', () {
-      const noAuthor = Book(
-        id: 'b1',
-        serverId: 's1',
-        title: 'Mystery Book',
-      );
+      const noAuthor = Book(id: 'b1', serverId: 's1', title: 'Mystery Book');
       final label = SemanticPlayer.playButtonLabel(book: noAuthor);
       expect(label, 'Play Mystery Book');
     });
