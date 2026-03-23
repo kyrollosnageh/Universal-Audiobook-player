@@ -133,8 +133,10 @@ void main() {
       ];
 
       chapters.sort(
-          (a, b) => a.startOffset.inMilliseconds.compareTo(
-              b.startOffset.inMilliseconds));
+        (a, b) => a.startOffset.inMilliseconds.compareTo(
+          b.startOffset.inMilliseconds,
+        ),
+      );
 
       expect(chapters[0].title, 'Chapter 1');
       expect(chapters[1].title, 'Chapter 2');

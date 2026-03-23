@@ -53,10 +53,9 @@ class PlayerState {
   final String? error;
 
   bool get hasBook => book != null;
-  double get progress =>
-      duration.inMilliseconds > 0
-          ? position.inMilliseconds / duration.inMilliseconds
-          : 0.0;
+  double get progress => duration.inMilliseconds > 0
+      ? position.inMilliseconds / duration.inMilliseconds
+      : 0.0;
 
   PlayerState copyWith({
     Book? book,
@@ -90,7 +89,7 @@ class PlayerState {
 /// Player state notifier — manages playback via PlaybackService.
 class PlayerNotifier extends StateNotifier<PlayerState> {
   PlayerNotifier(this._playbackService, this._syncService)
-      : super(const PlayerState());
+    : super(const PlayerState());
 
   final PlaybackService _playbackService;
   final SyncService _syncService;
@@ -161,32 +160,24 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
 
   Future<void> seek(Duration position) async {
     await _playbackService.seek(position);
-    state = state.copyWith(
-      currentChapter: _playbackService.currentChapter,
-    );
+    state = state.copyWith(currentChapter: _playbackService.currentChapter);
   }
 
   Future<void> skipForward() async => _playbackService.skipForward();
   Future<void> skipBackward() async => _playbackService.skipBackward();
   Future<void> nextChapter() async {
     await _playbackService.nextChapter();
-    state = state.copyWith(
-      currentChapter: _playbackService.currentChapter,
-    );
+    state = state.copyWith(currentChapter: _playbackService.currentChapter);
   }
 
   Future<void> previousChapter() async {
     await _playbackService.previousChapter();
-    state = state.copyWith(
-      currentChapter: _playbackService.currentChapter,
-    );
+    state = state.copyWith(currentChapter: _playbackService.currentChapter);
   }
 
   Future<void> seekToChapter(int index) async {
     await _playbackService.seekToChapter(index);
-    state = state.copyWith(
-      currentChapter: _playbackService.currentChapter,
-    );
+    state = state.copyWith(currentChapter: _playbackService.currentChapter);
   }
 
   Future<void> setSpeed(double speed) async {
@@ -290,8 +281,8 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
 
     _processingSub = _playbackService.processingStateStream.listen((ps) {
       state = state.copyWith(
-        isBuffering: ps == ProcessingState.buffering ||
-            ps == ProcessingState.loading,
+        isBuffering:
+            ps == ProcessingState.buffering || ps == ProcessingState.loading,
       );
 
       if (ps == ProcessingState.completed) {
@@ -302,16 +293,13 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
 
   void _startSleepTimerPolling() {
     _sleepTimerPollTimer?.cancel();
-    _sleepTimerPollTimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (_) {
-        final remaining = _playbackService.sleepTimerRemaining;
-        state = state.copyWith(sleepTimerRemaining: remaining);
-        if (remaining == null || remaining == Duration.zero) {
-          _sleepTimerPollTimer?.cancel();
-        }
-      },
-    );
+    _sleepTimerPollTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      final remaining = _playbackService.sleepTimerRemaining;
+      state = state.copyWith(sleepTimerRemaining: remaining);
+      if (remaining == null || remaining == Duration.zero) {
+        _sleepTimerPollTimer?.cancel();
+      }
+    });
   }
 
   @override
@@ -329,7 +317,7 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
 
 final playerNotifierProvider =
     StateNotifierProvider<PlayerNotifier, PlayerState>((ref) {
-  final playbackService = ref.watch(playbackServiceProvider);
-  final syncService = ref.watch(syncServiceProvider);
-  return PlayerNotifier(playbackService, syncService);
-});
+      final playbackService = ref.watch(playbackServiceProvider);
+      final syncService = ref.watch(syncServiceProvider);
+      return PlayerNotifier(playbackService, syncService);
+    });

@@ -13,8 +13,7 @@ class DownloadsTable extends Table {
   TextColumn get title => text()();
   TextColumn get filePath => text().nullable()();
   IntColumn get totalBytes => integer().nullable()();
-  IntColumn get downloadedBytes =>
-      integer().withDefault(const Constant(0))();
+  IntColumn get downloadedBytes => integer().withDefault(const Constant(0))();
   TextColumn get status => text()(); // queued, downloading, complete, error
   TextColumn get errorMessage => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();

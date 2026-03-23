@@ -10,9 +10,8 @@ import '../data/server_providers/server_provider.dart';
 /// - On reconnect after offline, sync queued positions in order
 /// - Conflict resolution: use furthest-ahead position; prompt if large divergence
 class SyncService {
-  SyncService({
-    required AppDatabase database,
-  }) : _positionDao = database.positionDao;
+  SyncService({required AppDatabase database})
+    : _positionDao = database.positionDao;
 
   final PositionDao _positionDao;
 
@@ -30,14 +29,16 @@ class SyncService {
     required Duration position,
     String? chapterId,
   }) async {
-    await _positionDao.savePosition(PositionEntry(
-      bookId: bookId,
-      serverId: serverId,
-      positionMs: position.inMilliseconds,
-      chapterId: chapterId,
-      updatedAt: DateTime.now(),
-      syncedToServer: false,
-    ));
+    await _positionDao.savePosition(
+      PositionEntry(
+        bookId: bookId,
+        serverId: serverId,
+        positionMs: position.inMilliseconds,
+        chapterId: chapterId,
+        updatedAt: DateTime.now(),
+        syncedToServer: false,
+      ),
+    );
   }
 
   // ── Get Local Position ────────────────────────────────────────────

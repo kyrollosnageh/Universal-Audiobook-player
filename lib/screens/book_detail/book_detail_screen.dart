@@ -20,17 +20,20 @@ final chapterServiceProvider = Provider<ChapterService>((ref) {
 });
 
 /// Book detail provider — fetches on demand.
-final bookDetailProvider =
-    FutureProvider.family<BookDetail?, String>((ref, bookId) async {
+final bookDetailProvider = FutureProvider.family<BookDetail?, String>((
+  ref,
+  bookId,
+) async {
   final provider = ref.watch(activeServerProvider);
   if (provider == null) return null;
   return provider.getBookDetail(bookId);
 });
 
 /// Chapters provider — fetches on demand.
-final chaptersProvider =
-    FutureProvider.family<List<UnifiedChapter>, String>(
-        (ref, bookId) async {
+final chaptersProvider = FutureProvider.family<List<UnifiedChapter>, String>((
+  ref,
+  bookId,
+) async {
   final provider = ref.watch(activeServerProvider);
   if (provider == null) return [];
   final chapterService = ref.watch(chapterServiceProvider);
@@ -41,10 +44,7 @@ final chaptersProvider =
 ///
 /// Shows cover art, metadata, chapter list, play/download buttons.
 class BookDetailScreen extends ConsumerWidget {
-  const BookDetailScreen({
-    super.key,
-    required this.bookId,
-  });
+  const BookDetailScreen({super.key, required this.bookId});
 
   final String bookId;
 
@@ -61,8 +61,11 @@ class BookDetailScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline,
-                  size: 48, color: theme.colorScheme.error),
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: theme.colorScheme.error,
+              ),
               const SizedBox(height: 16),
               Text('Failed to load book details'),
               const SizedBox(height: 8),
@@ -160,9 +163,11 @@ class BookDetailScreen extends ConsumerWidget {
                       Row(
                         children: [
                           if (book.duration != null) ...[
-                            Icon(Icons.schedule,
-                                size: 16,
-                                color: LibrettoTheme.onSurfaceVariant),
+                            Icon(
+                              Icons.schedule,
+                              size: 16,
+                              color: LibrettoTheme.onSurfaceVariant,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               book.duration!.toHumanReadable(),
@@ -170,11 +175,12 @@ class BookDetailScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 16),
                           ],
-                          if (book.progress != null &&
-                              book.progress! > 0) ...[
-                            Icon(Icons.play_circle_outline,
-                                size: 16,
-                                color: LibrettoTheme.onSurfaceVariant),
+                          if (book.progress != null && book.progress! > 0) ...[
+                            Icon(
+                              Icons.play_circle_outline,
+                              size: 16,
+                              color: LibrettoTheme.onSurfaceVariant,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               '${(book.progress! * 100).toInt()}% complete',
@@ -199,7 +205,8 @@ class BookDetailScreen extends ConsumerWidget {
                       // Series info
                       if (book.seriesName != null) ...[
                         Semantics(
-                          label: 'Part of series: ${book.seriesName}'
+                          label:
+                              'Part of series: ${book.seriesName}'
                               '${book.seriesIndex != null ? ', book ${book.seriesIndex}' : ''}',
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -232,24 +239,26 @@ class BookDetailScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: Semantics(
-                              label: book.progress != null &&
-                                      book.progress! > 0
+                              label: book.progress != null && book.progress! > 0
                                   ? 'Resume ${book.title}'
                                   : 'Play ${book.title}',
                               child: ElevatedButton.icon(
                                 onPressed: () async {
                                   final chapters =
                                       chaptersAsync.valueOrNull ?? [];
-                                  final provider =
-                                      ref.read(activeServerProvider);
+                                  final provider = ref.read(
+                                    activeServerProvider,
+                                  );
                                   if (provider == null) return;
 
                                   // Resolve position (local vs server)
-                                  final syncService =
-                                      ref.read(chapterServiceProvider);
+                                  final syncService = ref.read(
+                                    chapterServiceProvider,
+                                  );
 
                                   final notifier = ref.read(
-                                      playerNotifierProvider.notifier);
+                                    playerNotifierProvider.notifier,
+                                  );
                                   await notifier.playBook(
                                     book: book,
                                     chapters: chapters,
@@ -260,16 +269,14 @@ class BookDetailScreen extends ConsumerWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) =>
-                                            const PlayerScreen(),
+                                        builder: (_) => const PlayerScreen(),
                                       ),
                                     );
                                   }
                                 },
                                 icon: const Icon(Icons.play_arrow),
                                 label: Text(
-                                  book.progress != null &&
-                                          book.progress! > 0
+                                  book.progress != null && book.progress! > 0
                                       ? 'Resume'
                                       : 'Play',
                                 ),
@@ -296,10 +303,7 @@ class BookDetailScreen extends ConsumerWidget {
                       // Description
                       if (detail.description != null) ...[
                         const SizedBox(height: 24),
-                        Text(
-                          'About',
-                          style: theme.textTheme.titleMedium,
-                        ),
+                        Text('About', style: theme.textTheme.titleMedium),
                         const SizedBox(height: 8),
                         Text(
                           detail.description!,
@@ -324,10 +328,7 @@ class BookDetailScreen extends ConsumerWidget {
                       ],
 
                       const SizedBox(height: 24),
-                      Text(
-                        'Chapters',
-                        style: theme.textTheme.titleMedium,
-                      ),
+                      Text('Chapters', style: theme.textTheme.titleMedium),
                       const SizedBox(height: 8),
                     ],
                   ),
@@ -351,26 +352,21 @@ class BookDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 data: (chapters) => SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      return ChapterListTile(
-                        chapter: chapters[index],
-                        index: index,
-                        isCurrentChapter: false,
-                        onTap: () {
-                          // Phase 2: seek to chapter
-                        },
-                      );
-                    },
-                    childCount: chapters.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    return ChapterListTile(
+                      chapter: chapters[index],
+                      index: index,
+                      isCurrentChapter: false,
+                      onTap: () {
+                        // Phase 2: seek to chapter
+                      },
+                    );
+                  }, childCount: chapters.length),
                 ),
               ),
 
               // Bottom padding
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 80),
-              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           );
         },

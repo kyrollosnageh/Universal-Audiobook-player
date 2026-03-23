@@ -15,7 +15,15 @@ class SpeedSelector extends StatelessWidget {
   final ValueChanged<double> onChanged;
 
   static const List<double> _presets = [
-    0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+    2.5,
+    3.0,
   ];
 
   @override
@@ -34,10 +42,8 @@ class SpeedSelector extends StatelessWidget {
           child: Text(
             '${currentSpeed}x',
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: currentSpeed != 1.0
-                      ? LibrettoTheme.primary
-                      : null,
-                ),
+              color: currentSpeed != 1.0 ? LibrettoTheme.primary : null,
+            ),
           ),
         ),
         itemBuilder: (context) => _presets.map((speed) {
@@ -46,11 +52,8 @@ class SpeedSelector extends StatelessWidget {
             child: Text(
               '${speed}x',
               style: TextStyle(
-                fontWeight:
-                    speed == currentSpeed ? FontWeight.bold : null,
-                color: speed == currentSpeed
-                    ? LibrettoTheme.primary
-                    : null,
+                fontWeight: speed == currentSpeed ? FontWeight.bold : null,
+                color: speed == currentSpeed ? LibrettoTheme.primary : null,
               ),
             ),
           );

@@ -18,12 +18,10 @@ import 'server_provider.dart';
 /// - Series mapped via collections
 /// - Uses X-Plex-Token for all requests
 class PlexProvider implements ServerProvider {
-  PlexProvider({
-    required String serverUrl,
-    Dio? dio,
-  })  : _serverUrl = serverUrl.trimRight('/'),
-        _dio = dio ?? Dio(),
-        _plexTvDio = Dio() {
+  PlexProvider({required String serverUrl, Dio? dio})
+    : _serverUrl = serverUrl.trimRight('/'),
+      _dio = dio ?? Dio(),
+      _plexTvDio = Dio() {
     _configureDio();
   }
 
@@ -44,34 +42,36 @@ class PlexProvider implements ServerProvider {
     _dio.options.receiveTimeout = const Duration(seconds: 30);
     _dio.options.headers['Accept'] = 'application/json';
 
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        if (_token != null) {
-          options.queryParameters['X-Plex-Token'] = _token;
-        }
-        options.queryParameters.addAll({
-          'X-Plex-Client-Identifier': _clientId,
-          'X-Plex-Product': _product,
-          'X-Plex-Version': _version,
-        });
-        handler.next(options);
-      },
-      onError: (error, handler) {
-        if (error.response?.statusCode == 401) {
-          _token = null;
-          handler.reject(
-            DioException(
-              requestOptions: error.requestOptions,
-              error: const TokenExpiredException(),
-              type: DioExceptionType.badResponse,
-              response: error.response,
-            ),
-          );
-          return;
-        }
-        handler.next(error);
-      },
-    ));
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (_token != null) {
+            options.queryParameters['X-Plex-Token'] = _token;
+          }
+          options.queryParameters.addAll({
+            'X-Plex-Client-Identifier': _clientId,
+            'X-Plex-Product': _product,
+            'X-Plex-Version': _version,
+          });
+          handler.next(options);
+        },
+        onError: (error, handler) {
+          if (error.response?.statusCode == 401) {
+            _token = null;
+            handler.reject(
+              DioException(
+                requestOptions: error.requestOptions,
+                error: const TokenExpiredException(),
+                type: DioExceptionType.badResponse,
+                response: error.response,
+              ),
+            );
+            return;
+          }
+          handler.next(error);
+        },
+      ),
+    );
   }
 
   @override
@@ -114,10 +114,7 @@ class PlexProvider implements ServerProvider {
       final response = await _plexTvDio.post(
         'https://plex.tv/users/sign_in.json',
         data: {
-          'user': {
-            'login': username,
-            'password': password,
-          },
+          'user': {'login': username, 'password': password},
         },
         options: Options(
           headers: {
@@ -152,9 +149,7 @@ class PlexProvider implements ServerProvider {
       if (e.response?.statusCode == 401) {
         throw const AuthenticationException('Invalid Plex credentials');
       }
-      throw AuthenticationException(
-        'Plex authentication failed: ${e.message}',
-      );
+      throw AuthenticationException('Plex authentication failed: ${e.message}');
     }
   }
 
@@ -174,23 +169,18 @@ class PlexProvider implements ServerProvider {
     final pinId = data['id'] as int;
     final code = data['code'] as String;
 
-    final authUrl = '${PlexApiPaths.plexTvAuth}'
+    final authUrl =
+        '${PlexApiPaths.plexTvAuth}'
         '#!?clientID=$_clientId&code=$code';
 
-    return PlexAuthPin(
-      id: pinId,
-      code: code,
-      authUrl: authUrl,
-    );
+    return PlexAuthPin(id: pinId, code: code, authUrl: authUrl);
   }
 
   /// Poll for PIN completion after user authenticates in browser.
   Future<AuthResult?> checkAuthPin(int pinId) async {
     final response = await _plexTvDio.get(
       '${PlexApiPaths.plexTvPins}/$pinId',
-      queryParameters: {
-        'X-Plex-Client-Identifier': _clientId,
-      },
+      queryParameters: {'X-Plex-Client-Identifier': _clientId},
       options: Options(headers: {'Accept': 'application/json'}),
     );
 
@@ -283,7 +273,11 @@ class PlexProvider implements ServerProvider {
     final sectionId = libraryId ?? _audioLibrarySectionId;
     if (sectionId == null) {
       return const PaginatedResult(
-          items: [], totalCount: 0, offset: 0, limit: 50);
+        items: [],
+        totalCount: 0,
+        offset: 0,
+        limit: 50,
+      );
     }
 
     try {
@@ -308,9 +302,8 @@ class PlexProvider implements ServerProvider {
       final data = response.data as Map<String, dynamic>;
       final mc = data['MediaContainer'] as Map<String, dynamic>? ?? {};
       final items = mc['Metadata'] as List? ?? [];
-      final totalCount = mc['totalSize'] as int? ??
-          mc['size'] as int? ??
-          items.length;
+      final totalCount =
+          mc['totalSize'] as int? ?? mc['size'] as int? ?? items.length;
 
       // Heuristic: filter to only items that look like audiobooks
       final books = items
@@ -336,9 +329,7 @@ class PlexProvider implements ServerProvider {
     _requireAuth();
 
     try {
-      final response = await _dio.get(
-        PlexApiPaths.metadata(bookId),
-      );
+      final response = await _dio.get(PlexApiPaths.metadata(bookId));
 
       final data = response.data as Map<String, dynamic>;
       final mc = data['MediaContainer'] as Map<String, dynamic>? ?? {};
@@ -362,9 +353,7 @@ class PlexProvider implements ServerProvider {
 
     try {
       // Plex audiobook chapters are tracks within an album
-      final response = await _dio.get(
-        PlexApiPaths.children(bookId),
-      );
+      final response = await _dio.get(PlexApiPaths.children(bookId));
 
       final data = response.data as Map<String, dynamic>;
       final mc = data['MediaContainer'] as Map<String, dynamic>? ?? {};
@@ -388,9 +377,7 @@ class PlexProvider implements ServerProvider {
     // Plex direct stream
     return Uri.parse(
       '$_serverUrl/library/parts/$itemId/file',
-    ).withQueryParams({
-      'X-Plex-Token': _token ?? '',
-    });
+    ).withQueryParams({'X-Plex-Token': _token ?? ''});
   }
 
   @override
@@ -431,9 +418,7 @@ class PlexProvider implements ServerProvider {
     _requireAuth();
 
     try {
-      final response = await _dio.get(
-        PlexApiPaths.metadata(bookId),
-      );
+      final response = await _dio.get(PlexApiPaths.metadata(bookId));
 
       final data = response.data as Map<String, dynamic>;
       final mc = data['MediaContainer'] as Map<String, dynamic>? ?? {};
@@ -486,17 +471,13 @@ class PlexProvider implements ServerProvider {
     _requireAuth();
 
     try {
-      final response = await _dio.get(
-        PlexApiPaths.children(seriesId),
-      );
+      final response = await _dio.get(PlexApiPaths.children(seriesId));
 
       final data = response.data as Map<String, dynamic>;
       final mc = data['MediaContainer'] as Map<String, dynamic>? ?? {};
       final items = mc['Metadata'] as List? ?? [];
 
-      return items
-          .map((item) => _mapPlexAlbumToBook(item))
-          .toList();
+      return items.map((item) => _mapPlexAlbumToBook(item)).toList();
     } on DioException {
       return [];
     }
@@ -535,8 +516,7 @@ class PlexProvider implements ServerProvider {
       coverUrl: ratingKey.isNotEmpty
           ? getCoverArtUrl(ratingKey).toString()
           : null,
-      duration:
-          durationMs != null ? Duration(milliseconds: durationMs) : null,
+      duration: durationMs != null ? Duration(milliseconds: durationMs) : null,
       progress: progress,
       genre: map['genre'] as String?,
       year: map['year'] as int?,
@@ -554,25 +534,23 @@ class PlexProvider implements ServerProvider {
       book: book,
       description: map['summary'] as String?,
       publisher: map['studio'] as String?,
-      genres: (map['Genre'] as List?)
+      genres:
+          (map['Genre'] as List?)
               ?.map((g) => (g as Map)['tag'] as String? ?? '')
               .toList() ??
           const [],
     );
   }
 
-  List<UnifiedChapter> _tracksToChapters(
-    List<dynamic> tracks,
-    String albumId,
-  ) {
+  List<UnifiedChapter> _tracksToChapters(List<dynamic> tracks, String albumId) {
     var cumulativeOffset = Duration.zero;
 
     return tracks.asMap().entries.map((entry) {
       final track = entry.value as Map<String, dynamic>;
       final durationMs = track['duration'] as int? ?? 0;
       final duration = Duration(milliseconds: durationMs);
-      final ratingKey = track['ratingKey'] as String? ??
-          '${albumId}_track_${entry.key}';
+      final ratingKey =
+          track['ratingKey'] as String? ?? '${albumId}_track_${entry.key}';
 
       // Get the media part key for streaming
       final mediaList = track['Media'] as List?;
@@ -581,7 +559,8 @@ class PlexProvider implements ServerProvider {
         final parts =
             (mediaList.first as Map<String, dynamic>)['Part'] as List?;
         if (parts != null && parts.isNotEmpty) {
-          partKey = (parts.first as Map<String, dynamic>)['id']?.toString() ??
+          partKey =
+              (parts.first as Map<String, dynamic>)['id']?.toString() ??
               ratingKey;
         }
       }

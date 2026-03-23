@@ -23,9 +23,7 @@ class PlayerScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     if (!state.hasBook) {
-      return const Scaffold(
-        body: Center(child: Text('No book loaded')),
-      );
+      return const Scaffold(body: Center(child: Text('No book loaded')));
     }
 
     final book = state.book!;
@@ -37,11 +35,7 @@ class PlayerScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
           tooltip: 'Minimize player',
         ),
-        title: Text(
-          book.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(book.title, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
       body: SafeArea(
         child: Padding(
@@ -146,7 +140,8 @@ class PlayerScreen extends ConsumerWidget {
                             ? LibrettoTheme.primary
                             : null,
                       ),
-                      onPressed: () => _showSleepTimer(context, notifier, state),
+                      onPressed: () =>
+                          _showSleepTimer(context, notifier, state),
                       tooltip: 'Sleep timer',
                     ),
                   ),

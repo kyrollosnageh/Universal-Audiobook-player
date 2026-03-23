@@ -31,7 +31,8 @@ class PlaybackControls extends StatelessWidget {
       children: [
         // Skip back 15s
         Semantics(
-          label: 'Skip back ${AppConstants.skipBackwardDuration.inSeconds} seconds',
+          label:
+              'Skip back ${AppConstants.skipBackwardDuration.inSeconds} seconds',
           child: IconButton(
             icon: const Icon(Icons.replay_10),
             iconSize: 32,
@@ -86,7 +87,8 @@ class PlaybackControls extends StatelessWidget {
 
         // Skip forward 30s
         Semantics(
-          label: 'Skip forward ${AppConstants.skipForwardDuration.inSeconds} seconds',
+          label:
+              'Skip forward ${AppConstants.skipForwardDuration.inSeconds} seconds',
           child: IconButton(
             icon: const Icon(Icons.forward_30),
             iconSize: 32,

@@ -30,7 +30,7 @@ class Scrubber extends StatelessWidget {
         : 0.0;
     final bufferedValue = durationMs > 0
         ? bufferedPosition.inMilliseconds.toDouble().clamp(0, durationMs) /
-            durationMs
+              durationMs
         : 0.0;
 
     // Calculate chapter boundary positions
@@ -77,7 +77,9 @@ class Scrubber extends StatelessWidget {
                       child: Container(
                         width: 2,
                         decoration: BoxDecoration(
-                          color: LibrettoTheme.onSurfaceVariant.withOpacity(0.5),
+                          color: LibrettoTheme.onSurfaceVariant.withOpacity(
+                            0.5,
+                          ),
                           borderRadius: BorderRadius.circular(1),
                         ),
                       ),
@@ -86,7 +88,8 @@ class Scrubber extends StatelessWidget {
 
                   // Main slider
                   Semantics(
-                    label: 'Playback position. '
+                    label:
+                        'Playback position. '
                         '${position.toHms()} of ${duration.toHms()}. '
                         'Drag to seek.',
                     child: SliderTheme(
@@ -133,8 +136,8 @@ class Scrubber extends StatelessWidget {
                 Text(
                   _currentChapterLabel(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: LibrettoTheme.onSurfaceVariant,
-                      ),
+                    color: LibrettoTheme.onSurfaceVariant,
+                  ),
                 ),
               Text(
                 '-${(duration - position).toHms()}',

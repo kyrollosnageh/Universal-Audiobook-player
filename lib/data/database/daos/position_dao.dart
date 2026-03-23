@@ -18,8 +18,7 @@ class PositionDao extends DatabaseAccessor<AppDatabase>
   /// Get the saved position for a book.
   Future<PositionEntry?> getPosition(String bookId, String serverId) {
     return (select(positionsTable)
-          ..where(
-              (t) => t.bookId.equals(bookId) & t.serverId.equals(serverId)))
+          ..where((t) => t.bookId.equals(bookId) & t.serverId.equals(serverId)))
         .getSingleOrNull();
   }
 
@@ -34,18 +33,14 @@ class PositionDao extends DatabaseAccessor<AppDatabase>
   /// Mark a position as synced to the server.
   Future<void> markSynced(String bookId, String serverId) {
     return (update(positionsTable)
-          ..where(
-              (t) => t.bookId.equals(bookId) & t.serverId.equals(serverId)))
-        .write(const PositionsTableCompanion(
-      syncedToServer: Value(true),
-    ));
+          ..where((t) => t.bookId.equals(bookId) & t.serverId.equals(serverId)))
+        .write(const PositionsTableCompanion(syncedToServer: Value(true)));
   }
 
   /// Delete position for a book (on logout/clear).
   Future<int> clearPosition(String bookId, String serverId) {
     return (delete(positionsTable)
-          ..where(
-              (t) => t.bookId.equals(bookId) & t.serverId.equals(serverId)))
+          ..where((t) => t.bookId.equals(bookId) & t.serverId.equals(serverId)))
         .go();
   }
 }

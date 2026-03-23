@@ -24,7 +24,8 @@ class ChapterListTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Semantics(
-      label: 'Chapter ${index + 1}: ${chapter.title}, '
+      label:
+          'Chapter ${index + 1}: ${chapter.title}, '
           'duration ${chapter.duration.toHms()}'
           '${isCurrentChapter ? ', currently playing' : ''}',
       child: ListTile(
@@ -32,15 +33,8 @@ class ChapterListTile extends StatelessWidget {
           width: 32,
           child: Center(
             child: isCurrentChapter
-                ? Icon(
-                    Icons.equalizer,
-                    color: LibrettoTheme.primary,
-                    size: 24,
-                  )
-                : Text(
-                    '${index + 1}',
-                    style: theme.textTheme.bodySmall,
-                  ),
+                ? Icon(Icons.equalizer, color: LibrettoTheme.primary, size: 24)
+                : Text('${index + 1}', style: theme.textTheme.bodySmall),
           ),
         ),
         title: Text(
@@ -48,10 +42,8 @@ class ChapterListTile extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color:
-                isCurrentChapter ? LibrettoTheme.primary : null,
-            fontWeight:
-                isCurrentChapter ? FontWeight.w600 : null,
+            color: isCurrentChapter ? LibrettoTheme.primary : null,
+            fontWeight: isCurrentChapter ? FontWeight.w600 : null,
           ),
         ),
         trailing: Text(
@@ -59,8 +51,7 @@ class ChapterListTile extends StatelessWidget {
           style: theme.textTheme.bodySmall,
         ),
         onTap: onTap,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         minVerticalPadding: 0,
       ),
     );

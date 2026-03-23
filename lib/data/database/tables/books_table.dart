@@ -20,8 +20,7 @@ class BooksTable extends Table {
   IntColumn get year => integer().nullable()();
   DateTimeColumn get dateAdded => dateTime().nullable()();
   DateTimeColumn get lastPlayedAt => dateTime().nullable()();
-  BoolColumn get isDownloaded =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isDownloaded => boolean().withDefault(const Constant(false))();
   DateTimeColumn get cachedAt => dateTime()();
 
   @override

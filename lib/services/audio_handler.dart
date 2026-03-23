@@ -47,14 +47,16 @@ class LibrettoAudioHandler extends BaseAudioHandler
     Duration? duration,
     Uri? artUri,
   }) {
-    mediaItem.add(MediaItem(
-      id: 'current',
-      title: title,
-      artist: artist,
-      album: album,
-      duration: duration,
-      artUri: artUri,
-    ));
+    mediaItem.add(
+      MediaItem(
+        id: 'current',
+        title: title,
+        artist: artist,
+        album: album,
+        duration: duration,
+        artUri: artUri,
+      ),
+    );
   }
 
   @override

@@ -49,8 +49,7 @@ class SeriesService {
         index: book.seriesIndex ?? entry.key.toDouble(),
         status: status,
       );
-    }).toList()
-      ..sort((a, b) => a.index.compareTo(b.index));
+    }).toList()..sort((a, b) => a.index.compareTo(b.index));
   }
 
   /// Group books by series name from library data.
@@ -92,8 +91,7 @@ class SeriesService {
         totalDuration += sb.book.duration!;
         if (sb.status != BookStatus.completed) {
           final progress = sb.book.progress ?? 0.0;
-          final bookRemaining =
-              sb.book.duration! * (1.0 - progress);
+          final bookRemaining = sb.book.duration! * (1.0 - progress);
           remainingDuration += bookRemaining;
         }
       }
@@ -137,10 +135,7 @@ class SeriesService {
   ///
   /// Shows a 15-second countdown. [onAdvance] called when timer expires.
   /// Returns a stream of remaining seconds for UI countdown display.
-  Stream<int> startAutoAdvance(
-    Book nextBook,
-    void Function(Book) onAdvance,
-  ) {
+  Stream<int> startAutoAdvance(Book nextBook, void Function(Book) onAdvance) {
     if (!autoAdvanceEnabled) return const Stream.empty();
 
     _onAutoAdvance = onAdvance;
@@ -149,19 +144,16 @@ class SeriesService {
     var remaining = autoAdvanceDelay.inSeconds;
     controller.add(remaining);
 
-    _autoAdvanceTimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) {
-        remaining--;
-        controller.add(remaining);
+    _autoAdvanceTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      remaining--;
+      controller.add(remaining);
 
-        if (remaining <= 0) {
-          timer.cancel();
-          onAdvance(nextBook);
-          controller.close();
-        }
-      },
-    );
+      if (remaining <= 0) {
+        timer.cancel();
+        onAdvance(nextBook);
+        controller.close();
+      }
+    });
 
     return controller.stream;
   }
@@ -186,10 +178,7 @@ class SeriesService {
   }
 
   /// Apply custom order to a list of series books.
-  List<SeriesBook> applyCustomOrder(
-    String seriesId,
-    List<SeriesBook> books,
-  ) {
+  List<SeriesBook> applyCustomOrder(String seriesId, List<SeriesBook> books) {
     final order = _customOrder[seriesId];
     if (order == null) return books;
 

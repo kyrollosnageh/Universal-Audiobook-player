@@ -13,9 +13,8 @@ import '../data/server_providers/server_provider.dart';
 /// 3. Single MP3/FLAC with no chapter markers — time-based navigation
 /// 4. Mixed formats (some M4B + some MP3)
 class ChapterService {
-  ChapterService({
-    required AppDatabase database,
-  }) : _chapterDao = database.chapterDao;
+  ChapterService({required AppDatabase database})
+    : _chapterDao = database.chapterDao;
 
   final ChapterDao _chapterDao;
 
@@ -94,23 +93,23 @@ class ChapterService {
   ///
   /// For books that have some M4B files with sub-chapters and some MP3
   /// tracks, this creates a single flat list abstracting both.
-  List<UnifiedChapter> flattenMixedChapters(
-    List<UnifiedChapter> chapters,
-  ) {
+  List<UnifiedChapter> flattenMixedChapters(List<UnifiedChapter> chapters) {
     final flat = <UnifiedChapter>[];
     var globalOffset = Duration.zero;
 
     for (final ch in chapters) {
-      flat.add(UnifiedChapter(
-        id: ch.id,
-        title: ch.title,
-        startOffset: globalOffset,
-        duration: ch.duration,
-        trackItemId: ch.trackItemId,
-        imageUrl: ch.imageUrl,
-        isSeparateTrack: ch.isSeparateTrack,
-        trackIndex: ch.trackIndex,
-      ));
+      flat.add(
+        UnifiedChapter(
+          id: ch.id,
+          title: ch.title,
+          startOffset: globalOffset,
+          duration: ch.duration,
+          trackItemId: ch.trackItemId,
+          imageUrl: ch.imageUrl,
+          isSeparateTrack: ch.isSeparateTrack,
+          trackIndex: ch.trackIndex,
+        ),
+      );
       globalOffset += ch.duration;
     }
 
@@ -124,10 +123,7 @@ class ChapterService {
     final format = detectFormat(chapters);
     if (format == ChapterFormat.mp3PerChapter) {
       // Sum of individual tracks
-      return chapters.fold(
-        Duration.zero,
-        (sum, ch) => sum + ch.duration,
-      );
+      return chapters.fold(Duration.zero, (sum, ch) => sum + ch.duration);
     }
 
     // For embedded chapters: last chapter end offset
@@ -194,23 +190,19 @@ class ChapterService {
   }
 
   /// Calculate time elapsed in the current chapter.
-  Duration elapsedInChapter(
-    UnifiedChapter chapter,
-    Duration currentPosition,
-  ) {
+  Duration elapsedInChapter(UnifiedChapter chapter, Duration currentPosition) {
     final elapsed = currentPosition - chapter.startOffset;
     return elapsed.isNegative ? Duration.zero : elapsed;
   }
 
   /// Progress within the current chapter (0.0 - 1.0).
-  double chapterProgress(
-    UnifiedChapter chapter,
-    Duration currentPosition,
-  ) {
+  double chapterProgress(UnifiedChapter chapter, Duration currentPosition) {
     if (chapter.duration == Duration.zero) return 0.0;
     final elapsed = elapsedInChapter(chapter, currentPosition);
-    return (elapsed.inMilliseconds / chapter.duration.inMilliseconds)
-        .clamp(0.0, 1.0);
+    return (elapsed.inMilliseconds / chapter.duration.inMilliseconds).clamp(
+      0.0,
+      1.0,
+    );
   }
 
   // ── User Bookmarks ────────────────────────────────────────────
@@ -223,12 +215,14 @@ class ChapterService {
     String? chapterId,
   }) {
     _bookmarks.putIfAbsent(bookId, () => []);
-    _bookmarks[bookId]!.add(UserBookmark(
-      position: position,
-      note: note,
-      chapterId: chapterId,
-      createdAt: DateTime.now(),
-    ));
+    _bookmarks[bookId]!.add(
+      UserBookmark(
+        position: position,
+        note: note,
+        chapterId: chapterId,
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   /// Get all bookmarks for a book.
@@ -264,8 +258,10 @@ class ChapterService {
       validated.sort((a, b) => a.trackIndex.compareTo(b.trackIndex));
     } else {
       validated.sort(
-          (a, b) => a.startOffset.inMilliseconds.compareTo(
-              b.startOffset.inMilliseconds));
+        (a, b) => a.startOffset.inMilliseconds.compareTo(
+          b.startOffset.inMilliseconds,
+        ),
+      );
     }
 
     // Remove overlapping chapters (keep the first one)
@@ -333,18 +329,20 @@ class ChapterService {
     await _chapterDao.clearBookChapters(bookId, serverId);
 
     final entries = chapters
-        .map((ch) => ChapterEntry(
-              id: ch.id,
-              bookId: bookId,
-              serverId: serverId,
-              title: ch.title,
-              startOffsetMs: ch.startOffset.inMilliseconds,
-              durationMs: ch.duration.inMilliseconds,
-              trackItemId: ch.trackItemId,
-              imageUrl: ch.imageUrl,
-              isSeparateTrack: ch.isSeparateTrack,
-              trackIndex: ch.trackIndex,
-            ))
+        .map(
+          (ch) => ChapterEntry(
+            id: ch.id,
+            bookId: bookId,
+            serverId: serverId,
+            title: ch.title,
+            startOffsetMs: ch.startOffset.inMilliseconds,
+            durationMs: ch.duration.inMilliseconds,
+            trackItemId: ch.trackItemId,
+            imageUrl: ch.imageUrl,
+            isSeparateTrack: ch.isSeparateTrack,
+            trackIndex: ch.trackIndex,
+          ),
+        )
         .toList();
 
     await _chapterDao.upsertChapters(entries);
@@ -368,10 +366,13 @@ class ChapterService {
 enum ChapterFormat {
   /// M4B/M4A with embedded chapter markers.
   embeddedChapters,
+
   /// Multiple MP3 files, one per chapter.
   mp3PerChapter,
+
   /// Single file with no chapter markers.
   noChapters,
+
   /// Mixed: some files with embedded chapters, some separate tracks.
   mixed,
 }

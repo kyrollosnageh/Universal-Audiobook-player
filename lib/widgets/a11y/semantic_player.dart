@@ -68,21 +68,12 @@ class SemanticPlayer {
   }
 
   /// Announce playback speed change.
-  static void announceSpeedChange(
-    BuildContext context,
-    double speed,
-  ) {
-    SemanticsService.announce(
-      'Playback speed: ${speed}x',
-      TextDirection.ltr,
-    );
+  static void announceSpeedChange(BuildContext context, double speed) {
+    SemanticsService.announce('Playback speed: ${speed}x', TextDirection.ltr);
   }
 
   /// Announce sleep timer set.
-  static void announceSleepTimer(
-    BuildContext context,
-    Duration? remaining,
-  ) {
+  static void announceSleepTimer(BuildContext context, Duration? remaining) {
     if (remaining == null) {
       SemanticsService.announce('Sleep timer cancelled', TextDirection.ltr);
     } else if (remaining.isNegative) {

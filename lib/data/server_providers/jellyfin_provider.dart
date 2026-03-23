@@ -16,10 +16,7 @@ import 'emby_provider.dart';
 ///
 /// All browsing, chapter, streaming, and progress APIs are identical.
 class JellyfinProvider extends EmbyProvider {
-  JellyfinProvider({
-    required super.serverUrl,
-    super.dio,
-  });
+  JellyfinProvider({required super.serverUrl, super.dio});
 
   @override
   String get providerName => 'Jellyfin';
