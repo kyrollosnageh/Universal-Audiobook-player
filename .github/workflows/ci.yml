@@ -36,6 +36,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Run code generation (Drift, Freezed, etc.)
+        run: dart run build_runner build --delete-conflicting-outputs
+
       - name: Auto-format code
         run: dart format .
 

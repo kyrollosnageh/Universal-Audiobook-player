@@ -98,27 +98,30 @@ class MediaBrowseTree {
       }
     }
 
-    return authors.toList()
-      ..sort()
-      ..map(
-        (author) => MediaItem(
-          id: 'author:$author',
-          title: author,
-          playable: false,
-          extras: const {'browsable': true},
-        ),
-      ).toList();
+    final sorted = authors.toList()..sort();
+    return sorted
+        .map(
+          (author) => MediaItem(
+            id: 'author:$author',
+            title: author,
+            playable: false,
+            extras: const {'browsable': true},
+          ),
+        )
+        .toList();
   }
 
   Future<List<MediaItem>> _getBooksByAuthor(
     String serverId,
-    String author,
+    String authorName,
   ) async {
-    final books = await libraryService.getCachedBooks(
+    final allBooks = await libraryService.getCachedBooks(
       serverId,
-      limit: 100,
-      author: author,
+      limit: 200,
     );
+    final books = allBooks
+        .where((b) => b.author == authorName)
+        .toList();
 
     return books.map((b) => carHandler.bookToMediaItem(b)).toList();
   }
