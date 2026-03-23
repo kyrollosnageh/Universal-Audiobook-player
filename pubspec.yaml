@@ -25,10 +25,10 @@ dependencies:
 
   # Local Database
   drift: ^2.14.1
-  sqlite3_flutter_libs: ^0.5.18
+  sqlite3_flutter_libs: ^0.6.0+eol
 
   # Secure Storage
-  flutter_secure_storage: ^9.0.0
+  flutter_secure_storage: ^10.0.0
 
   # Image Caching
   cached_network_image: ^3.3.1
