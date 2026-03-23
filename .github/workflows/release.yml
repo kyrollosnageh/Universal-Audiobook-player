@@ -58,6 +58,9 @@ jobs:
           flutter create --org com.libretto --platforms android .
           flutter pub get
 
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
+
       - name: Build release APK
         run: flutter build apk --release
 
@@ -104,6 +107,9 @@ jobs:
         run: |
           flutter create --org com.libretto --platforms ios .
           flutter pub get
+
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build iOS (no codesign)
         run: flutter build ios --no-codesign --release
