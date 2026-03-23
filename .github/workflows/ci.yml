@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   JAVA_VERSION: "17"
@@ -24,6 +24,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: subosito/flutter-action@v2
         with:
@@ -33,8 +36,23 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify formatting
-        run: dart format --set-exit-if-changed .
+      - name: Auto-format code
+        run: dart format .
+
+      - name: Check for formatting changes
+        run: |
+          if [ -n "$(git diff --name-only)" ]; then
+            echo "::notice::Auto-formatted files:"
+            git diff --name-only
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "style: auto-format for Dart $(dart --version 2>&1 | grep -oP '\d+\.\d+\.\d+')"
+            git push
+            echo "::warning::Pushed formatting fixes. Workflow will re-run."
+            exit 1
+          fi
+          echo "All files correctly formatted."
 
       - name: Run analyzer
         run: dart analyze --fatal-infos --fatal-warnings
