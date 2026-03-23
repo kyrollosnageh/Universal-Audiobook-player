@@ -333,7 +333,7 @@ class BookDetailScreen extends ConsumerWidget {
                               child: ElevatedButton.icon(
                                 onPressed: () async {
                                   final chapters =
-                                      chaptersAsync.valueOrNull ?? [];
+                                      chaptersAsync.value ?? [];
                                   final provider = ref.read(
                                     activeServerProvider,
                                   );

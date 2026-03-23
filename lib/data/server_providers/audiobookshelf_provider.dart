@@ -6,6 +6,7 @@ import '../../core/extensions.dart';
 import '../models/auth_result.dart';
 import '../models/book.dart';
 import '../models/series.dart';
+import '../models/server_config.dart';
 import '../models/unified_chapter.dart';
 import 'server_provider.dart';
 

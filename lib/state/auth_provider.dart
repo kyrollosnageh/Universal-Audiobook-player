@@ -22,7 +22,7 @@ final authServiceProvider = Provider<AuthService>((ref) {
 });
 
 /// Currently active server provider (the API abstraction, not Riverpod provider).
-final activeServerProvider = StateProvider<ServerProvider?>((ref) {
+final activeServerProvider = Provider<ServerProvider?>((ref) {
   return ref.watch(authServiceProvider).currentProvider;
 });
 

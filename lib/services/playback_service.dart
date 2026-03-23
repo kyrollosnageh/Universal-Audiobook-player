@@ -183,7 +183,7 @@ class PlaybackService {
       return AudioSource.uri(Uri.parse(url.toString()), tag: ch.id);
     }).toList();
 
-    final playlist = AudioSource.concatenation(
+    final playlist = ConcatenatingAudioSource(
       useLazyPreparation: true,
       children: sources,
     );

@@ -6,6 +6,7 @@ import '../../core/extensions.dart';
 import '../models/auth_result.dart';
 import '../models/book.dart';
 import '../models/series.dart';
+import '../models/server_config.dart';
 import '../models/unified_chapter.dart';
 import 'server_provider.dart';
 
@@ -604,7 +605,7 @@ class PlexProvider implements ServerProvider {
       genre: map['genre'] as String?,
       year: map['year'] as int?,
       dateAdded: map['addedAt'] != null
-          ? DateTime.fromSecondsSinceEpoch(map['addedAt'] as int)
+          ? DateTime.fromMillisecondsSinceEpoch((map['addedAt'] as int) * 1000)
           : null,
     );
   }
