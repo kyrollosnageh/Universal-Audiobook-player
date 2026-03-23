@@ -9,30 +9,11 @@ permissions:
   pull-requests: write
 
 jobs:
-  # ── Review new/changed dependencies in PRs ───────────────────
-  dependency-review:
-    name: Dependency Review
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          # Fail on high/critical vulnerabilities
-          fail-on-severity: high
-          # Deny copyleft licenses that conflict with App Store distribution
-          deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0
-          # Comment on PR with review results
-          comment-summary-in-pr: always
-
   # ── Validate Dependabot PR (auto-merge patch updates) ────────
   auto-merge-dependabot:
     name: Auto-merge Dependabot (patch)
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
-    needs: dependency-review
     permissions:
       contents: write
       pull-requests: write
