@@ -145,15 +145,13 @@ class PlayerScreen extends ConsumerWidget {
                       tooltip: 'Sleep timer',
                     ),
                   ),
-                  // Bookmarks
+                  // Bookmarks (coming soon)
                   Semantics(
-                    label: 'Bookmarks',
+                    label: 'Bookmarks. Coming soon.',
                     child: IconButton(
                       icon: const Icon(Icons.bookmark_outline),
-                      onPressed: () {
-                        // Bookmark current position
-                      },
-                      tooltip: 'Bookmarks',
+                      onPressed: null,
+                      tooltip: 'Bookmarks (coming soon)',
                     ),
                   ),
                   // Chapter list

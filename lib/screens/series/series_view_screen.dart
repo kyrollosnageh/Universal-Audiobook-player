@@ -237,7 +237,7 @@ class _SeriesBookTile extends StatelessWidget {
     switch (seriesBook.status) {
       case BookStatus.completed:
         statusIcon = Icons.check_circle;
-        statusColor = Colors.green;
+        statusColor = const Color(0xFF4CAF50);
         break;
       case BookStatus.inProgress:
         statusIcon = Icons.play_circle;

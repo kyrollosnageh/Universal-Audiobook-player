@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants.dart';
 import '../../core/errors.dart';
 import '../../core/extensions.dart';
+import '../../core/theme.dart';
 import '../../data/models/server_config.dart';
 import '../../data/server_providers/server_detector.dart';
 import '../../state/auth_provider.dart';
@@ -216,7 +217,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                   Text(
                     _urlWarning!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.orange,
+                      color: LibrettoTheme.secondary,
                     ),
                   ),
                 ],
@@ -308,7 +309,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                               height: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: theme.colorScheme.onPrimary,
                               ),
                             )
                           : const Text('Connect'),
@@ -339,7 +340,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                               color: theme.colorScheme.error,
                               child: const Icon(
                                 Icons.delete,
-                                color: Colors.white,
+                                color: theme.colorScheme.onPrimary,
                               ),
                             ),
                             onDismissed: (_) {
@@ -362,7 +363,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                                 trailing: server.isActive
                                     ? const Icon(
                                         Icons.check_circle,
-                                        color: Colors.green,
+                                        color: LibrettoTheme.primary,
                                       )
                                     : null,
                                 onTap: () {
@@ -421,7 +422,7 @@ class _ServerTypeBadge extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 20),
+            Icon(Icons.check_circle, color: LibrettoTheme.primary, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

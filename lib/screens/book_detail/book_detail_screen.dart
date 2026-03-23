@@ -11,7 +11,7 @@ import '../../state/library_provider.dart';
 import '../../state/player_provider.dart';
 import '../../widgets/book_cover.dart';
 import '../../widgets/chapter_list.dart';
-import '../player/player_screen.dart';
+import 'package:go_router/go_router.dart';
 
 /// Chapter service provider.
 final chapterServiceProvider = Provider<ChapterService>((ref) {
@@ -266,12 +266,7 @@ class BookDetailScreen extends ConsumerWidget {
                                   );
 
                                   if (context.mounted) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => const PlayerScreen(),
-                                      ),
-                                    );
+                                    context.push('/player');
                                   }
                                 },
                                 icon: const Icon(Icons.play_arrow),
@@ -285,11 +280,9 @@ class BookDetailScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: 12),
                           Semantics(
-                            label: 'Download ${book.title} for offline',
+                            label: 'Download ${book.title} for offline. Coming soon.',
                             child: OutlinedButton.icon(
-                              onPressed: () {
-                                // Phase 4: download
-                              },
+                              onPressed: null,
                               icon: const Icon(Icons.download),
                               label: const Text('Download'),
                               style: OutlinedButton.styleFrom(
@@ -357,9 +350,7 @@ class BookDetailScreen extends ConsumerWidget {
                       chapter: chapters[index],
                       index: index,
                       isCurrentChapter: false,
-                      onTap: () {
-                        // Phase 2: seek to chapter
-                      },
+                      onTap: null,
                     );
                   }, childCount: chapters.length),
                 ),

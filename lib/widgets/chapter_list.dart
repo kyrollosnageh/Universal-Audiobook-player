@@ -11,13 +11,13 @@ class ChapterListTile extends StatelessWidget {
     required this.chapter,
     required this.index,
     required this.isCurrentChapter,
-    required this.onTap,
+    this.onTap,
   });
 
   final UnifiedChapter chapter;
   final int index;
   final bool isCurrentChapter;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
