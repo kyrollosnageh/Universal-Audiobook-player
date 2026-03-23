@@ -4,7 +4,6 @@ import '../core/extensions.dart';
 import '../core/theme.dart';
 import '../data/models/unified_chapter.dart';
 
-
 /// Audio scrubber/seek bar with chapter boundary tick marks and buffered indicator.
 class Scrubber extends StatelessWidget {
   const Scrubber({
@@ -172,4 +171,3 @@ class Scrubber extends StatelessWidget {
     return '1 of ${chapters.length}';
   }
 }
-
