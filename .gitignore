@@ -30,4 +30,3 @@ credentials.json
 # Generated
 *.freezed.dart
 *.mocks.dart
-pubspec.lock

@@ -64,17 +64,19 @@ extension StringExtensions on String {
     final uri = Uri.tryParse(this);
     if (uri == null) return false;
     final host = uri.host;
-    return host == 'localhost' ||
-        host == '127.0.0.1' ||
-        host.startsWith('192.168.') ||
-        host.startsWith('10.') ||
-        host.startsWith('172.16.') ||
-        host.startsWith('172.17.') ||
-        host.startsWith('172.18.') ||
-        host.startsWith('172.19.') ||
-        host.startsWith('172.2') ||
-        host.startsWith('172.3') ||
-        host.endsWith('.local');
+    if (host == 'localhost' || host == '127.0.0.1' || host.endsWith('.local')) {
+      return true;
+    }
+    if (host.startsWith('192.168.') || host.startsWith('10.')) return true;
+    // RFC 1918: 172.16.0.0/12 = 172.16.0.0 - 172.31.255.255
+    if (host.startsWith('172.')) {
+      final parts = host.split('.');
+      if (parts.length >= 2) {
+        final second = int.tryParse(parts[1]);
+        if (second != null && second >= 16 && second <= 31) return true;
+      }
+    }
+    return false;
   }
 }
 

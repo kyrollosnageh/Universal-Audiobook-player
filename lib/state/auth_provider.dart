@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/errors.dart';
 import '../data/database/app_database.dart';
 import '../data/models/server_config.dart';
 import '../data/server_providers/server_detector.dart';
@@ -100,7 +101,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
       state = AuthState(isAuthenticated: true, activeServer: config);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _sanitizeError(e));
     }
   }
 
@@ -135,8 +136,14 @@ class AuthNotifier extends Notifier<AuthState> {
 
       state = const AuthState();
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: _sanitizeError(e));
     }
+  }
+
+  String _sanitizeError(Object e) {
+    if (e is LibrettoException) return e.message;
+    // Strip server URLs and tokens from generic exceptions
+    return 'An unexpected error occurred. Please try again.';
   }
 }
 

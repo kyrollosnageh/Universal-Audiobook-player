@@ -294,10 +294,13 @@ class DownloadService {
         ),
       );
 
-      // Re-queue for retry if network error
+      // Re-queue for retry if network error (up to max retries)
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout) {
-        _queue.add(queued); // Will retry when connection restored
+        if (queued.retryCount < _QueuedDownload.maxRetries) {
+          queued.retryCount++;
+          _queue.add(queued); // Will retry when connection restored
+        }
       }
     }
   }
@@ -370,6 +373,7 @@ class _QueuedDownload {
     required this.title,
     required this.serverId,
     this.isPrefetch = false,
+    this.retryCount = 0,
   });
 
   final String bookId;
@@ -378,6 +382,9 @@ class _QueuedDownload {
   final String title;
   final String serverId;
   final bool isPrefetch;
+  int retryCount;
+
+  static const int maxRetries = 3;
 }
 
 class _DownloadTask {

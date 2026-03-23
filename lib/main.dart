@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,9 +19,10 @@ void main() {
       runApp(const ProviderScope(child: LibrettoApp()));
     },
     (error, stackTrace) {
-      // Catch uncaught errors and report them
-      debugPrint('Uncaught error: $error');
-      debugPrint('Stack trace: $stackTrace');
+      if (kDebugMode) {
+        debugPrint('Uncaught error: $error');
+        debugPrint('Stack trace: $stackTrace');
+      }
     },
   );
 }

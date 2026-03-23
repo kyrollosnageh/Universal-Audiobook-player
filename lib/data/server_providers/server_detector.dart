@@ -23,6 +23,17 @@ class ServerDetector {
   Future<ServerDetectionResult> detect(String url) async {
     final baseUrl = url.trimTrailing('/');
 
+    // SSRF protection: block non-HTTP schemes and internal metadata endpoints
+    final uri = Uri.tryParse(baseUrl);
+    if (uri == null) throw ServerDetectionException(url);
+    if (uri.scheme != 'http' && uri.scheme != 'https') {
+      throw ServerDetectionException(url);
+    }
+    // Block cloud metadata endpoints
+    if (uri.host == '169.254.169.254' || uri.host == 'metadata.google.internal') {
+      throw ServerDetectionException(url);
+    }
+
     // Try Emby/Jellyfin first (they share the endpoint)
     try {
       final result = await _probeEmbyJellyfin(baseUrl);

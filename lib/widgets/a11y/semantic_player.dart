@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/extensions.dart';
@@ -18,7 +19,7 @@ class SemanticPlayer {
   static void _announce(String message) {
     // Live announcements are handled by the Semantics widgets in the UI tree.
     // This method exists as a hook for programmatic announcements.
-    debugPrint('[a11y] $message');
+    if (kDebugMode) debugPrint('[a11y] $message');
   }
 
   /// Build a descriptive label for the play button.
