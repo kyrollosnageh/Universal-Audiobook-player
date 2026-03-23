@@ -49,9 +49,11 @@ class SemanticPlayer {
     BuildContext context,
     UnifiedChapter chapter,
   ) {
-    SemanticsService.announce(
-      'Now playing: ${chapter.title}',
-      TextDirection.ltr,
+    SemanticsService.sendAnnouncement(
+      AnnounceSemanticsEvent(
+        'Now playing: ${chapter.title}',
+        TextDirection.ltr,
+      ),
     );
   }
 
@@ -61,30 +63,43 @@ class SemanticPlayer {
     required bool isPlaying,
     required String bookTitle,
   }) {
-    SemanticsService.announce(
-      isPlaying ? 'Playing $bookTitle' : 'Paused $bookTitle',
-      TextDirection.ltr,
+    SemanticsService.sendAnnouncement(
+      AnnounceSemanticsEvent(
+        isPlaying ? 'Playing $bookTitle' : 'Paused $bookTitle',
+        TextDirection.ltr,
+      ),
     );
   }
 
   /// Announce playback speed change.
   static void announceSpeedChange(BuildContext context, double speed) {
-    SemanticsService.announce('Playback speed: ${speed}x', TextDirection.ltr);
+    SemanticsService.sendAnnouncement(
+      AnnounceSemanticsEvent('Playback speed: ${speed}x', TextDirection.ltr),
+    );
   }
 
   /// Announce sleep timer set.
   static void announceSleepTimer(BuildContext context, Duration? remaining) {
     if (remaining == null) {
-      SemanticsService.announce('Sleep timer cancelled', TextDirection.ltr);
+      SemanticsService.sendAnnouncement(
+        const AnnounceSemanticsEvent(
+          'Sleep timer cancelled',
+          TextDirection.ltr,
+        ),
+      );
     } else if (remaining.isNegative) {
-      SemanticsService.announce(
-        'Sleep timer set: end of chapter',
-        TextDirection.ltr,
+      SemanticsService.sendAnnouncement(
+        const AnnounceSemanticsEvent(
+          'Sleep timer set: end of chapter',
+          TextDirection.ltr,
+        ),
       );
     } else {
-      SemanticsService.announce(
-        'Sleep timer set: ${remaining.toHumanReadable()}',
-        TextDirection.ltr,
+      SemanticsService.sendAnnouncement(
+        AnnounceSemanticsEvent(
+          'Sleep timer set: ${remaining.toHumanReadable()}',
+          TextDirection.ltr,
+        ),
       );
     }
   }
@@ -95,9 +110,11 @@ class SemanticPlayer {
     String bookTitle,
     double progress,
   ) {
-    SemanticsService.announce(
-      'Downloading $bookTitle: ${(progress * 100).toInt()}%',
-      TextDirection.ltr,
+    SemanticsService.sendAnnouncement(
+      AnnounceSemanticsEvent(
+        'Downloading $bookTitle: ${(progress * 100).toInt()}%',
+        TextDirection.ltr,
+      ),
     );
   }
 

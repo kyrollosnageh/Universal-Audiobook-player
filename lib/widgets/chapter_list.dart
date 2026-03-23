@@ -11,13 +11,13 @@ class ChapterListTile extends StatelessWidget {
     required this.chapter,
     required this.index,
     required this.isCurrentChapter,
-    required this.onTap,
+    this.onTap,
   });
 
   final UnifiedChapter chapter;
   final int index;
   final bool isCurrentChapter;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,11 @@ class ChapterListTile extends StatelessWidget {
           width: 32,
           child: Center(
             child: isCurrentChapter
-                ? Icon(Icons.equalizer, color: LibrettoTheme.primary, size: 24)
+                ? const Icon(
+                    Icons.equalizer,
+                    color: LibrettoTheme.primary,
+                    size: 24,
+                  )
                 : Text('${index + 1}', style: theme.textTheme.bodySmall),
           ),
         ),

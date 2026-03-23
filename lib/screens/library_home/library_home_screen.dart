@@ -38,6 +38,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -56,7 +57,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
     final playerState = ref.watch(playerNotifierProvider);
     final authState = ref.watch(authNotifierProvider);
     final theme = Theme.of(context);
-    final textScale = MediaQuery.textScaleFactorOf(context);
+    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
     final useListLayout = textScale > AppConstants.highTextScaleThreshold;
 
     return Scaffold(
@@ -93,13 +94,11 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               ),
             ],
           ),
-          // Settings / server management
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
-            onPressed: () {
-              // Settings screen — future phase
-            },
+          // Settings / server management (coming soon)
+          const IconButton(
+            icon: Icon(Icons.settings),
+            tooltip: 'Settings (coming soon)',
+            onPressed: null,
           ),
         ],
       ),
@@ -135,7 +134,8 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                     ),
                     onChanged: (query) {
                       ref.read(libraryNotifierProvider.notifier).search(query);
-                      setState(() {}); // Update clear button visibility
+                      // Trigger rebuild for clear button visibility
+                      setState(() {});
                     },
                   ),
                 ),
@@ -314,11 +314,12 @@ class _ContinueListeningCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       label:
-          '${book.title} by ${book.author ?? "unknown author"}, '
+          '${book.title} by ${book.author ?? "Unknown Author"}, '
           '${((book.progress ?? 0) * 100).toInt()}% complete. '
           'Tap to continue listening.',
-      child: GestureDetector(
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
         child: SizedBox(
           width: 130,
           child: Column(
@@ -368,11 +369,12 @@ class _BookGridCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       label:
-          '${book.title} by ${book.author ?? "unknown"}. '
+          '${book.title} by ${book.author ?? "Unknown Author"}. '
           '${book.duration?.toHumanReadable() ?? "unknown duration"}. '
           'Tap for details.',
-      child: GestureDetector(
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -412,7 +414,7 @@ class _BookListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       label:
-          '${book.title} by ${book.author ?? "unknown"}. '
+          '${book.title} by ${book.author ?? "Unknown Author"}. '
           '${book.duration?.toHumanReadable() ?? "unknown duration"}.',
       child: ListTile(
         leading: SizedBox(
@@ -421,7 +423,7 @@ class _BookListTile extends StatelessWidget {
           child: BookCover(imageUrl: book.coverUrl),
         ),
         title: Text(book.title),
-        subtitle: Text(book.author ?? ''),
+        subtitle: Text(book.author ?? 'Unknown Author'),
         trailing: book.duration != null
             ? Text(
                 book.duration!.toHumanReadable(),
@@ -449,9 +451,9 @@ class _MiniPlayer extends ConsumerWidget {
           'Tap for full player.',
       child: Container(
         height: 72,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: LibrettoTheme.cardColor,
-          border: const Border(top: BorderSide(color: LibrettoTheme.divider)),
+          border: Border(top: BorderSide(color: LibrettoTheme.divider)),
         ),
         child: Row(
           children: [
@@ -488,6 +490,7 @@ class _MiniPlayer extends ConsumerWidget {
                 playerState.isPlaying ? Icons.pause : Icons.play_arrow,
               ),
               iconSize: 32,
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               onPressed: () {
                 ref.read(playerNotifierProvider.notifier).togglePlayPause();
               },

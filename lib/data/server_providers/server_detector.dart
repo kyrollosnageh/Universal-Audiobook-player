@@ -125,7 +125,7 @@ class ServerDetector {
 
       // Try string-based detection for XML responses
       if (data is String && data.contains('MediaContainer')) {
-        return ServerDetectionResult(
+        return const ServerDetectionResult(
           type: ServerType.plex,
           serverName: 'Plex Server',
         );

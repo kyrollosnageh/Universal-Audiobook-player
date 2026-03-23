@@ -34,7 +34,6 @@ class Scrubber extends StatelessWidget {
         : 0.0;
 
     // Calculate chapter boundary positions
-    final chapterService = ChapterService._staticInstance;
     final boundaries = chapters.length > 1
         ? _getChapterBoundaries(chapters, duration)
         : <double>[];
@@ -61,7 +60,7 @@ class Scrubber extends StatelessWidget {
                         value: bufferedValue,
                         backgroundColor: LibrettoTheme.divider,
                         valueColor: AlwaysStoppedAnimation(
-                          LibrettoTheme.primary.withOpacity(0.3),
+                          LibrettoTheme.primary.withValues(alpha: 0.3),
                         ),
                         minHeight: 4,
                       ),
@@ -77,8 +76,8 @@ class Scrubber extends StatelessWidget {
                       child: Container(
                         width: 2,
                         decoration: BoxDecoration(
-                          color: LibrettoTheme.onSurfaceVariant.withOpacity(
-                            0.5,
+                          color: LibrettoTheme.onSurfaceVariant.withValues(
+                            alpha: 0.5,
                           ),
                           borderRadius: BorderRadius.circular(1),
                         ),

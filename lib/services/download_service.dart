@@ -8,7 +8,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../core/constants.dart';
 import '../core/errors.dart';
 import '../data/database/app_database.dart';
-import '../data/database/daos/book_dao.dart';
 import '../data/models/book.dart';
 import '../data/models/unified_chapter.dart';
 import '../data/server_providers/server_provider.dart';
@@ -24,10 +23,8 @@ import '../data/server_providers/server_provider.dart';
 /// - Progress tracking per-book and total
 class DownloadService {
   DownloadService({required AppDatabase database, Dio? dio})
-    : _bookDao = database.bookDao,
-      _dio = dio ?? Dio();
+    : _dio = dio ?? Dio();
 
-  final BookDao _bookDao;
   final Dio _dio;
 
   final Map<String, _DownloadTask> _activeTasks = {};
@@ -85,7 +82,7 @@ class DownloadService {
       );
     }
 
-    _processQueue();
+    await _processQueue();
   }
 
   /// Cancel a download.
@@ -167,7 +164,7 @@ class DownloadService {
       );
     }
 
-    _processQueue();
+    await _processQueue();
   }
 
   // ── Queue Management ──────────────────────────────────────────
@@ -280,7 +277,7 @@ class DownloadService {
       );
 
       // Process next in queue
-      _processQueue();
+      unawaited(_processQueue());
     } on DioException catch (e) {
       _activeTasks.remove(taskKey);
 

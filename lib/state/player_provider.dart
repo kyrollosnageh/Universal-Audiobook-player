@@ -302,7 +302,6 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     });
   }
 
-  @override
   void dispose() {
     _positionSub?.cancel();
     _durationSub?.cancel();
@@ -311,7 +310,6 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
     _processingSub?.cancel();
     _stopPositionTracking();
     _savePositionImmediately();
-    super.dispose();
   }
 }
 

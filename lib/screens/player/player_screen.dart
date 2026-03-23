@@ -145,15 +145,13 @@ class PlayerScreen extends ConsumerWidget {
                       tooltip: 'Sleep timer',
                     ),
                   ),
-                  // Bookmarks
+                  // Bookmarks (coming soon)
                   Semantics(
-                    label: 'Bookmarks',
-                    child: IconButton(
-                      icon: const Icon(Icons.bookmark_outline),
-                      onPressed: () {
-                        // Bookmark current position
-                      },
-                      tooltip: 'Bookmarks',
+                    label: 'Bookmarks. Coming soon.',
+                    child: const IconButton(
+                      icon: Icon(Icons.bookmark_outline),
+                      onPressed: null,
+                      tooltip: 'Bookmarks (coming soon)',
                     ),
                   ),
                   // Chapter list
@@ -243,9 +241,11 @@ class PlayerScreen extends ConsumerWidget {
                   onTap: () {
                     notifier.seekToChapter(index);
                     Navigator.pop(context);
-                    SemanticsService.announce(
-                      'Now playing: ${state.chapters[index].title}',
-                      TextDirection.ltr,
+                    SemanticsService.sendAnnouncement(
+                      AnnounceSemanticsEvent(
+                        'Now playing: ${state.chapters[index].title}',
+                        TextDirection.ltr,
+                      ),
                     );
                   },
                 ),

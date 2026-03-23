@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:libretto/widgets/a11y/semantic_player.dart';
-import 'package:libretto/widgets/a11y/focus_manager.dart';
 import 'package:libretto/data/models/book.dart';
 import 'package:libretto/data/models/unified_chapter.dart';
 

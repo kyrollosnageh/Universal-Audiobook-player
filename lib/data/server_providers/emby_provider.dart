@@ -417,7 +417,7 @@ class EmbyProvider implements ServerProvider {
               (map['ImageTags'] as Map).containsKey('Primary')
           ? getCoverArtUrl(map['Id'] as String).toString()
           : null,
-      duration: ticks != null ? ticks.ticksToDuration() : null,
+      duration: ticks?.ticksToDuration(),
       progress: progress,
       seriesName: map['SeriesName'] as String?,
       seriesIndex: (map['IndexNumber'] as num?)?.toDouble(),
