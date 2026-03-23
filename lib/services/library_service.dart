@@ -15,9 +15,7 @@ import '../data/server_providers/server_provider.dart';
 /// - On first launch, prefetches library in background batches of 200
 /// - Deduplicates search results (local + server)
 class LibraryService {
-  LibraryService({
-    required AppDatabase database,
-  }) : _bookDao = database.bookDao;
+  LibraryService({required AppDatabase database}) : _bookDao = database.bookDao;
 
   final BookDao _bookDao;
 

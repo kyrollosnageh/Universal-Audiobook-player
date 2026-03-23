@@ -141,9 +141,10 @@ void main() {
 
     test('hasMore false at end', () {
       final result = PaginatedResult<Book>(
-        items: List.generate(25, (i) => Book(
-          id: '$i', serverId: 's', title: '$i',
-        )),
+        items: List.generate(
+          25,
+          (i) => Book(id: '$i', serverId: 's', title: '$i'),
+        ),
         totalCount: 125,
         offset: 100,
         limit: 50,

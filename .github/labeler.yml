@@ -1,0 +1,34 @@
+# Auto-label PRs based on changed file paths
+ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'
+
+android:
+  - changed-files:
+      - any-glob-to-any-file: 'android/**'
+
+ios:
+  - changed-files:
+      - any-glob-to-any-file: 'ios/**'
+
+dart:
+  - changed-files:
+      - any-glob-to-any-file: 'lib/**'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file: 'test/**'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'pubspec.yaml'
+          - 'pubspec.lock'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file: '**/*.md'
+
+assets:
+  - changed-files:
+      - any-glob-to-any-file: 'assets/**'

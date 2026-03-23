@@ -180,10 +180,7 @@ class PlaybackService {
   ) async {
     final sources = chapters.map((ch) {
       final url = provider.getStreamUrl(ch.trackItemId);
-      return AudioSource.uri(
-        Uri.parse(url.toString()),
-        tag: ch.id,
-      );
+      return AudioSource.uri(Uri.parse(url.toString()), tag: ch.id);
     }).toList();
 
     final playlist = ConcatenatingAudioSource(
@@ -195,8 +192,10 @@ class PlaybackService {
 
     // Seek to the correct track and position
     if (startPosition > Duration.zero) {
-      final (trackIndex, trackPosition) =
-          _resolvePlaylistPosition(chapters, startPosition);
+      final (trackIndex, trackPosition) = _resolvePlaylistPosition(
+        chapters,
+        startPosition,
+      );
       await _player!.seek(trackPosition, index: trackIndex);
     }
   }
@@ -236,8 +235,10 @@ class PlaybackService {
     _ensureInitialized();
 
     if (_hasSeparateTracks(_chapters)) {
-      final (trackIndex, trackPosition) =
-          _resolvePlaylistPosition(_chapters, position);
+      final (trackIndex, trackPosition) = _resolvePlaylistPosition(
+        _chapters,
+        position,
+      );
       await _player!.seek(trackPosition, index: trackIndex);
     } else {
       await _player!.seek(position);

@@ -5,11 +5,7 @@ import '../core/theme.dart';
 
 /// Bottom sheet for selecting a sleep timer duration.
 class SleepTimerSheet extends StatelessWidget {
-  const SleepTimerSheet({
-    super.key,
-    required this.onSelect,
-    this.currentTimer,
-  });
+  const SleepTimerSheet({super.key, required this.onSelect, this.currentTimer});
 
   final ValueChanged<Duration?> onSelect;
   final Duration? currentTimer;
@@ -23,10 +19,7 @@ class SleepTimerSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Sleep Timer',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('Sleep Timer', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
 
             // Preset durations

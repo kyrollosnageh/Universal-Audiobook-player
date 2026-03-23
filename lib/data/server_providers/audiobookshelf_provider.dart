@@ -20,11 +20,9 @@ import 'server_provider.dart';
 /// - Series: `/api/series` (native series API)
 /// - Progress: native progress sync via `/api/me/progress/{id}`
 class AudiobookshelfProvider implements ServerProvider {
-  AudiobookshelfProvider({
-    required String serverUrl,
-    Dio? dio,
-  })  : _serverUrl = serverUrl.trimRight('/'),
-        _dio = dio ?? Dio() {
+  AudiobookshelfProvider({required String serverUrl, Dio? dio})
+    : _serverUrl = serverUrl.trimRight('/'),
+      _dio = dio ?? Dio() {
     _configureDio();
   }
 
@@ -40,30 +38,32 @@ class AudiobookshelfProvider implements ServerProvider {
     _dio.options.receiveTimeout = const Duration(seconds: 30);
     _dio.options.headers['Content-Type'] = 'application/json';
 
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        if (_token != null) {
-          options.headers['Authorization'] = 'Bearer $_token';
-        }
-        handler.next(options);
-      },
-      onError: (error, handler) {
-        if (error.response?.statusCode == 401) {
-          _token = null;
-          _userId = null;
-          handler.reject(
-            DioException(
-              requestOptions: error.requestOptions,
-              error: const TokenExpiredException(),
-              type: DioExceptionType.badResponse,
-              response: error.response,
-            ),
-          );
-          return;
-        }
-        handler.next(error);
-      },
-    ));
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (_token != null) {
+            options.headers['Authorization'] = 'Bearer $_token';
+          }
+          handler.next(options);
+        },
+        onError: (error, handler) {
+          if (error.response?.statusCode == 401) {
+            _token = null;
+            _userId = null;
+            handler.reject(
+              DioException(
+                requestOptions: error.requestOptions,
+                error: const TokenExpiredException(),
+                type: DioExceptionType.badResponse,
+                response: error.response,
+              ),
+            );
+            return;
+          }
+          handler.next(error);
+        },
+      ),
+    );
   }
 
   @override
@@ -96,10 +96,7 @@ class AudiobookshelfProvider implements ServerProvider {
     try {
       final response = await _dio.post(
         AbsApiPaths.login,
-        data: {
-          'username': username,
-          'password': password,
-        },
+        data: {'username': username, 'password': password},
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -123,13 +120,10 @@ class AudiobookshelfProvider implements ServerProvider {
         username: user?['username'] as String?,
       );
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401 ||
-          e.response?.statusCode == 400) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 400) {
         throw const AuthenticationException('Invalid username or password');
       }
-      throw AuthenticationException(
-        'Authentication failed: ${e.message}',
-      );
+      throw AuthenticationException('Authentication failed: ${e.message}');
     }
   }
 
@@ -149,10 +143,9 @@ class AudiobookshelfProvider implements ServerProvider {
       }
 
       // Fallback to first library
-      _defaultLibraryId ??=
-          libraries.isNotEmpty
-              ? (libraries.first as Map<String, dynamic>)['id'] as String
-              : null;
+      _defaultLibraryId ??= libraries.isNotEmpty
+          ? (libraries.first as Map<String, dynamic>)['id'] as String
+          : null;
     } catch (_) {
       // Non-critical
     }
@@ -197,7 +190,11 @@ class AudiobookshelfProvider implements ServerProvider {
         'page': offset ~/ limit,
         'sort': _mapSortField(sort),
         'desc': _isSortDescending(sort) ? 1 : 0,
-        'filter': _buildFilter(genre: genre, author: author, narrator: narrator),
+        'filter': _buildFilter(
+          genre: genre,
+          author: author,
+          narrator: narrator,
+        ),
       };
 
       // Remove null/empty filter
@@ -232,10 +229,7 @@ class AudiobookshelfProvider implements ServerProvider {
   ) async {
     final response = await _dio.get(
       '/api/libraries/$libraryId/search',
-      queryParameters: {
-        'q': query,
-        'limit': limit,
-      },
+      queryParameters: {'q': query, 'limit': limit},
     );
 
     final data = response.data as Map<String, dynamic>;
@@ -311,19 +305,14 @@ class AudiobookshelfProvider implements ServerProvider {
     // ABS streaming via direct file access
     return Uri.parse(
       '$_serverUrl/api/items/$itemId/file',
-    ).withQueryParams({
-      'token': _token ?? '',
-    });
+    ).withQueryParams({'token': _token ?? ''});
   }
 
   @override
   Uri getCoverArtUrl(String itemId, {int maxWidth = 300}) {
     return Uri.parse(
       '$_serverUrl/api/items/$itemId/cover',
-    ).withQueryParams({
-      'width': maxWidth.toString(),
-      'token': _token ?? '',
-    });
+    ).withQueryParams({'width': maxWidth.toString(), 'token': _token ?? ''});
   }
 
   // ── Progress Sync ─────────────────────────────────────────────
@@ -431,12 +420,10 @@ class AudiobookshelfProvider implements ServerProvider {
   Book _mapToBook(dynamic item) {
     final map = item as Map<String, dynamic>;
     final media = map['media'] as Map<String, dynamic>? ?? {};
-    final metadata =
-        media['metadata'] as Map<String, dynamic>? ?? {};
+    final metadata = media['metadata'] as Map<String, dynamic>? ?? {};
 
     final durationSec = media['duration'] as num?;
-    final progress =
-        map['userMediaProgress'] as Map<String, dynamic>?;
+    final progress = map['userMediaProgress'] as Map<String, dynamic>?;
 
     String? coverUrl;
     if (map['id'] != null) {
@@ -474,8 +461,7 @@ class AudiobookshelfProvider implements ServerProvider {
           ? int.tryParse(metadata['publishedYear'].toString())
           : null,
       dateAdded: map['addedAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(
-              (map['addedAt'] as num).toInt())
+          ? DateTime.fromMillisecondsSinceEpoch((map['addedAt'] as num).toInt())
           : null,
     );
   }
@@ -483,8 +469,7 @@ class AudiobookshelfProvider implements ServerProvider {
   BookDetail _mapToBookDetail(Map<String, dynamic> data) {
     final book = _mapToBook(data);
     final media = data['media'] as Map<String, dynamic>? ?? {};
-    final metadata =
-        media['metadata'] as Map<String, dynamic>? ?? {};
+    final metadata = media['metadata'] as Map<String, dynamic>? ?? {};
 
     return BookDetail(
       book: book,
@@ -493,13 +478,11 @@ class AudiobookshelfProvider implements ServerProvider {
       isbn: metadata['isbn'] as String?,
       asin: metadata['asin'] as String?,
       language: metadata['language'] as String?,
-      genres: (metadata['genres'] as List?)
-              ?.map((g) => g.toString())
-              .toList() ??
+      genres:
+          (metadata['genres'] as List?)?.map((g) => g.toString()).toList() ??
           const [],
-      tags: (data['tags'] as List?)
-              ?.map((t) => t.toString())
-              .toList() ??
+      tags:
+          (data['tags'] as List?)?.map((t) => t.toString()).toList() ??
           const [],
     );
   }
@@ -517,8 +500,7 @@ class AudiobookshelfProvider implements ServerProvider {
         id: '${bookId}_ch_${entry.key}',
         title: ch['title'] as String? ?? 'Chapter ${entry.key + 1}',
         startOffset: Duration(milliseconds: (startSec * 1000).toInt()),
-        duration:
-            Duration(milliseconds: ((endSec - startSec) * 1000).toInt()),
+        duration: Duration(milliseconds: ((endSec - startSec) * 1000).toInt()),
         trackItemId: bookId,
         isSeparateTrack: false,
         trackIndex: 0,
@@ -526,23 +508,19 @@ class AudiobookshelfProvider implements ServerProvider {
     }).toList();
   }
 
-  List<UnifiedChapter> _tracksToChapters(
-    List<dynamic> tracks,
-    String bookId,
-  ) {
+  List<UnifiedChapter> _tracksToChapters(List<dynamic> tracks, String bookId) {
     var cumulativeOffset = Duration.zero;
 
     return tracks.asMap().entries.map((entry) {
       final track = entry.value as Map<String, dynamic>;
       final durationSec = (track['duration'] as num?)?.toDouble() ?? 0;
-      final duration =
-          Duration(milliseconds: (durationSec * 1000).toInt());
+      final duration = Duration(milliseconds: (durationSec * 1000).toInt());
       final ino = track['ino'] as String? ?? '${bookId}_track_${entry.key}';
 
       final chapter = UnifiedChapter(
         id: ino,
-        title: track['metadata']?['title'] as String? ??
-            'Track ${entry.key + 1}',
+        title:
+            track['metadata']?['title'] as String? ?? 'Track ${entry.key + 1}',
         startOffset: cumulativeOffset,
         duration: duration,
         trackItemId: ino,
@@ -588,11 +566,7 @@ class AudiobookshelfProvider implements ServerProvider {
     }
   }
 
-  String? _buildFilter({
-    String? genre,
-    String? author,
-    String? narrator,
-  }) {
+  String? _buildFilter({String? genre, String? author, String? narrator}) {
     final filters = <String>[];
     if (genre != null) filters.add('genres.$genre');
     if (author != null) filters.add('authors.$author');

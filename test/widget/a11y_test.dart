@@ -40,11 +40,7 @@ void main() {
     });
 
     test('play button label — no author', () {
-      const noAuthor = Book(
-        id: 'b1',
-        serverId: 's1',
-        title: 'Mystery Book',
-      );
+      const noAuthor = Book(id: 'b1', serverId: 's1', title: 'Mystery Book');
       final label = SemanticPlayer.playButtonLabel(book: noAuthor);
       expect(label, 'Play Mystery Book');
     });

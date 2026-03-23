@@ -18,11 +18,9 @@ import 'server_provider.dart';
 /// - Stream: `/Audio/{ItemId}/stream`
 /// - Chapters: embedded in item detail response
 class EmbyProvider implements ServerProvider {
-  EmbyProvider({
-    required String serverUrl,
-    Dio? dio,
-  })  : _serverUrl = serverUrl.trimRight('/'),
-        _dio = dio ?? Dio() {
+  EmbyProvider({required String serverUrl, Dio? dio})
+    : _serverUrl = serverUrl.trimRight('/'),
+      _dio = dio ?? Dio() {
     _configureDio();
   }
 
@@ -44,28 +42,30 @@ class EmbyProvider implements ServerProvider {
     _dio.options.headers['Content-Type'] = 'application/json';
 
     // Add auth interceptor
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        options.headers['X-Emby-Authorization'] = _buildAuthHeader();
-        handler.next(options);
-      },
-      onError: (error, handler) {
-        if (error.response?.statusCode == 401) {
-          _token = null;
-          _userId = null;
-          handler.reject(
-            DioException(
-              requestOptions: error.requestOptions,
-              error: const TokenExpiredException(),
-              type: DioExceptionType.badResponse,
-              response: error.response,
-            ),
-          );
-          return;
-        }
-        handler.next(error);
-      },
-    ));
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          options.headers['X-Emby-Authorization'] = _buildAuthHeader();
+          handler.next(options);
+        },
+        onError: (error, handler) {
+          if (error.response?.statusCode == 401) {
+            _token = null;
+            _userId = null;
+            handler.reject(
+              DioException(
+                requestOptions: error.requestOptions,
+                error: const TokenExpiredException(),
+                type: DioExceptionType.badResponse,
+                response: error.response,
+              ),
+            );
+            return;
+          }
+          handler.next(error);
+        },
+      ),
+    );
   }
 
   String _buildAuthHeader() {
@@ -111,10 +111,7 @@ class EmbyProvider implements ServerProvider {
     try {
       final response = await _dio.post(
         EmbyApiPaths.authenticateByName,
-        data: {
-          'Username': username,
-          'Pw': password,
-        },
+        data: {'Username': username, 'Pw': password},
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -138,9 +135,7 @@ class EmbyProvider implements ServerProvider {
       if (e.response?.statusCode == 401) {
         throw const AuthenticationException('Invalid username or password');
       }
-      throw AuthenticationException(
-        'Authentication failed: ${e.message}',
-      );
+      throw AuthenticationException('Authentication failed: ${e.message}');
     }
   }
 
@@ -178,7 +173,8 @@ class EmbyProvider implements ServerProvider {
       'Recursive': true,
       'StartIndex': offset,
       'Limit': limit,
-      'Fields': 'Overview,Genres,Studios,DateCreated,RunTimeTicks,'
+      'Fields':
+          'Overview,Genres,Studios,DateCreated,RunTimeTicks,'
           'UserDataPlayCount,UserDataLastPlayedDate,'
           'SeriesName,IndexNumber',
       'ImageTypeLimit': 1,
@@ -213,9 +209,7 @@ class EmbyProvider implements ServerProvider {
         limit: limit,
       );
     } on DioException catch (e) {
-      throw ServerUnreachableException(
-        '$_serverUrl: ${e.message}',
-      );
+      throw ServerUnreachableException('$_serverUrl: ${e.message}');
     }
   }
 
@@ -229,7 +223,8 @@ class EmbyProvider implements ServerProvider {
       final response = await _dio.get(
         EmbyApiPaths.itemDetail(bookId),
         queryParameters: {
-          'Fields': 'Overview,Genres,Studios,DateCreated,RunTimeTicks,'
+          'Fields':
+              'Overview,Genres,Studios,DateCreated,RunTimeTicks,'
               'MediaSources,Chapters,People,Tags,'
               'SeriesName,IndexNumber,UserDataPlayCount',
         },
@@ -251,9 +246,7 @@ class EmbyProvider implements ServerProvider {
     try {
       final response = await _dio.get(
         EmbyApiPaths.itemDetail(bookId),
-        queryParameters: {
-          'Fields': 'Chapters,MediaSources,RunTimeTicks',
-        },
+        queryParameters: {'Fields': 'Chapters,MediaSources,RunTimeTicks'},
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -304,9 +297,7 @@ class EmbyProvider implements ServerProvider {
     try {
       await _dio.post(
         '/Users/$_userId/PlayingItems/$bookId/Progress',
-        queryParameters: {
-          'PositionTicks': position.toTicks(),
-        },
+        queryParameters: {'PositionTicks': position.toTicks()},
       );
     } on DioException {
       // Non-critical — position saved locally regardless.
@@ -320,10 +311,7 @@ class EmbyProvider implements ServerProvider {
     try {
       final response = await _dio.get(
         EmbyApiPaths.userItems(_userId!),
-        queryParameters: {
-          'Ids': bookId,
-          'Fields': 'UserData',
-        },
+        queryParameters: {'Ids': bookId, 'Fields': 'UserData'},
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -422,10 +410,10 @@ class EmbyProvider implements ServerProvider {
       id: map['Id'] as String,
       serverId: _serverId ?? _serverUrl,
       title: map['Name'] as String? ?? 'Unknown',
-      author: _extractPerson(map, 'Author') ??
-          (map['AlbumArtist'] as String?),
+      author: _extractPerson(map, 'Author') ?? (map['AlbumArtist'] as String?),
       narrator: _extractPerson(map, 'Narrator'),
-      coverUrl: map['ImageTags'] != null &&
+      coverUrl:
+          map['ImageTags'] != null &&
               (map['ImageTags'] as Map).containsKey('Primary')
           ? getCoverArtUrl(map['Id'] as String).toString()
           : null,
@@ -459,14 +447,11 @@ class EmbyProvider implements ServerProvider {
       bitrate: firstSource?['Bitrate'] as int?,
       communityRating: (data['CommunityRating'] as num?)?.toDouble(),
       parentId: data['ParentId'] as String?,
-      genres: (data['Genres'] as List?)
-              ?.map((g) => g as String)
-              .toList() ??
+      genres:
+          (data['Genres'] as List?)?.map((g) => g as String).toList() ??
           const [],
-      tags: (data['Tags'] as List?)
-              ?.map((t) => t as String)
-              .toList() ??
-          const [],
+      tags:
+          (data['Tags'] as List?)?.map((t) => t as String).toList() ?? const [],
     );
   }
 
@@ -488,8 +473,9 @@ class EmbyProvider implements ServerProvider {
 
     // Case 3: No chapters — return a single "chapter" spanning the whole file
     final ticks = data['RunTimeTicks'] as int?;
-    final duration =
-        ticks != null ? ticks.ticksToDuration() : const Duration(hours: 1);
+    final duration = ticks != null
+        ? ticks.ticksToDuration()
+        : const Duration(hours: 1);
 
     return [
       UnifiedChapter(
@@ -522,8 +508,8 @@ class EmbyProvider implements ServerProvider {
       if (i < chapters.length - 1) {
         final nextStart =
             (chapters[i + 1] as Map<String, dynamic>)['StartPositionTicks']
-                    as int? ??
-                0;
+                as int? ??
+            0;
         chapterDuration = nextStart.ticksToDuration() - startOffset;
       } else {
         chapterDuration = totalDuration - startOffset;
@@ -537,15 +523,17 @@ class EmbyProvider implements ServerProvider {
 
       final name = ch['Name'] as String? ?? 'Chapter ${i + 1}';
 
-      result.add(UnifiedChapter(
-        id: '${bookId}_ch_$i',
-        title: name,
-        startOffset: startOffset,
-        duration: chapterDuration,
-        trackItemId: bookId,
-        isSeparateTrack: false,
-        trackIndex: 0,
-      ));
+      result.add(
+        UnifiedChapter(
+          id: '${bookId}_ch_$i',
+          title: name,
+          startOffset: startOffset,
+          duration: chapterDuration,
+          trackItemId: bookId,
+          isSeparateTrack: false,
+          trackIndex: 0,
+        ),
+      );
     }
 
     return result;
@@ -577,15 +565,17 @@ class EmbyProvider implements ServerProvider {
       final ticks = item['RunTimeTicks'] as int? ?? 0;
       final duration = ticks.ticksToDuration();
 
-      chapters.add(UnifiedChapter(
-        id: item['Id'] as String,
-        title: item['Name'] as String? ?? 'Track ${i + 1}',
-        startOffset: cumulativeOffset,
-        duration: duration,
-        trackItemId: item['Id'] as String,
-        isSeparateTrack: true,
-        trackIndex: i,
-      ));
+      chapters.add(
+        UnifiedChapter(
+          id: item['Id'] as String,
+          title: item['Name'] as String? ?? 'Track ${i + 1}',
+          startOffset: cumulativeOffset,
+          duration: duration,
+          trackItemId: item['Id'] as String,
+          isSeparateTrack: true,
+          trackIndex: i,
+        ),
+      );
 
       cumulativeOffset += duration;
     }

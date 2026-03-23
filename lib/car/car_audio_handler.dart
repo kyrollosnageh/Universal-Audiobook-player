@@ -13,9 +13,7 @@ import '../services/playback_service.dart';
 /// - Voice commands resume last-played book
 /// - Front-loaded titles for truncation on car screens
 class CarAudioHandler {
-  CarAudioHandler({
-    required this.playbackService,
-  });
+  CarAudioHandler({required this.playbackService});
 
   final PlaybackService playbackService;
 
@@ -44,10 +42,7 @@ class CarAudioHandler {
       album: book.seriesName,
       duration: book.duration,
       artUri: book.coverUrl != null ? Uri.tryParse(book.coverUrl!) : null,
-      extras: {
-        'serverId': book.serverId,
-        'progress': book.progress,
-      },
+      extras: {'serverId': book.serverId, 'progress': book.progress},
     );
   }
 

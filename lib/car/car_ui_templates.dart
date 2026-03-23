@@ -56,9 +56,7 @@ class CarUiTemplates {
   /// Update the library list on CarPlay.
   Future<void> updateLibraryList(List<Map<String, dynamic>> items) async {
     try {
-      await _channel.invokeMethod('updateLibraryList', {
-        'items': items,
-      });
+      await _channel.invokeMethod('updateLibraryList', {'items': items});
     } on PlatformException {
       // CarPlay not available
     }

@@ -20,8 +20,7 @@ void main() {
     });
 
     test('serverUrl strips trailing slash', () {
-      final p =
-          PlexProvider(serverUrl: 'https://plex.example.com:32400/');
+      final p = PlexProvider(serverUrl: 'https://plex.example.com:32400/');
       expect(p.serverUrl, 'https://plex.example.com:32400');
       p.dispose();
     });
@@ -31,10 +30,7 @@ void main() {
     });
 
     test('restoreSession sets auth state', () {
-      provider.restoreSession(
-        token: 'plex-token',
-        userId: 'user1',
-      );
+      provider.restoreSession(token: 'plex-token', userId: 'user1');
 
       expect(provider.isAuthenticated, true);
       expect(provider.token, 'plex-token');
@@ -66,10 +62,7 @@ void main() {
     });
 
     test('fetchLibrary throws when not authenticated', () {
-      expect(
-        () => provider.fetchLibrary(),
-        throwsA(isA<Exception>()),
-      );
+      expect(() => provider.fetchLibrary(), throwsA(isA<Exception>()));
     });
   });
 

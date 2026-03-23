@@ -31,9 +31,8 @@ class LibrettoApp extends ConsumerWidget {
         ),
         GoRoute(
           path: '/book/:bookId',
-          builder: (context, state) => BookDetailScreen(
-            bookId: state.pathParameters['bookId']!,
-          ),
+          builder: (context, state) =>
+              BookDetailScreen(bookId: state.pathParameters['bookId']!),
         ),
         GoRoute(
           path: '/player',

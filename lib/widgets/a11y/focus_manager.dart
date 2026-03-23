@@ -11,10 +11,7 @@ class LibrettoFocusManager {
   LibrettoFocusManager._();
 
   /// Request focus on a specific node after navigation.
-  static void requestFocusAfterBuild(
-    BuildContext context,
-    FocusNode node,
-  ) {
+  static void requestFocusAfterBuild(BuildContext context, FocusNode node) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.mounted) {
         node.requestFocus();
@@ -24,10 +21,7 @@ class LibrettoFocusManager {
 
   /// Create a focus scope that traps focus within a modal.
   static Widget focusTrap({required Widget child}) {
-    return FocusScope(
-      autofocus: true,
-      child: child,
-    );
+    return FocusScope(autofocus: true, child: child);
   }
 
   /// Determine if we should use list layout based on text scale.
@@ -113,10 +107,7 @@ class AccessibleTapTarget extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 48,
-            minHeight: 48,
-          ),
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           child: Center(child: child),
         ),
       ),
