@@ -128,7 +128,7 @@ class PlaybackService {
   ///
   /// Sets up the audio source based on chapter format:
   /// - Single file (M4B): loads the file, seeks to resume position
-  /// - MP3-per-chapter: builds a ConcatenatingAudioSource playlist
+  /// - MP3-per-chapter: builds a concatenated audio source playlist
   Future<void> loadBook({
     required Book book,
     required List<UnifiedChapter> chapters,
@@ -183,7 +183,7 @@ class PlaybackService {
       return AudioSource.uri(Uri.parse(url.toString()), tag: ch.id);
     }).toList();
 
-    final playlist = ConcatenatingAudioSource(
+    final playlist = AudioSource.concatenation(
       useLazyPreparation: true,
       children: sources,
     );
@@ -408,7 +408,7 @@ class PlaybackService {
         await play();
         _retryCount = 0;
       } catch (_) {
-        retryAfterError(); // Try again with longer delay
+        unawaited(retryAfterError()); // Try again with longer delay
       }
     });
   }

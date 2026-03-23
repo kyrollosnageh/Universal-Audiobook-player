@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -67,7 +69,7 @@ class BookDetailScreen extends ConsumerWidget {
                 color: theme.colorScheme.error,
               ),
               const SizedBox(height: 16),
-              Text('Failed to load book details'),
+              const Text('Failed to load book details'),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () => ref.invalidate(bookDetailProvider(bookId)),
@@ -96,7 +98,7 @@ class BookDetailScreen extends ConsumerWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          LibrettoTheme.primary.withOpacity(0.3),
+                          LibrettoTheme.primary.withValues(alpha: 0.3),
                           LibrettoTheme.background,
                         ],
                       ),
@@ -163,7 +165,7 @@ class BookDetailScreen extends ConsumerWidget {
                       Row(
                         children: [
                           if (book.duration != null) ...[
-                            Icon(
+                            const Icon(
                               Icons.schedule,
                               size: 16,
                               color: LibrettoTheme.onSurfaceVariant,
@@ -176,7 +178,7 @@ class BookDetailScreen extends ConsumerWidget {
                             const SizedBox(width: 16),
                           ],
                           if (book.progress != null && book.progress! > 0) ...[
-                            Icon(
+                            const Icon(
                               Icons.play_circle_outline,
                               size: 16,
                               color: LibrettoTheme.onSurfaceVariant,
@@ -266,7 +268,7 @@ class BookDetailScreen extends ConsumerWidget {
                                   );
 
                                   if (context.mounted) {
-                                    context.push('/player');
+                                    unawaited(context.push('/player'));
                                   }
                                 },
                                 icon: const Icon(Icons.play_arrow),
@@ -339,7 +341,7 @@ class BookDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                error: (_, __) => const SliverToBoxAdapter(
+                error: (_, _) => const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(16),
                     child: Text('Failed to load chapters'),

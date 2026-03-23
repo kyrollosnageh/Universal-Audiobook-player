@@ -27,7 +27,7 @@ class LibrettoFocusManager {
   /// Determine if we should use list layout based on text scale.
   /// At text scale > 1.5x, grid items become too small — switch to list.
   static bool shouldUseListLayout(BuildContext context) {
-    return MediaQuery.textScaleFactorOf(context) > 1.5;
+    return MediaQuery.textScalerOf(context).scale(1.0) > 1.5;
   }
 
   /// Check if animations should be disabled.
@@ -37,7 +37,7 @@ class LibrettoFocusManager {
 
   /// Get the appropriate cover art size for the current text scale.
   static double coverArtSize(BuildContext context, {double base = 130}) {
-    final scale = MediaQuery.textScaleFactorOf(context);
+    final scale = MediaQuery.textScalerOf(context).scale(1.0);
     if (scale > 2.0) return base * 0.7;
     if (scale > 1.5) return base * 0.85;
     return base;

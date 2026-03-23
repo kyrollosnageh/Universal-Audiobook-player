@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +62,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
         httpAcknowledged: _httpAcknowledged,
       );
     } on InsecureConnectionException {
-      _showHttpWarningDialog(url);
+      unawaited(_showHttpWarningDialog(url));
       return;
     }
 
@@ -113,7 +115,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
 
     if (confirmed == true) {
       setState(() => _httpAcknowledged = true);
-      _detectServer();
+      unawaited(_detectServer());
     }
   }
 
@@ -304,7 +306,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                           ? null
                           : _login,
                       child: authState.isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
@@ -338,7 +340,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                               alignment: Alignment.centerRight,
                               padding: const EdgeInsets.only(right: 16),
                               color: theme.colorScheme.error,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.delete,
                                 color: theme.colorScheme.onPrimary,
                               ),
@@ -378,7 +380,7 @@ class _ServerConnectScreenState extends ConsumerState<ServerConnectScreen> {
                     );
                   },
                   loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                 ),
               ],
             ),
@@ -418,11 +420,11 @@ class _ServerTypeBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: LibrettoTheme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: LibrettoTheme.primary.withOpacity(0.5)),
+          border: Border.all(color: LibrettoTheme.primary.withValues(alpha: 0.5)),
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle, color: LibrettoTheme.primary, size: 20),
+            const Icon(Icons.check_circle, color: LibrettoTheme.primary, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

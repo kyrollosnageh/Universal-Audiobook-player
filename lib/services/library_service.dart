@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 
 import '../core/constants.dart';
@@ -47,7 +49,7 @@ class LibraryService {
     );
 
     // Cache results in background
-    _cacheBooks(result.items, provider.serverUrl);
+    unawaited(_cacheBooks(result.items, provider.serverUrl));
 
     return result;
   }
@@ -81,7 +83,7 @@ class LibraryService {
     );
 
     // Cache new results
-    _cacheBooks(result.items, provider.serverUrl);
+    unawaited(_cacheBooks(result.items, provider.serverUrl));
 
     return result;
   }
@@ -155,7 +157,7 @@ class LibraryService {
       );
 
       totalCount ??= result.totalCount;
-      _cacheBooks(result.items, provider.serverUrl);
+      unawaited(_cacheBooks(result.items, provider.serverUrl));
 
       offset += result.items.length;
       yield (offset, totalCount);

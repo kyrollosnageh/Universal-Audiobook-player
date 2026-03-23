@@ -95,7 +95,7 @@ class SyncService {
 
     // Both zero — fresh start
     if (local == Duration.zero && server == Duration.zero) {
-      return PositionResolution(
+      return const PositionResolution(
         position: Duration.zero,
         source: PositionSource.none,
         conflict: false,

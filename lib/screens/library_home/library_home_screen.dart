@@ -57,7 +57,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
     final playerState = ref.watch(playerNotifierProvider);
     final authState = ref.watch(authNotifierProvider);
     final theme = Theme.of(context);
-    final textScale = MediaQuery.textScaleFactorOf(context);
+    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
     final useListLayout = textScale > AppConstants.highTextScaleThreshold;
 
     return Scaffold(
@@ -451,9 +451,9 @@ class _MiniPlayer extends ConsumerWidget {
           'Tap for full player.',
       child: Container(
         height: 72,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: LibrettoTheme.cardColor,
-          border: const Border(top: BorderSide(color: LibrettoTheme.divider)),
+          border: Border(top: BorderSide(color: LibrettoTheme.divider)),
         ),
         child: Row(
           children: [

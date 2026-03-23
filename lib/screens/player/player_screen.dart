@@ -241,10 +241,10 @@ class PlayerScreen extends ConsumerWidget {
                   onTap: () {
                     notifier.seekToChapter(index);
                     Navigator.pop(context);
-                    SemanticsService.announce(
+                    SemanticsService.sendAnnouncement(AnnounceSemanticsEvent(
                       'Now playing: ${state.chapters[index].title}',
                       TextDirection.ltr,
-                    );
+                    ));
                   },
                 ),
               ),

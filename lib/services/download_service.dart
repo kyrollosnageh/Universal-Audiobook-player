@@ -85,7 +85,7 @@ class DownloadService {
       );
     }
 
-    _processQueue();
+    await _processQueue();
   }
 
   /// Cancel a download.
@@ -167,7 +167,7 @@ class DownloadService {
       );
     }
 
-    _processQueue();
+    await _processQueue();
   }
 
   // ── Queue Management ──────────────────────────────────────────
@@ -280,7 +280,7 @@ class DownloadService {
       );
 
       // Process next in queue
-      _processQueue();
+      unawaited(_processQueue());
     } on DioException catch (e) {
       _activeTasks.remove(taskKey);
 

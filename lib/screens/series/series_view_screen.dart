@@ -40,7 +40,7 @@ class SeriesViewScreen extends ConsumerWidget {
                 color: theme.colorScheme.error,
               ),
               const SizedBox(height: 16),
-              Text('Failed to load series'),
+              const Text('Failed to load series'),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () => ref.invalidate(seriesBooksProvider(seriesId)),

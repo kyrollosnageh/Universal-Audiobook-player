@@ -49,10 +49,10 @@ class SemanticPlayer {
     BuildContext context,
     UnifiedChapter chapter,
   ) {
-    SemanticsService.announce(
+    SemanticsService.sendAnnouncement(AnnounceSemanticsEvent(
       'Now playing: ${chapter.title}',
       TextDirection.ltr,
-    );
+    ));
   }
 
   /// Announce a playback state change.
@@ -61,31 +61,31 @@ class SemanticPlayer {
     required bool isPlaying,
     required String bookTitle,
   }) {
-    SemanticsService.announce(
+    SemanticsService.sendAnnouncement(AnnounceSemanticsEvent(
       isPlaying ? 'Playing $bookTitle' : 'Paused $bookTitle',
       TextDirection.ltr,
-    );
+    ));
   }
 
   /// Announce playback speed change.
   static void announceSpeedChange(BuildContext context, double speed) {
-    SemanticsService.announce('Playback speed: ${speed}x', TextDirection.ltr);
+    SemanticsService.sendAnnouncement(AnnounceSemanticsEvent('Playback speed: ${speed}x', TextDirection.ltr));
   }
 
   /// Announce sleep timer set.
   static void announceSleepTimer(BuildContext context, Duration? remaining) {
     if (remaining == null) {
-      SemanticsService.announce('Sleep timer cancelled', TextDirection.ltr);
+      SemanticsService.sendAnnouncement(AnnounceSemanticsEvent('Sleep timer cancelled', TextDirection.ltr));
     } else if (remaining.isNegative) {
-      SemanticsService.announce(
+      SemanticsService.sendAnnouncement(AnnounceSemanticsEvent(
         'Sleep timer set: end of chapter',
         TextDirection.ltr,
-      );
+      ));
     } else {
-      SemanticsService.announce(
+      SemanticsService.sendAnnouncement(AnnounceSemanticsEvent(
         'Sleep timer set: ${remaining.toHumanReadable()}',
         TextDirection.ltr,
-      );
+      ));
     }
   }
 
@@ -95,10 +95,10 @@ class SemanticPlayer {
     String bookTitle,
     double progress,
   ) {
-    SemanticsService.announce(
+    SemanticsService.sendAnnouncement(AnnounceSemanticsEvent(
       'Downloading $bookTitle: ${(progress * 100).toInt()}%',
       TextDirection.ltr,
-    );
+    ));
   }
 
   /// Build descriptive label for a book in the library grid/list.

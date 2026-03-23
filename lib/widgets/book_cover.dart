@@ -101,7 +101,7 @@ class _PlaceholderState extends State<_Placeholder>
         return Container(
           width: widget.width,
           height: widget.height,
-          color: LibrettoTheme.cardColor.withOpacity(_animation.value),
+          color: LibrettoTheme.cardColor.withValues(alpha: _animation.value),
         );
       },
     );
