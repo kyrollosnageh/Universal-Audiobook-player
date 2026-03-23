@@ -53,4 +53,21 @@ class ServerDao extends DatabaseAccessor<AppDatabase> with _$ServerDaoMixin {
       serversTable,
     )..orderBy([(t) => OrderingTerm.desc(t.addedAt)])).watch();
   }
+
+  /// Update last connected time and book count for a server.
+  Future<void> updateServerMeta(
+    String serverId, {
+    DateTime? lastConnectedAt,
+    int? bookCount,
+  }) {
+    return (update(serversTable)..where((t) => t.id.equals(serverId))).write(
+      ServersTableCompanion(
+        lastConnectedAt: lastConnectedAt != null
+            ? Value(lastConnectedAt)
+            : const Value.absent(),
+        bookCount:
+            bookCount != null ? Value(bookCount) : const Value.absent(),
+      ),
+    );
+  }
 }

@@ -36,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -49,6 +49,10 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(booksTable, booksTable.isFinished);
           await m.addColumn(booksTable, booksTable.isFavorite);
           await m.addColumn(booksTable, booksTable.userRating);
+        }
+        if (from < 3) {
+          await m.addColumn(serversTable, serversTable.lastConnectedAt);
+          await m.addColumn(serversTable, serversTable.bookCount);
         }
       },
     );

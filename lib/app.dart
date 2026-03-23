@@ -1,29 +1,102 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/theme.dart';
-import 'screens/server_connect/server_connect_screen.dart';
+import 'screens/server_hub/server_hub_screen.dart';
+import 'screens/welcome/welcome_screen.dart';
 import 'screens/library_home/library_home_screen.dart';
 import 'screens/book_detail/book_detail_screen.dart';
 import 'screens/player/player_screen.dart';
 import 'screens/series/series_view_screen.dart';
 import 'state/auth_provider.dart';
+import 'widgets/add_server_sheet.dart';
+
+/// Key for tracking whether onboarding has been completed.
+const _onboardingCompleteKey = 'onboarding_complete';
 
 /// Root application widget with routing and theme.
-class LibrettoApp extends ConsumerWidget {
+class LibrettoApp extends ConsumerStatefulWidget {
   const LibrettoApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LibrettoApp> createState() => _LibrettoAppState();
+}
+
+class _LibrettoAppState extends ConsumerState<LibrettoApp> {
+  bool? _onboardingComplete;
+  int? _serverCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialState();
+  }
+
+  Future<void> _loadInitialState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final onboarded = prefs.getBool(_onboardingCompleteKey) ?? false;
+
+    // Check how many servers exist
+    final servers = await ref.read(savedServersProvider.future);
+
+    if (mounted) {
+      setState(() {
+        _onboardingComplete = onboarded;
+        _serverCount = servers.length;
+      });
+    }
+
+    // Auto-restore session if exactly one server
+    if (servers.length == 1) {
+      await ref.read(authNotifierProvider.notifier).restoreSession();
+    }
+  }
+
+  String _initialLocation(AuthState authState) {
+    // Still loading initial state
+    if (_onboardingComplete == null) return '/hub';
+
+    // First launch — show welcome
+    if (_onboardingComplete == false) return '/welcome';
+
+    // Authenticated with auto-restored session — go to library
+    if (authState.isAuthenticated) return '/library';
+
+    // Has servers — show hub
+    return '/hub';
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
 
     final router = GoRouter(
-      initialLocation: authState.isAuthenticated ? '/library' : '/connect',
+      initialLocation: _initialLocation(authState),
       routes: [
         GoRoute(
-          path: '/connect',
-          builder: (context, state) => const ServerConnectScreen(),
+          path: '/welcome',
+          builder: (context, state) => WelcomeScreen(
+            onGetStarted: () async {
+              final result = await showModalBottomSheet<bool>(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const AddServerSheet(),
+              );
+
+              if (result == true) {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool(_onboardingCompleteKey, true);
+                if (context.mounted) context.go('/library');
+              }
+            },
+          ),
+        ),
+        GoRoute(
+          path: '/hub',
+          builder: (context, state) => const ServerHubScreen(),
         ),
         GoRoute(
           path: '/library',
@@ -48,10 +121,14 @@ class LibrettoApp extends ConsumerWidget {
       ],
       redirect: (context, state) {
         final isAuth = authState.isAuthenticated;
-        final isConnectPage = state.matchedLocation == '/connect';
+        final location = state.matchedLocation;
 
-        if (!isAuth && !isConnectPage) return '/connect';
-        if (isAuth && isConnectPage) return '/library';
+        // Allow welcome and hub without auth
+        if (location == '/welcome' || location == '/hub') return null;
+
+        // Require auth for everything else
+        if (!isAuth) return '/hub';
+
         return null;
       },
     );

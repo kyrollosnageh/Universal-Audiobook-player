@@ -14,6 +14,8 @@ class ServersTable extends Table {
   BoolColumn get isActive => boolean().withDefault(const Constant(false))();
   TextColumn get trustedCertFingerprint => text().nullable()();
   DateTimeColumn get addedAt => dateTime()();
+  DateTimeColumn get lastConnectedAt => dateTime().nullable()();
+  IntColumn get bookCount => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
