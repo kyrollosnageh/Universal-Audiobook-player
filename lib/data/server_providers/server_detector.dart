@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/constants.dart';
 import '../../core/errors.dart';
+import '../../core/extensions.dart';
 import '../models/server_config.dart';
 
 /// Probes a URL to auto-detect the server type.
@@ -153,12 +154,3 @@ class ServerDetectionResult {
   final String? version;
 }
 
-extension on String {
-  String trimRight(String char) {
-    var s = this;
-    while (s.endsWith(char)) {
-      s = s.substring(0, s.length - char.length);
-    }
-    return s;
-  }
-}

@@ -615,12 +615,3 @@ class AudiobookshelfProvider implements ServerProvider {
   }
 }
 
-extension on String {
-  String trimRight(String char) {
-    var s = this;
-    while (s.endsWith(char)) {
-      s = s.substring(0, s.length - char.length);
-    }
-    return s;
-  }
-}

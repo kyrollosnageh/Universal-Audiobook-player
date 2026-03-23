@@ -173,11 +173,6 @@ class Scrubber extends StatelessWidget {
   }
 }
 
-// Static instance helper for chapter calculations
-extension on ChapterService {
-  static final _staticInstance = _ChapterCalcHelper();
-}
-
 class _ChapterCalcHelper {
   List<double> getChapterBoundaries(
     List<UnifiedChapter> chapters,

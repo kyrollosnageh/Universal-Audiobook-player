@@ -402,7 +402,7 @@ class EmbyProvider implements ServerProvider {
     try {
       // Emby doesn't have a native series API for audiobooks.
       // We group by SeriesName from book metadata.
-      final response = await _dio.get(
+      await _dio.get(
         EmbyApiPaths.userItems(_userId!),
         queryParameters: {
           'IncludeItemTypes': 'AudioBook',
@@ -524,7 +524,6 @@ class EmbyProvider implements ServerProvider {
     String bookId,
   ) {
     final chapters = data['Chapters'] as List?;
-    final mediaSources = data['MediaSources'] as List?;
 
     // Case 1: Embedded chapters in a single file (M4B/M4A)
     if (chapters != null && chapters.isNotEmpty) {
@@ -706,12 +705,3 @@ class EmbyProvider implements ServerProvider {
   }
 }
 
-extension on String {
-  String trimRight(String char) {
-    var s = this;
-    while (s.endsWith(char)) {
-      s = s.substring(0, s.length - char.length);
-    }
-    return s;
-  }
-}

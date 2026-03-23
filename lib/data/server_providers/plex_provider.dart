@@ -668,7 +668,6 @@ class PlexProvider implements ServerProvider {
     // In a dedicated audiobook library, everything is an audiobook
     // This heuristic is for mixed music/audiobook libraries
     final title = book.title.toLowerCase();
-    final author = (book.author ?? '').toLowerCase();
 
     // Long duration suggests audiobook (> 1 hour)
     if (book.duration != null && book.duration!.inHours >= 1) {
@@ -721,12 +720,3 @@ class PlexAuthPin {
   final String authUrl;
 }
 
-extension on String {
-  String trimRight(String char) {
-    var s = this;
-    while (s.endsWith(char)) {
-      s = s.substring(0, s.length - char.length);
-    }
-    return s;
-  }
-}

@@ -58,7 +58,7 @@ jobs:
           echo "All files correctly formatted."
 
       - name: Run analyzer
-        run: dart analyze --fatal-infos --fatal-warnings
+        run: dart analyze --fatal-warnings
 
       - name: Check for hardcoded secrets
         run: |

@@ -1,6 +1,3 @@
-import 'package:dio/dio.dart';
-
-import '../../core/constants.dart';
 import '../../core/errors.dart';
 import '../models/auth_result.dart';
 import '../models/server_config.dart';
