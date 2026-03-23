@@ -30,7 +30,8 @@ class ServerDetector {
       throw ServerDetectionException(url);
     }
     // Block cloud metadata endpoints
-    if (uri.host == '169.254.169.254' || uri.host == 'metadata.google.internal') {
+    if (uri.host == '169.254.169.254' ||
+        uri.host == 'metadata.google.internal') {
       throw ServerDetectionException(url);
     }
 
