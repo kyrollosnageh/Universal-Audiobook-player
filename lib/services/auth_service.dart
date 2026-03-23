@@ -12,6 +12,8 @@ import '../data/server_providers/server_detector.dart';
 import '../data/server_providers/server_provider.dart';
 import '../data/server_providers/emby_provider.dart';
 import '../data/server_providers/audiobookshelf_provider.dart';
+import '../data/server_providers/jellyfin_provider.dart';
+import '../data/server_providers/plex_provider.dart';
 
 /// Manages authentication, multi-server connections, and HTTPS enforcement.
 ///
@@ -161,8 +163,10 @@ class AuthService {
     }
     if (provider is AudiobookshelfProvider) {
       provider.restoreSession(token: token, userId: userId);
+    } else if (provider is PlexProvider) {
+      provider.restoreSession(token: token, userId: userId);
     }
-    // Other providers will be added in later phases
+    // JellyfinProvider extends EmbyProvider — handled above
 
     _activeProviders[config.url] = provider;
 
@@ -242,13 +246,11 @@ class AuthService {
       case ServerType.emby:
         return EmbyProvider(serverUrl: url);
       case ServerType.jellyfin:
-        // JellyfinProvider extends EmbyProvider — Phase 6
-        return EmbyProvider(serverUrl: url);
+        return JellyfinProvider(serverUrl: url);
       case ServerType.audiobookshelf:
         return AudiobookshelfProvider(serverUrl: url);
       case ServerType.plex:
-        // PlexProvider — Phase 6
-        throw UnimplementedError('Plex support coming in Phase 6');
+        return PlexProvider(serverUrl: url);
     }
   }
 
