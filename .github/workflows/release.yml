@@ -1,0 +1,138 @@
+name: Release & Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: "3.24.0"
+  JAVA_VERSION: "17"
+
+jobs:
+  # ── Draft / publish GitHub Release ───────────────────────────
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.release-drafter.outputs.tag_name }}
+    steps:
+      - id: release-drafter
+        uses: release-drafter/release-drafter@v6
+        with:
+          publish: ${{ github.event_name == 'push' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Build & upload Android APK ────────────────────────────────
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: release
+    if: github.event_name == 'push'
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Rename APK with version
+        run: |
+          TAG="${{ needs.release.outputs.tag_name }}"
+          VERSION="${TAG#v}"
+          mv build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/libretto-${VERSION}.apk
+
+      - name: Upload APK to GitHub Release
+        run: |
+          TAG="${{ needs.release.outputs.tag_name }}"
+          VERSION="${TAG#v}"
+          gh release upload "$TAG" \
+            "build/app/outputs/flutter-apk/libretto-${VERSION}.apk" \
+            --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload APK as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/libretto-*.apk
+          retention-days: 30
+
+  # ── Build & upload iOS IPA ────────────────────────────────────
+  build-ios:
+    name: Build iOS IPA
+    runs-on: macos-latest
+    needs: release
+    if: github.event_name == 'push'
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --no-codesign --release
+
+      - name: Package IPA
+        run: |
+          TAG="${{ needs.release.outputs.tag_name }}"
+          VERSION="${TAG#v}"
+          APP_PATH=$(find build/ios/Release-iphoneos -name "*.app" | head -1)
+
+          mkdir -p build/ios/ipa/Payload
+          cp -r "$APP_PATH" build/ios/ipa/Payload/
+          cd build/ios/ipa
+          zip -r "libretto-${VERSION}.ipa" Payload/
+        env:
+          TAG: ${{ needs.release.outputs.tag_name }}
+
+      - name: Upload IPA to GitHub Release
+        run: |
+          TAG="${{ needs.release.outputs.tag_name }}"
+          VERSION="${TAG#v}"
+          gh release upload "$TAG" \
+            "build/ios/ipa/libretto-${VERSION}.ipa" \
+            --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload IPA as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-${{ github.sha }}
+          path: build/ios/ipa/libretto-*.ipa
+          retention-days: 30
