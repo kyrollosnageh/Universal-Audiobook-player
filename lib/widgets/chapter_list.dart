@@ -33,7 +33,11 @@ class ChapterListTile extends StatelessWidget {
           width: 32,
           child: Center(
             child: isCurrentChapter
-                ? const Icon(Icons.equalizer, color: LibrettoTheme.primary, size: 24)
+                ? const Icon(
+                    Icons.equalizer,
+                    color: LibrettoTheme.primary,
+                    size: 24,
+                  )
                 : Text('${index + 1}', style: theme.textTheme.bodySmall),
           ),
         ),

@@ -420,11 +420,17 @@ class _ServerTypeBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: LibrettoTheme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: LibrettoTheme.primary.withValues(alpha: 0.5)),
+          border: Border.all(
+            color: LibrettoTheme.primary.withValues(alpha: 0.5),
+          ),
         ),
         child: Row(
           children: [
-            const Icon(Icons.check_circle, color: LibrettoTheme.primary, size: 20),
+            const Icon(
+              Icons.check_circle,
+              color: LibrettoTheme.primary,
+              size: 20,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
