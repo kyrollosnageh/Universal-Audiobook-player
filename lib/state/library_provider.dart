@@ -88,19 +88,21 @@ class LibraryState {
   }
 }
 
-class LibraryNotifier extends StateNotifier<LibraryState> {
-  LibraryNotifier(this._libraryService, this._ref)
-    : _syncService = _ref.read(syncServiceProvider),
-      super(const LibraryState());
-
-  final LibraryService _libraryService;
-  final SyncService _syncService;
-  final Ref _ref;
+class LibraryNotifier extends Notifier<LibraryState> {
+  late LibraryService _libraryService;
+  late SyncService _syncService;
   Timer? _searchDebounce;
+
+  @override
+  LibraryState build() {
+    _libraryService = ref.read(libraryServiceProvider);
+    _syncService = ref.read(syncServiceProvider);
+    return const LibraryState();
+  }
 
   /// Load the initial library page + continue listening.
   Future<void> loadLibrary() async {
-    final provider = _ref.read(activeServerProvider);
+    final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
     state = state.copyWith(isLoading: true, error: null);
@@ -156,7 +158,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   Future<void> loadMore() async {
     if (state.isLoadingMore || !state.hasMore) return;
 
-    final provider = _ref.read(activeServerProvider);
+    final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
     state = state.copyWith(isLoadingMore: true);
@@ -202,7 +204,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   }
 
   Future<void> _searchLocal(String query) async {
-    final provider = _ref.read(activeServerProvider);
+    final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
     final local = await _libraryService.searchLocal(query, provider.serverUrl);
@@ -213,7 +215,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
   }
 
   Future<void> _searchServer(String query) async {
-    final provider = _ref.read(activeServerProvider);
+    final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
     try {
@@ -238,7 +240,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
   /// Toggle a book's favorite status and sync to server.
   Future<void> toggleFavorite(Book book) async {
-    final provider = _ref.read(activeServerProvider);
+    final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
     final newValue = !book.isFavorite;
@@ -257,7 +259,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
   /// Toggle a book's finished status and sync to server.
   Future<void> toggleFinished(Book book) async {
-    final provider = _ref.read(activeServerProvider);
+    final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
     final newValue = !book.isFinished;
@@ -321,7 +323,4 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 }
 
 final libraryNotifierProvider =
-    StateNotifierProvider<LibraryNotifier, LibraryState>((ref) {
-      final libraryService = ref.watch(libraryServiceProvider);
-      return LibraryNotifier(libraryService, ref);
-    });
+    NotifierProvider<LibraryNotifier, LibraryState>(LibraryNotifier.new);

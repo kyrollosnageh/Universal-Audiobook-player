@@ -68,10 +68,14 @@ class AuthState {
   }
 }
 
-class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier(this._authService) : super(const AuthState());
+class AuthNotifier extends Notifier<AuthState> {
+  late AuthService _authService;
 
-  final AuthService _authService;
+  @override
+  AuthState build() {
+    _authService = ref.read(authServiceProvider);
+    return const AuthState();
+  }
 
   Future<void> login({
     required String url,
@@ -133,9 +137,5 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 }
 
-final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((
-  ref,
-) {
-  final authService = ref.watch(authServiceProvider);
-  return AuthNotifier(authService);
-});
+final authNotifierProvider =
+    NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);

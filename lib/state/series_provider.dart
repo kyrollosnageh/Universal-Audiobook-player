@@ -36,14 +36,17 @@ class SeriesState {
   }
 }
 
-class SeriesNotifier extends StateNotifier<SeriesState> {
-  SeriesNotifier(this._seriesService, this._ref) : super(const SeriesState());
+class SeriesNotifier extends Notifier<SeriesState> {
+  late SeriesService _seriesService;
 
-  final SeriesService _seriesService;
-  final Ref _ref;
+  @override
+  SeriesState build() {
+    _seriesService = ref.read(seriesServiceProvider);
+    return const SeriesState();
+  }
 
   Future<void> loadSeries() async {
-    final provider = _ref.read(activeServerProvider);
+    final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
     state = state.copyWith(isLoading: true, error: null);
@@ -58,10 +61,7 @@ class SeriesNotifier extends StateNotifier<SeriesState> {
 }
 
 final seriesNotifierProvider =
-    StateNotifierProvider<SeriesNotifier, SeriesState>((ref) {
-      final service = ref.watch(seriesServiceProvider);
-      return SeriesNotifier(service, ref);
-    });
+    NotifierProvider<SeriesNotifier, SeriesState>(SeriesNotifier.new);
 
 /// Series detail: books within a series.
 final seriesBooksProvider = FutureProvider.family<List<SeriesBook>, String>((

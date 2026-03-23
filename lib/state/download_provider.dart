@@ -56,13 +56,16 @@ class DownloadState {
   }
 }
 
-class DownloadNotifier extends StateNotifier<DownloadState> {
-  DownloadNotifier(this._downloadService) : super(const DownloadState()) {
-    _subscription = _downloadService.progressStream.listen(_onProgress);
-  }
-
-  final DownloadService _downloadService;
+class DownloadNotifier extends Notifier<DownloadState> {
+  late DownloadService _downloadService;
   StreamSubscription? _subscription;
+
+  @override
+  DownloadState build() {
+    _downloadService = ref.read(downloadServiceProvider);
+    _subscription = _downloadService.progressStream.listen(_onProgress);
+    return const DownloadState();
+  }
 
   void _onProgress(DownloadProgress progress) {
     switch (progress.status) {
@@ -125,7 +128,4 @@ class DownloadNotifier extends StateNotifier<DownloadState> {
 }
 
 final downloadNotifierProvider =
-    StateNotifierProvider<DownloadNotifier, DownloadState>((ref) {
-      final service = ref.watch(downloadServiceProvider);
-      return DownloadNotifier(service);
-    });
+    NotifierProvider<DownloadNotifier, DownloadState>(DownloadNotifier.new);
