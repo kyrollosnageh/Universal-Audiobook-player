@@ -704,4 +704,3 @@ class EmbyProvider implements ServerProvider {
     }
   }
 }
-

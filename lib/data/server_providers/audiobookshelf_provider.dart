@@ -614,4 +614,3 @@ class AudiobookshelfProvider implements ServerProvider {
     return filters.isNotEmpty ? filters.join(',') : null;
   }
 }
-

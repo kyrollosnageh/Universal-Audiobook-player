@@ -153,4 +153,3 @@ class ServerDetectionResult {
   final String serverName;
   final String? version;
 }
-

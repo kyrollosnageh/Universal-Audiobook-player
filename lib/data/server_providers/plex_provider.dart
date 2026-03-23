@@ -719,4 +719,3 @@ class PlexAuthPin {
   final String code;
   final String authUrl;
 }
-
