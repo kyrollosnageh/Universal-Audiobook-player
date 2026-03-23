@@ -53,8 +53,10 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Generate Android platform files
+        run: |
+          flutter create --org com.libretto --platforms android .
+          flutter pub get
 
       - name: Build release APK
         run: flutter build apk --release
@@ -98,8 +100,10 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Generate iOS platform files
+        run: |
+          flutter create --org com.libretto --platforms ios .
+          flutter pub get
 
       - name: Build iOS (no codesign)
         run: flutter build ios --no-codesign --release
