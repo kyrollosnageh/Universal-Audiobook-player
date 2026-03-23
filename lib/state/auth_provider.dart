@@ -77,6 +77,9 @@ class AuthNotifier extends Notifier<AuthState> {
     return const AuthState();
   }
 
+  /// Directly set state (used by server hub for session restoration).
+  set state(AuthState newState) => super.state = newState;
+
   Future<void> login({
     required String url,
     required String username,
