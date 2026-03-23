@@ -22,7 +22,12 @@ class DiscoveredServer {
   final String name;
   final String? version;
 
-  String get url => 'http://$address:$port';
+  /// URL defaults to HTTP; callers should upgrade to HTTPS when possible.
+  String get url {
+    // Port 8920 is Emby HTTPS
+    if (port == 8920) return 'https://$address:$port';
+    return 'http://$address:$port';
+  }
 }
 
 /// Discovers media servers on the local network via UDP broadcast and port scanning.
@@ -191,7 +196,8 @@ class DiscoveryService {
         if (_cancelled) return;
 
         try {
-          final result = await detector.detect('http://$host:${entry.key}');
+          final scheme = entry.key == 8920 ? 'https' : 'http';
+          final result = await detector.detect('$scheme://$host:${entry.key}');
           yield DiscoveredServer(
             address: host,
             port: entry.key,

@@ -33,7 +33,7 @@ class EmbyProvider implements ServerProvider {
 
   static const String _clientName = 'Libretto';
   static const String _deviceName = 'Flutter';
-  static const String _deviceId = 'libretto-flutter-001';
+  static String _deviceId = 'libretto-${DateTime.now().millisecondsSinceEpoch.toRadixString(36)}';
   static const String _clientVersion = '1.0.0';
 
   void _configureDio() {
