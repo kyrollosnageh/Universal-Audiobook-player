@@ -34,7 +34,7 @@ dependencies:
   cached_network_image: ^3.3.1
 
   # Connectivity
-  connectivity_plus: ^5.0.2
+  connectivity_plus: ^7.0.0
 
   # Local Auth (biometric)
   local_auth: ^2.1.8
