@@ -19,7 +19,7 @@ import 'server_provider.dart';
 /// - Chapters: embedded in item detail response
 class EmbyProvider implements ServerProvider {
   EmbyProvider({required String serverUrl, Dio? dio})
-    : _serverUrl = serverUrl.trimRight('/'),
+    : _serverUrl = serverUrl.trimTrailing('/'),
       _dio = dio ?? Dio() {
     _configureDio();
   }

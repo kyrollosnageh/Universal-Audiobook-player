@@ -21,7 +21,7 @@ class ServerDetector {
   /// Returns [ServerType] on success.
   /// Throws [ServerDetectionException] if no known server is found.
   Future<ServerDetectionResult> detect(String url) async {
-    final baseUrl = url.trimRight('/');
+    final baseUrl = url.trimTrailing('/');
 
     // Try Emby/Jellyfin first (they share the endpoint)
     try {

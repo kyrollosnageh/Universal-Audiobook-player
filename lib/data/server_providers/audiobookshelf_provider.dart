@@ -21,7 +21,7 @@ import 'server_provider.dart';
 /// - Progress: native progress sync via `/api/me/progress/{id}`
 class AudiobookshelfProvider implements ServerProvider {
   AudiobookshelfProvider({required String serverUrl, Dio? dio})
-    : _serverUrl = serverUrl.trimRight('/'),
+    : _serverUrl = serverUrl.trimTrailing('/'),
       _dio = dio ?? Dio() {
     _configureDio();
   }

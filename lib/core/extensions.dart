@@ -45,7 +45,7 @@ extension DurationFormatting on Duration {
 
 extension StringExtensions on String {
   /// Remove trailing occurrences of [char] from the string.
-  String trimRight(String char) {
+  String trimTrailing(String char) {
     var s = this;
     while (s.endsWith(char)) {
       s = s.substring(0, s.length - char.length);

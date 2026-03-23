@@ -19,7 +19,7 @@ import 'server_provider.dart';
 /// - Uses X-Plex-Token for all requests
 class PlexProvider implements ServerProvider {
   PlexProvider({required String serverUrl, Dio? dio})
-    : _serverUrl = serverUrl.trimRight('/'),
+    : _serverUrl = serverUrl.trimTrailing('/'),
       _dio = dio ?? Dio(),
       _plexTvDio = Dio() {
     _configureDio();

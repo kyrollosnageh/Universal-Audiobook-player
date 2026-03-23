@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/extensions.dart';
 import '../core/theme.dart';
 import '../data/models/unified_chapter.dart';
-import '../services/chapter_service.dart';
+
 
 /// Audio scrubber/seek bar with chapter boundary tick marks and buffered indicator.
 class Scrubber extends StatelessWidget {
@@ -173,15 +173,3 @@ class Scrubber extends StatelessWidget {
   }
 }
 
-class _ChapterCalcHelper {
-  List<double> getChapterBoundaries(
-    List<UnifiedChapter> chapters,
-    Duration totalDuration,
-  ) {
-    if (chapters.length <= 1 || totalDuration == Duration.zero) return [];
-    final totalMs = totalDuration.inMilliseconds.toDouble();
-    return chapters.skip(1).map((ch) {
-      return ch.startOffset.inMilliseconds / totalMs;
-    }).toList();
-  }
-}
