@@ -11,8 +11,7 @@ abstract class LibrettoException implements Exception {
 
 /// Server authentication failed or token expired.
 class AuthenticationException extends LibrettoException {
-  const AuthenticationException([String message = 'Authentication failed'])
-    : super(message);
+  const AuthenticationException([super.message = 'Authentication failed']);
 }
 
 /// Token has expired or been revoked (HTTP 401).

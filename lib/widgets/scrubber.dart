@@ -34,7 +34,6 @@ class Scrubber extends StatelessWidget {
         : 0.0;
 
     // Calculate chapter boundary positions
-    final chapterService = ChapterService._staticInstance;
     final boundaries = chapters.length > 1
         ? _getChapterBoundaries(chapters, duration)
         : <double>[];

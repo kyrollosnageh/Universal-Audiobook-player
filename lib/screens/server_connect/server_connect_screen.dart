@@ -8,7 +8,6 @@ import '../../core/constants.dart';
 import '../../core/errors.dart';
 import '../../core/extensions.dart';
 import '../../core/theme.dart';
-import '../../data/models/server_config.dart';
 import '../../data/server_providers/server_detector.dart';
 import '../../state/auth_provider.dart';
 

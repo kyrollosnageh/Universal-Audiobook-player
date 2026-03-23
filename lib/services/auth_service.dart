@@ -6,7 +6,6 @@ import '../core/errors.dart';
 import '../core/extensions.dart';
 import '../data/database/app_database.dart';
 import '../data/database/daos/server_dao.dart';
-import '../data/models/auth_result.dart';
 import '../data/models/server_config.dart';
 import '../data/server_providers/server_detector.dart';
 import '../data/server_providers/server_provider.dart';

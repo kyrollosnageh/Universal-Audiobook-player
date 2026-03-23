@@ -119,10 +119,8 @@ class DownloadNotifier extends StateNotifier<DownloadState> {
     );
   }
 
-  @override
   void dispose() {
     _subscription?.cancel();
-    super.dispose();
   }
 }
 

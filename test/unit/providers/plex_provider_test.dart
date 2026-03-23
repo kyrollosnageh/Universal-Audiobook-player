@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:libretto/data/server_providers/plex_provider.dart';
-import 'package:libretto/data/models/auth_result.dart';
 
 void main() {
   group('PlexProvider', () {

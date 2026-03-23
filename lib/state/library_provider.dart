@@ -231,10 +231,8 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     loadLibrary();
   }
 
-  @override
   void dispose() {
     _searchDebounce?.cancel();
-    super.dispose();
   }
 }
 

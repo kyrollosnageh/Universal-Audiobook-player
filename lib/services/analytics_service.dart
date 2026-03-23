@@ -31,7 +31,7 @@ class AnalyticsService {
   void trackEvent(String name, [Map<String, dynamic>? properties]) {
     if (!_optedIn) return;
     // Strip any PII fields before sending
-    final safe = _stripPii(properties);
+    _stripPii(properties);
     // Send to analytics backend
   }
 

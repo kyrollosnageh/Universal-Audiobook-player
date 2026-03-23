@@ -148,8 +148,8 @@ class PlayerScreen extends ConsumerWidget {
                   // Bookmarks (coming soon)
                   Semantics(
                     label: 'Bookmarks. Coming soon.',
-                    child: IconButton(
-                      icon: const Icon(Icons.bookmark_outline),
+                    child: const IconButton(
+                      icon: Icon(Icons.bookmark_outline),
                       onPressed: null,
                       tooltip: 'Bookmarks (coming soon)',
                     ),

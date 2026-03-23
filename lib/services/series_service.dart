@@ -24,7 +24,6 @@ class SeriesService {
   Duration autoAdvanceDelay = AppConstants.autoAdvanceCountdown;
 
   Timer? _autoAdvanceTimer;
-  void Function(Book nextBook)? _onAutoAdvance;
 
   // ── Series Detection ──────────────────────────────────────────
 
@@ -138,7 +137,6 @@ class SeriesService {
   Stream<int> startAutoAdvance(Book nextBook, void Function(Book) onAdvance) {
     if (!autoAdvanceEnabled) return const Stream.empty();
 
-    _onAutoAdvance = onAdvance;
     final controller = StreamController<int>.broadcast();
 
     var remaining = autoAdvanceDelay.inSeconds;
@@ -162,7 +160,6 @@ class SeriesService {
   void cancelAutoAdvance() {
     _autoAdvanceTimer?.cancel();
     _autoAdvanceTimer = null;
-    _onAutoAdvance = null;
   }
 
   // ── Custom Reading Order ──────────────────────────────────────

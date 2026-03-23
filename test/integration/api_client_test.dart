@@ -5,8 +5,6 @@ import 'package:libretto/data/server_providers/audiobookshelf_provider.dart';
 import 'package:libretto/data/server_providers/jellyfin_provider.dart';
 import 'package:libretto/data/server_providers/plex_provider.dart';
 import 'package:libretto/data/server_providers/server_detector.dart';
-import 'package:libretto/data/models/auth_result.dart';
-import 'package:libretto/data/models/server_config.dart';
 import 'package:libretto/core/extensions.dart';
 
 void main() {

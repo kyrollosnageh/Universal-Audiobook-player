@@ -95,8 +95,8 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
             ],
           ),
           // Settings / server management (coming soon)
-          IconButton(
-            icon: const Icon(Icons.settings),
+          const IconButton(
+            icon: Icon(Icons.settings),
             tooltip: 'Settings (coming soon)',
             onPressed: null,
           ),
