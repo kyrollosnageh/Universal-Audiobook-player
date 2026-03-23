@@ -1,0 +1,44 @@
+name: Commit Lint
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  commitlint:
+    name: Lint Commit Messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate conventional commits
+        run: |
+          # Check all commits in this PR use conventional format
+          COMMITS=$(git log --format="%s" origin/${{ github.base_ref }}..HEAD)
+          FAILED=0
+
+          PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|deps)(\(.+\))?(!)?: .{1,}"
+
+          while IFS= read -r msg; do
+            if [[ -z "$msg" ]]; then continue; fi
+            if [[ ! "$msg" =~ $PATTERN ]]; then
+              echo "::error::Invalid commit message: '$msg'"
+              echo "  Expected format: type(scope): description"
+              echo "  Valid types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, deps"
+              FAILED=1
+            fi
+          done <<< "$COMMITS"
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo ""
+            echo "::error::Some commit messages don't follow conventional commits format."
+            echo "See: https://www.conventionalcommits.org/"
+            exit 1
+          fi
+
+          echo "All commit messages follow conventional commits format."
