@@ -60,8 +60,9 @@ class SeriesNotifier extends Notifier<SeriesState> {
   }
 }
 
-final seriesNotifierProvider =
-    NotifierProvider<SeriesNotifier, SeriesState>(SeriesNotifier.new);
+final seriesNotifierProvider = NotifierProvider<SeriesNotifier, SeriesState>(
+  SeriesNotifier.new,
+);
 
 /// Series detail: books within a series.
 final seriesBooksProvider = FutureProvider.family<List<SeriesBook>, String>((

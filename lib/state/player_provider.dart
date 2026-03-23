@@ -317,5 +317,6 @@ class PlayerNotifier extends Notifier<PlayerState> {
   }
 }
 
-final playerNotifierProvider =
-    NotifierProvider<PlayerNotifier, PlayerState>(PlayerNotifier.new);
+final playerNotifierProvider = NotifierProvider<PlayerNotifier, PlayerState>(
+  PlayerNotifier.new,
+);
