@@ -1,5 +1,5 @@
-name-template: 'v$RESOLVED-VERSION'
-tag-template: 'v$RESOLVED-VERSION'
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
 
 categories:
   - title: 'Features'
@@ -42,5 +42,5 @@ template: |
   ### Downloads
   | Platform | File |
   |----------|------|
-  | Android  | `libretto-$RESOLVED-VERSION.apk` |
-  | iOS      | `libretto-$RESOLVED-VERSION.ipa` (sideload / TestFlight) |
+  | Android  | `libretto-$RESOLVED_VERSION.apk` |
+  | iOS      | `libretto-$RESOLVED_VERSION.ipa` (sideload / TestFlight) |
