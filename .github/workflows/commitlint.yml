@@ -22,7 +22,7 @@ jobs:
           COMMITS=$(git log --format="%s" origin/${{ github.base_ref }}..HEAD)
           FAILED=0
 
-          PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|deps)(\(.+\))?(!)?: .{1,}"
+          PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|deps|merge)(\(.+\))?(!)?: .{1,}"
           MERGE_PATTERN="^Merge "
 
           while IFS= read -r msg; do
