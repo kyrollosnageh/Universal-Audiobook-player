@@ -115,13 +115,8 @@ class MediaBrowseTree {
     String serverId,
     String authorName,
   ) async {
-    final allBooks = await libraryService.getCachedBooks(
-      serverId,
-      limit: 200,
-    );
-    final books = allBooks
-        .where((b) => b.author == authorName)
-        .toList();
+    final allBooks = await libraryService.getCachedBooks(serverId, limit: 200);
+    final books = allBooks.where((b) => b.author == authorName).toList();
 
     return books.map((b) => carHandler.bookToMediaItem(b)).toList();
   }
