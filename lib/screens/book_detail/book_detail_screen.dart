@@ -102,12 +102,8 @@ class BookDetailScreen extends ConsumerWidget {
                           .toggleFavorite(book);
                     },
                     icon: Icon(
-                      book.isFavorite
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: book.isFavorite
-                          ? LibrettoTheme.secondary
-                          : null,
+                      book.isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: book.isFavorite ? LibrettoTheme.secondary : null,
                     ),
                     tooltip: book.isFavorite
                         ? 'Remove from favorites'
@@ -136,9 +132,11 @@ class BookDetailScreen extends ConsumerWidget {
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            Text(book.isFinished
-                                ? 'Mark as unfinished'
-                                : 'Mark as finished'),
+                            Text(
+                              book.isFinished
+                                  ? 'Mark as unfinished'
+                                  : 'Mark as finished',
+                            ),
                           ],
                         ),
                       ),
@@ -271,8 +269,11 @@ class BookDetailScreen extends ConsumerWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.check_circle,
-                                  size: 14, color: Colors.green),
+                              const Icon(
+                                Icons.check_circle,
+                                size: 14,
+                                color: Colors.green,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 'Finished',
@@ -326,10 +327,9 @@ class BookDetailScreen extends ConsumerWidget {
                             child: Semantics(
                               label: book.isFinished
                                   ? 'Listen again to ${book.title}'
-                                  : book.progress != null &&
-                                          book.progress! > 0
-                                      ? 'Resume ${book.title}'
-                                      : 'Play ${book.title}',
+                                  : book.progress != null && book.progress! > 0
+                                  ? 'Resume ${book.title}'
+                                  : 'Play ${book.title}',
                               child: ElevatedButton.icon(
                                 onPressed: () async {
                                   final chapters =
@@ -357,16 +357,18 @@ class BookDetailScreen extends ConsumerWidget {
                                     unawaited(context.push('/player'));
                                   }
                                 },
-                                icon: Icon(book.isFinished
-                                    ? Icons.replay
-                                    : Icons.play_arrow),
+                                icon: Icon(
+                                  book.isFinished
+                                      ? Icons.replay
+                                      : Icons.play_arrow,
+                                ),
                                 label: Text(
                                   book.isFinished
                                       ? 'Listen Again'
                                       : book.progress != null &&
-                                              book.progress! > 0
-                                          ? 'Resume'
-                                          : 'Play',
+                                            book.progress! > 0
+                                      ? 'Resume'
+                                      : 'Play',
                                 ),
                               ),
                             ),

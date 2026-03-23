@@ -87,7 +87,8 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
   Future<List<BookEntry>> getFinishedBooks(String serverId) {
     return (select(booksTable)
           ..where(
-              (t) => t.serverId.equals(serverId) & t.isFinished.equals(true))
+            (t) => t.serverId.equals(serverId) & t.isFinished.equals(true),
+          )
           ..orderBy([(t) => OrderingTerm.desc(t.lastPlayedAt)])
           ..limit(50))
         .get();
@@ -97,7 +98,8 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
   Future<List<BookEntry>> getFavoriteBooks(String serverId) {
     return (select(booksTable)
           ..where(
-              (t) => t.serverId.equals(serverId) & t.isFavorite.equals(true))
+            (t) => t.serverId.equals(serverId) & t.isFavorite.equals(true),
+          )
           ..orderBy([(t) => OrderingTerm.asc(t.title)]))
         .get();
   }

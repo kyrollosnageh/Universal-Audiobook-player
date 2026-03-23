@@ -90,8 +90,8 @@ class LibraryState {
 
 class LibraryNotifier extends StateNotifier<LibraryState> {
   LibraryNotifier(this._libraryService, this._ref)
-      : _syncService = _ref.read(syncServiceProvider),
-        super(const LibraryState());
+    : _syncService = _ref.read(syncServiceProvider),
+      super(const LibraryState());
 
   final LibraryService _libraryService;
   final SyncService _syncService;
@@ -251,8 +251,7 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
 
     // Update local state
     _updateBookInState(book.id, (b) => b.copyWith(isFavorite: newValue));
-    final favorites =
-        await _libraryService.getFavoriteBooks(book.serverId);
+    final favorites = await _libraryService.getFavoriteBooks(book.serverId);
     state = state.copyWith(favoriteBooks: favorites);
   }
 
@@ -272,8 +271,9 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     // Update local state
     _updateBookInState(book.id, (b) => b.copyWith(isFinished: newValue));
     final serverId = book.serverId;
-    final continueListening =
-        await _libraryService.getContinueListening(serverId);
+    final continueListening = await _libraryService.getContinueListening(
+      serverId,
+    );
     final finished = await _libraryService.getFinishedBooks(serverId);
     state = state.copyWith(
       continueListening: continueListening,

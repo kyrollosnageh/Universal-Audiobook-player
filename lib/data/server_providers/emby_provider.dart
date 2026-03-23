@@ -351,10 +351,7 @@ class EmbyProvider implements ServerProvider {
     try {
       final response = await _dio.get(
         EmbyApiPaths.userItems(_userId!),
-        queryParameters: {
-          'Ids': bookId,
-          'Fields': 'UserData',
-        },
+        queryParameters: {'Ids': bookId, 'Fields': 'UserData'},
       );
       final data = response.data as Map<String, dynamic>;
       final items = (data['Items'] as List<dynamic>?) ?? [];

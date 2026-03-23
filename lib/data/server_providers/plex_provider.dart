@@ -443,15 +443,21 @@ class PlexProvider implements ServerProvider {
     _requireAuth();
     try {
       if (isFinished) {
-        await _dio.get('/:/scrobble', queryParameters: {
-          'identifier': 'com.plexapp.plugins.library',
-          'key': '/library/metadata/$bookId',
-        });
+        await _dio.get(
+          '/:/scrobble',
+          queryParameters: {
+            'identifier': 'com.plexapp.plugins.library',
+            'key': '/library/metadata/$bookId',
+          },
+        );
       } else {
-        await _dio.get('/:/unscrobble', queryParameters: {
-          'identifier': 'com.plexapp.plugins.library',
-          'key': '/library/metadata/$bookId',
-        });
+        await _dio.get(
+          '/:/unscrobble',
+          queryParameters: {
+            'identifier': 'com.plexapp.plugins.library',
+            'key': '/library/metadata/$bookId',
+          },
+        );
       }
     } on DioException {
       // Non-critical
@@ -482,11 +488,14 @@ class PlexProvider implements ServerProvider {
     _requireAuth();
     try {
       // Plex uses rating=10 as "loved"
-      await _dio.put('/:/rate', queryParameters: {
-        'key': '/library/metadata/$bookId',
-        'identifier': 'com.plexapp.plugins.library',
-        'rating': isFavorite ? 10 : 0,
-      });
+      await _dio.put(
+        '/:/rate',
+        queryParameters: {
+          'key': '/library/metadata/$bookId',
+          'identifier': 'com.plexapp.plugins.library',
+          'rating': isFavorite ? 10 : 0,
+        },
+      );
     } on DioException {
       // Non-critical
     }
@@ -497,11 +506,14 @@ class PlexProvider implements ServerProvider {
     _requireAuth();
     try {
       // Plex uses 0-10 scale, we normalize from 0.0-1.0
-      await _dio.put('/:/rate', queryParameters: {
-        'key': '/library/metadata/$bookId',
-        'identifier': 'com.plexapp.plugins.library',
-        'rating': (rating * 10).round(),
-      });
+      await _dio.put(
+        '/:/rate',
+        queryParameters: {
+          'key': '/library/metadata/$bookId',
+          'identifier': 'com.plexapp.plugins.library',
+          'rating': (rating * 10).round(),
+        },
+      );
     } on DioException {
       // Non-critical
     }

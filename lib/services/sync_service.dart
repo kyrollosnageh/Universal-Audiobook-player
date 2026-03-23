@@ -12,8 +12,8 @@ import '../data/server_providers/server_provider.dart';
 /// - Conflict resolution: use furthest-ahead position; prompt if large divergence
 class SyncService {
   SyncService({required AppDatabase database})
-      : _positionDao = database.positionDao,
-        _bookDao = database.bookDao;
+    : _positionDao = database.positionDao,
+      _bookDao = database.bookDao;
 
   final PositionDao _positionDao;
   final BookDao _bookDao;
@@ -48,7 +48,9 @@ class SyncService {
 
   /// Get the locally saved position for a book, including chapter info.
   Future<SavedPosition?> getLocalPosition(
-      String bookId, String serverId) async {
+    String bookId,
+    String serverId,
+  ) async {
     final entry = await _positionDao.getPosition(bookId, serverId);
     if (entry == null) return null;
     return SavedPosition(
@@ -220,10 +222,7 @@ class SyncService {
 
 /// A locally saved position with optional chapter info.
 class SavedPosition {
-  const SavedPosition({
-    required this.position,
-    this.chapterId,
-  });
+  const SavedPosition({required this.position, this.chapterId});
 
   final Duration position;
   final String? chapterId;
