@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../core/extensions.dart';
 import '../../core/theme.dart';
 import '../../data/models/series.dart';
-import '../../services/series_service.dart';
 import '../../state/series_provider.dart';
 import '../../widgets/book_cover.dart';
 

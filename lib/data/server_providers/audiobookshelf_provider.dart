@@ -6,6 +6,7 @@ import '../../core/extensions.dart';
 import '../models/auth_result.dart';
 import '../models/book.dart';
 import '../models/series.dart';
+import '../models/server_config.dart';
 import '../models/unified_chapter.dart';
 import 'server_provider.dart';
 
@@ -21,7 +22,7 @@ import 'server_provider.dart';
 /// - Progress: native progress sync via `/api/me/progress/{id}`
 class AudiobookshelfProvider implements ServerProvider {
   AudiobookshelfProvider({required String serverUrl, Dio? dio})
-    : _serverUrl = serverUrl.trimRight('/'),
+    : _serverUrl = serverUrl.trimTrailing('/'),
       _dio = dio ?? Dio() {
     _configureDio();
   }
@@ -612,15 +613,5 @@ class AudiobookshelfProvider implements ServerProvider {
     if (author != null) filters.add('authors.$author');
     if (narrator != null) filters.add('narrators.$narrator');
     return filters.isNotEmpty ? filters.join(',') : null;
-  }
-}
-
-extension on String {
-  String trimRight(String char) {
-    var s = this;
-    while (s.endsWith(char)) {
-      s = s.substring(0, s.length - char.length);
-    }
-    return s;
   }
 }

@@ -1,6 +1,5 @@
 import 'package:audio_service/audio_service.dart';
 
-import '../data/models/book.dart';
 import '../services/library_service.dart';
 import 'car_audio_handler.dart';
 

@@ -87,12 +87,16 @@ class PlayerState {
 }
 
 /// Player state notifier — manages playback via PlaybackService.
-class PlayerNotifier extends StateNotifier<PlayerState> {
-  PlayerNotifier(this._playbackService, this._syncService)
-    : super(const PlayerState());
+class PlayerNotifier extends Notifier<PlayerState> {
+  late PlaybackService _playbackService;
+  late SyncService _syncService;
 
-  final PlaybackService _playbackService;
-  final SyncService _syncService;
+  @override
+  PlayerState build() {
+    _playbackService = ref.read(playbackServiceProvider);
+    _syncService = ref.read(syncServiceProvider);
+    return const PlayerState();
+  }
 
   StreamSubscription? _positionSub;
   StreamSubscription? _durationSub;
@@ -313,9 +317,6 @@ class PlayerNotifier extends StateNotifier<PlayerState> {
   }
 }
 
-final playerNotifierProvider =
-    StateNotifierProvider<PlayerNotifier, PlayerState>((ref) {
-      final playbackService = ref.watch(playbackServiceProvider);
-      final syncService = ref.watch(syncServiceProvider);
-      return PlayerNotifier(playbackService, syncService);
-    });
+final playerNotifierProvider = NotifierProvider<PlayerNotifier, PlayerState>(
+  PlayerNotifier.new,
+);

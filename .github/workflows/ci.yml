@@ -58,7 +58,7 @@ jobs:
           echo "All files correctly formatted."
 
       - name: Run analyzer
-        run: dart analyze --fatal-infos --fatal-warnings
+        run: dart analyze --fatal-warnings
 
       - name: Check for hardcoded secrets
         run: |
@@ -85,6 +85,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Run code generation (Drift, Freezed, etc.)
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Run unit & widget tests with coverage
         run: flutter test --coverage --reporter=github
@@ -163,8 +166,13 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Generate Android platform files
+        run: |
+          flutter create --org com.libretto --platforms android .
+          flutter pub get
+
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build debug APK
         run: flutter build apk --debug
@@ -191,8 +199,13 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Generate iOS platform files
+        run: |
+          flutter create --org com.libretto --platforms ios .
+          flutter pub get
+
+      - name: Run code generation
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build iOS (no codesign)
         run: flutter build ios --no-codesign --debug

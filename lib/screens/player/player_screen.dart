@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// ignore: unused_import
 import '../../core/extensions.dart';
+import '../../widgets/a11y/semantic_player.dart';
 import '../../core/theme.dart';
 import '../../state/player_provider.dart';
 import '../../widgets/book_cover.dart';
@@ -241,11 +242,9 @@ class PlayerScreen extends ConsumerWidget {
                   onTap: () {
                     notifier.seekToChapter(index);
                     Navigator.pop(context);
-                    SemanticsService.sendAnnouncement(
-                      AnnounceSemanticsEvent(
-                        'Now playing: ${state.chapters[index].title}',
-                        TextDirection.ltr,
-                      ),
+                    SemanticPlayer.announceChapterChange(
+                      context,
+                      state.chapters[index],
                     );
                   },
                 ),

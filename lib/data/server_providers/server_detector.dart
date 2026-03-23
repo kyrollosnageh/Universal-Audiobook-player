@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/constants.dart';
 import '../../core/errors.dart';
+import '../../core/extensions.dart';
 import '../models/server_config.dart';
 
 /// Probes a URL to auto-detect the server type.
@@ -20,7 +21,7 @@ class ServerDetector {
   /// Returns [ServerType] on success.
   /// Throws [ServerDetectionException] if no known server is found.
   Future<ServerDetectionResult> detect(String url) async {
-    final baseUrl = url.trimRight('/');
+    final baseUrl = url.trimTrailing('/');
 
     // Try Emby/Jellyfin first (they share the endpoint)
     try {
@@ -151,14 +152,4 @@ class ServerDetectionResult {
   final ServerType type;
   final String serverName;
   final String? version;
-}
-
-extension on String {
-  String trimRight(String char) {
-    var s = this;
-    while (s.endsWith(char)) {
-      s = s.substring(0, s.length - char.length);
-    }
-    return s;
-  }
 }

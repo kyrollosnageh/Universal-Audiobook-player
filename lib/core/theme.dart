@@ -125,7 +125,7 @@ class LibrettoTheme {
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: surface,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
       ),

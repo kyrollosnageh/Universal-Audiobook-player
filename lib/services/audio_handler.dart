@@ -138,7 +138,6 @@ Future<LibrettoAudioHandler> initAudioHandler(AudioPlayer player) async {
     config: const AudioServiceConfig(
       androidNotificationChannelId: 'com.libretto.audio',
       androidNotificationChannelName: 'Libretto Playback',
-      androidNotificationOngoing: true,
       androidStopForegroundOnPause: false,
       artDownscaleWidth: 300,
       artDownscaleHeight: 300,

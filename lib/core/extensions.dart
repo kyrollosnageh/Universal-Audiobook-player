@@ -3,8 +3,6 @@ library;
 
 /// Emby/Jellyfin use "ticks" (1 tick = 100 nanoseconds).
 /// 10,000,000 ticks = 1 second.
-const int _ticksPerSecond = 10000000;
-const int _ticksPerMillisecond = 10000;
 
 extension DurationTickConversion on Duration {
   /// Convert a Dart [Duration] to Emby/Jellyfin ticks.
@@ -46,6 +44,15 @@ extension DurationFormatting on Duration {
 }
 
 extension StringExtensions on String {
+  /// Remove trailing occurrences of [char] from the string.
+  String trimTrailing(String char) {
+    var s = this;
+    while (s.endsWith(char)) {
+      s = s.substring(0, s.length - char.length);
+    }
+    return s;
+  }
+
   /// Capitalize the first letter.
   String capitalize() {
     if (isEmpty) return this;

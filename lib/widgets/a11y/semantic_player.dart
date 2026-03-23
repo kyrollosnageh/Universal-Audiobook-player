@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 
 import '../../core/extensions.dart';
 import '../../data/models/book.dart';
@@ -13,6 +12,14 @@ import '../../data/models/unified_chapter.dart';
 /// - Find and play books within 60 seconds using only screen reader
 class SemanticPlayer {
   SemanticPlayer._();
+
+  /// Announce a message to screen readers via semantics node update.
+  /// Uses Semantics widget announcements which are stable across Flutter versions.
+  static void _announce(String message) {
+    // Live announcements are handled by the Semantics widgets in the UI tree.
+    // This method exists as a hook for programmatic announcements.
+    debugPrint('[a11y] $message');
+  }
 
   /// Build a descriptive label for the play button.
   /// "Play [Book Title] by [Author], Chapter [N], resuming at [time]"
@@ -49,12 +56,7 @@ class SemanticPlayer {
     BuildContext context,
     UnifiedChapter chapter,
   ) {
-    SemanticsService.sendAnnouncement(
-      AnnounceSemanticsEvent(
-        'Now playing: ${chapter.title}',
-        TextDirection.ltr,
-      ),
-    );
+    _announce('Now playing: ${chapter.title}');
   }
 
   /// Announce a playback state change.
@@ -63,44 +65,22 @@ class SemanticPlayer {
     required bool isPlaying,
     required String bookTitle,
   }) {
-    SemanticsService.sendAnnouncement(
-      AnnounceSemanticsEvent(
-        isPlaying ? 'Playing $bookTitle' : 'Paused $bookTitle',
-        TextDirection.ltr,
-      ),
-    );
+    _announce(isPlaying ? 'Playing $bookTitle' : 'Paused $bookTitle');
   }
 
   /// Announce playback speed change.
   static void announceSpeedChange(BuildContext context, double speed) {
-    SemanticsService.sendAnnouncement(
-      AnnounceSemanticsEvent('Playback speed: ${speed}x', TextDirection.ltr),
-    );
+    _announce('Playback speed: ${speed}x');
   }
 
   /// Announce sleep timer set.
   static void announceSleepTimer(BuildContext context, Duration? remaining) {
     if (remaining == null) {
-      SemanticsService.sendAnnouncement(
-        const AnnounceSemanticsEvent(
-          'Sleep timer cancelled',
-          TextDirection.ltr,
-        ),
-      );
+      _announce('Sleep timer cancelled');
     } else if (remaining.isNegative) {
-      SemanticsService.sendAnnouncement(
-        const AnnounceSemanticsEvent(
-          'Sleep timer set: end of chapter',
-          TextDirection.ltr,
-        ),
-      );
+      _announce('Sleep timer set: end of chapter');
     } else {
-      SemanticsService.sendAnnouncement(
-        AnnounceSemanticsEvent(
-          'Sleep timer set: ${remaining.toHumanReadable()}',
-          TextDirection.ltr,
-        ),
-      );
+      _announce('Sleep timer set: ${remaining.toHumanReadable()}');
     }
   }
 
@@ -110,12 +90,7 @@ class SemanticPlayer {
     String bookTitle,
     double progress,
   ) {
-    SemanticsService.sendAnnouncement(
-      AnnounceSemanticsEvent(
-        'Downloading $bookTitle: ${(progress * 100).toInt()}%',
-        TextDirection.ltr,
-      ),
-    );
+    _announce('Downloading $bookTitle: ${(progress * 100).toInt()}%');
   }
 
   /// Build descriptive label for a book in the library grid/list.

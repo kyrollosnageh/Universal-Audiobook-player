@@ -6,6 +6,7 @@ import '../../core/extensions.dart';
 import '../models/auth_result.dart';
 import '../models/book.dart';
 import '../models/series.dart';
+import '../models/server_config.dart';
 import '../models/unified_chapter.dart';
 import 'server_provider.dart';
 
@@ -19,7 +20,7 @@ import 'server_provider.dart';
 /// - Uses X-Plex-Token for all requests
 class PlexProvider implements ServerProvider {
   PlexProvider({required String serverUrl, Dio? dio})
-    : _serverUrl = serverUrl.trimRight('/'),
+    : _serverUrl = serverUrl.trimTrailing('/'),
       _dio = dio ?? Dio(),
       _plexTvDio = Dio() {
     _configureDio();
@@ -604,7 +605,7 @@ class PlexProvider implements ServerProvider {
       genre: map['genre'] as String?,
       year: map['year'] as int?,
       dateAdded: map['addedAt'] != null
-          ? DateTime.fromSecondsSinceEpoch(map['addedAt'] as int)
+          ? DateTime.fromMillisecondsSinceEpoch((map['addedAt'] as int) * 1000)
           : null,
     );
   }
@@ -668,7 +669,6 @@ class PlexProvider implements ServerProvider {
     // In a dedicated audiobook library, everything is an audiobook
     // This heuristic is for mixed music/audiobook libraries
     final title = book.title.toLowerCase();
-    final author = (book.author ?? '').toLowerCase();
 
     // Long duration suggests audiobook (> 1 hour)
     if (book.duration != null && book.duration!.inHours >= 1) {
@@ -719,14 +719,4 @@ class PlexAuthPin {
   final int id;
   final String code;
   final String authUrl;
-}
-
-extension on String {
-  String trimRight(String char) {
-    var s = this;
-    while (s.endsWith(char)) {
-      s = s.substring(0, s.length - char.length);
-    }
-    return s;
-  }
 }

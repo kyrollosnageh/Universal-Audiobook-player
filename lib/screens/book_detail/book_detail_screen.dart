@@ -263,7 +263,7 @@ class BookDetailScreen extends ConsumerWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.15),
+                            color: Colors.green.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
@@ -332,17 +332,11 @@ class BookDetailScreen extends ConsumerWidget {
                                   : 'Play ${book.title}',
                               child: ElevatedButton.icon(
                                 onPressed: () async {
-                                  final chapters =
-                                      chaptersAsync.valueOrNull ?? [];
+                                  final chapters = chaptersAsync.value ?? [];
                                   final provider = ref.read(
                                     activeServerProvider,
                                   );
                                   if (provider == null) return;
-
-                                  // Resolve position (local vs server)
-                                  final syncService = ref.read(
-                                    chapterServiceProvider,
-                                  );
 
                                   final notifier = ref.read(
                                     playerNotifierProvider.notifier,

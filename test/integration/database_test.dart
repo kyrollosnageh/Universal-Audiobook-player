@@ -4,6 +4,7 @@ import 'package:libretto/data/models/book.dart';
 import 'package:libretto/data/models/unified_chapter.dart';
 import 'package:libretto/data/models/series.dart';
 import 'package:libretto/data/models/auth_result.dart';
+import 'package:libretto/data/models/server_config.dart';
 
 void main() {
   // Database integration tests would use an in-memory Drift database.
