@@ -37,7 +37,7 @@ dependencies:
   connectivity_plus: ^5.0.2
 
   # Local Auth (biometric)
-  local_auth: ^2.1.8
+  local_auth: ^3.0.1
 
   # Firebase Crashlytics
   firebase_core: ^2.24.2
