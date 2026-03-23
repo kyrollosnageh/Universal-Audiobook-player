@@ -24,7 +24,7 @@ dependencies:
   dio: ^5.4.0
 
   # Local Database
-  drift: ^2.31.0
+  drift: ^2.14.1
   sqlite3_flutter_libs: ^0.6.0+eol
 
   # Secure Storage
