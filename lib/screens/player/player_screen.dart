@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// ignore: unused_import
 import '../../core/extensions.dart';
 import '../../core/theme.dart';
 import '../../state/player_provider.dart';
