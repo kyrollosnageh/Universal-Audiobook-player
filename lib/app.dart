@@ -10,6 +10,7 @@ import 'screens/library_home/library_home_screen.dart';
 import 'screens/book_detail/book_detail_screen.dart';
 import 'screens/player/player_screen.dart';
 import 'screens/series/series_view_screen.dart';
+import 'screens/settings/settings_screen.dart';
 import 'state/auth_provider.dart';
 import 'widgets/add_server_sheet.dart';
 
@@ -118,13 +119,19 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
             seriesName: state.uri.queryParameters['name'],
           ),
         ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsScreen(),
+        ),
       ],
       redirect: (context, state) {
         final isAuth = authState.isAuthenticated;
         final location = state.matchedLocation;
 
-        // Allow welcome and hub without auth
-        if (location == '/welcome' || location == '/hub') return null;
+        // Allow welcome, hub, and settings without auth
+        if (location == '/welcome' ||
+            location == '/hub' ||
+            location == '/settings') return null;
 
         // Require auth for everything else
         if (!isAuth) return '/hub';

@@ -94,6 +94,11 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               ),
             ],
           ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () => context.push('/settings'),
+          ),
         ],
       ),
       body: RefreshIndicator(

@@ -201,7 +201,17 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
         padding: const EdgeInsets.all(24),
         children: [
           // Header
-          Text('Your Servers', style: theme.textTheme.headlineLarge),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Your Servers', style: theme.textTheme.headlineLarge),
+              IconButton(
+                icon: const Icon(Icons.settings),
+                tooltip: 'Settings',
+                onPressed: () => context.push('/settings'),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
 
           // Hero card
