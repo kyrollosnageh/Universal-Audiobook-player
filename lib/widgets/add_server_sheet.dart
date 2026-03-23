@@ -187,13 +187,15 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
     });
 
     try {
-      await ref.read(authNotifierProvider.notifier).login(
-        url: _urlController.text.trim(),
-        username: _usernameController.text.trim(),
-        password: _passwordController.text,
-        serverType: _detectedServer!.type,
-        serverName: _detectedServer!.serverName,
-      );
+      await ref
+          .read(authNotifierProvider.notifier)
+          .login(
+            url: _urlController.text.trim(),
+            username: _usernameController.text.trim(),
+            password: _passwordController.text,
+            serverType: _detectedServer!.type,
+            serverName: _detectedServer!.serverName,
+          );
 
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
@@ -261,7 +263,8 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
                   ),
                   for (final type in ServerType.values)
                     _FilterChip(
-                      label: type.name[0].toUpperCase() + type.name.substring(1),
+                      label:
+                          type.name[0].toUpperCase() + type.name.substring(1),
                       selected: _filterType == type,
                       onTap: () => _onFilterChanged(type),
                     ),
@@ -299,8 +302,10 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
 
                   // Discovered servers
                   if (_discoveredServers.isNotEmpty) ...[
-                    Text('Found on your network',
-                        style: theme.textTheme.titleMedium),
+                    Text(
+                      'Found on your network',
+                      style: theme.textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 12),
                     for (final server in _discoveredServers)
                       _DiscoveredServerTile(
@@ -433,8 +438,8 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
                           SizedBox(
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: _isConnecting ||
-                                      _detectedServer == null
+                              onPressed:
+                                  _isConnecting || _detectedServer == null
                                   ? null
                                   : _connect,
                               child: _isConnecting
@@ -489,10 +494,7 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _DiscoveredServerTile extends StatelessWidget {
-  const _DiscoveredServerTile({
-    required this.server,
-    required this.onTap,
-  });
+  const _DiscoveredServerTile({required this.server, required this.onTap});
 
   final DiscoveredServer server;
   final VoidCallback onTap;
@@ -514,10 +516,7 @@ class _DiscoveredServerTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                _iconForType(server.type),
-                color: LibrettoTheme.primary,
-              ),
+              Icon(_iconForType(server.type), color: LibrettoTheme.primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -533,7 +532,10 @@ class _DiscoveredServerTile extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: LibrettoTheme.onSurfaceVariant),
+              const Icon(
+                Icons.chevron_right,
+                color: LibrettoTheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),
@@ -563,13 +565,15 @@ class _DetectedBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: LibrettoTheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: LibrettoTheme.primary.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: LibrettoTheme.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.check_circle, color: LibrettoTheme.primary, size: 18),
+          const Icon(
+            Icons.check_circle,
+            color: LibrettoTheme.primary,
+            size: 18,
+          ),
           const SizedBox(width: 8),
           Text(
             '${result.serverName} — ${result.type.name.toUpperCase()}'

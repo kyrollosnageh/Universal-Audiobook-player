@@ -63,11 +63,7 @@ class DiscoveryService {
 
       // Send discovery message
       final message = 'who is JellyfinServer?';
-      socket.send(
-        message.codeUnits,
-        InternetAddress('255.255.255.255'),
-        7359,
-      );
+      socket.send(message.codeUnits, InternetAddress('255.255.255.255'), 7359);
 
       // Listen for responses with timeout
       await for (final event in socket.timeout(const Duration(seconds: 5))) {
@@ -101,7 +97,9 @@ class DiscoveryService {
       final jsonStr = response.substring(response.indexOf('{'));
       // Simple JSON parse without importing dart:convert at top level
       final fields = <String, String>{};
-      for (final match in RegExp(r'"(\w+)"\s*:\s*"([^"]*)"').allMatches(jsonStr)) {
+      for (final match in RegExp(
+        r'"(\w+)"\s*:\s*"([^"]*)"',
+      ).allMatches(jsonStr)) {
         fields[match.group(1)!] = match.group(2)!;
       }
 
@@ -112,7 +110,8 @@ class DiscoveryService {
 
       final uri = Uri.tryParse(serverAddress);
       final port = uri?.port ?? 8096;
-      final isJellyfin = name.toLowerCase().contains('jellyfin') ||
+      final isJellyfin =
+          name.toLowerCase().contains('jellyfin') ||
           response.toLowerCase().contains('jellyfin');
 
       return DiscoveredServer(
@@ -135,11 +134,7 @@ class DiscoveryService {
 
       // GDM discovery message
       final message = 'M-SEARCH * HTTP/1.1\r\n\r\n';
-      socket.send(
-        message.codeUnits,
-        InternetAddress('255.255.255.255'),
-        32414,
-      );
+      socket.send(message.codeUnits, InternetAddress('255.255.255.255'), 32414);
 
       await for (final event in socket.timeout(const Duration(seconds: 5))) {
         if (_cancelled) break;

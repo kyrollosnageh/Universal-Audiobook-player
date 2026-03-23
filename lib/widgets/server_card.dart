@@ -32,8 +32,13 @@ class ServerCard extends StatelessWidget {
 
   Widget _buildHeroCard(BuildContext context, ThemeData theme) {
     return Semantics(
-      label: '${server.name}, ${server.type} server. '
-          '${isOnline == true ? 'Online' : isOnline == false ? 'Offline' : 'Checking'}. '
+      label:
+          '${server.name}, ${server.type} server. '
+          '${isOnline == true
+              ? 'Online'
+              : isOnline == false
+              ? 'Offline'
+              : 'Checking'}. '
           '${bookCount != null ? '$bookCount books. ' : ''}'
           'Tap to continue.',
       button: true,
@@ -98,10 +103,7 @@ class ServerCard extends StatelessWidget {
                       color: LibrettoTheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      '$bookCount books',
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text('$bookCount books', style: theme.textTheme.bodySmall),
                     const SizedBox(width: 16),
                   ],
                   Text(
@@ -139,14 +141,20 @@ class ServerCard extends StatelessWidget {
 
   Widget _buildCompactCard(BuildContext context, ThemeData theme) {
     return Semantics(
-      label: '${server.name}, ${server.type} server. '
-          '${isOnline == true ? 'Online' : isOnline == false ? 'Offline' : 'Checking'}. '
+      label:
+          '${server.name}, ${server.type} server. '
+          '${isOnline == true
+              ? 'Online'
+              : isOnline == false
+              ? 'Offline'
+              : 'Checking'}. '
           'Tap to connect.',
       button: true,
       child: Dismissible(
         key: ValueKey(server.id),
-        direction:
-            onDelete != null ? DismissDirection.endToStart : DismissDirection.none,
+        direction: onDelete != null
+            ? DismissDirection.endToStart
+            : DismissDirection.none,
         background: Container(
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
@@ -164,9 +172,7 @@ class ServerCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: LibrettoTheme.cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: LibrettoTheme.divider,
-              ),
+              border: Border.all(color: LibrettoTheme.divider),
             ),
             child: Row(
               children: [
@@ -246,10 +252,7 @@ class _StatusDot extends StatelessWidget {
     return Container(
       width: 10,
       height: 10,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 }

@@ -123,10 +123,7 @@ class _FeatureRow extends StatelessWidget {
         Icon(icon, color: LibrettoTheme.primary, size: 24),
         const SizedBox(width: 16),
         Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+          child: Text(text, style: Theme.of(context).textTheme.bodyLarge),
         ),
       ],
     );

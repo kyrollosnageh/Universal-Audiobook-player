@@ -58,20 +58,25 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen> {
 
     try {
       await ref.read(authServiceProvider).switchServer(config);
-      ref.read(authNotifierProvider.notifier).login(
-        url: server.url,
-        username: '', // Will use stored credentials
-        password: '',
-        serverType: config.type,
-        serverName: server.name,
-      );
+      ref
+          .read(authNotifierProvider.notifier)
+          .login(
+            url: server.url,
+            username: '', // Will use stored credentials
+            password: '',
+            serverType: config.type,
+            serverName: server.name,
+          );
 
       // Try restoring session first (faster — no re-auth)
-      final provider = await ref.read(authServiceProvider).restoreSession(config);
+      final provider = await ref
+          .read(authServiceProvider)
+          .restoreSession(config);
       if (provider != null && mounted) {
-        ref
-            .read(authNotifierProvider.notifier)
-            .state = AuthState(isAuthenticated: true, activeServer: config);
+        ref.read(authNotifierProvider.notifier).state = AuthState(
+          isAuthenticated: true,
+          activeServer: config,
+        );
         context.go('/library');
       }
     } catch (_) {
@@ -212,10 +217,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen> {
               color: LibrettoTheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 24),
-            Text(
-              'No servers yet',
-              style: theme.textTheme.headlineMedium,
-            ),
+            Text('No servers yet', style: theme.textTheme.headlineMedium),
             const SizedBox(height: 8),
             Text(
               'Add your first server to get started',

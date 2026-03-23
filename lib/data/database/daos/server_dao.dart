@@ -65,8 +65,7 @@ class ServerDao extends DatabaseAccessor<AppDatabase> with _$ServerDaoMixin {
         lastConnectedAt: lastConnectedAt != null
             ? Value(lastConnectedAt)
             : const Value.absent(),
-        bookCount:
-            bookCount != null ? Value(bookCount) : const Value.absent(),
+        bookCount: bookCount != null ? Value(bookCount) : const Value.absent(),
       ),
     );
   }
