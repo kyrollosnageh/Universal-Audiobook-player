@@ -42,97 +42,101 @@ class ServerCard extends StatelessWidget {
           '${bookCount != null ? '$bookCount books. ' : ''}'
           'Tap to continue.',
       button: true,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                LibrettoTheme.primary.withValues(alpha: 0.3),
-                LibrettoTheme.cardColor,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: LibrettoTheme.primary.withValues(alpha: 0.4),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  _ServerTypeIcon(type: server.type, size: 40),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          server.name,
-                          style: theme.textTheme.headlineMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          server.type.toUpperCase(),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: LibrettoTheme.primary,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _StatusDot(isOnline: isOnline),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Ink(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  LibrettoTheme.primary.withValues(alpha: 0.3),
+                  LibrettoTheme.cardColor,
                 ],
               ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  if (bookCount != null) ...[
-                    Icon(
-                      Icons.library_books_outlined,
-                      size: 16,
-                      color: LibrettoTheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 6),
-                    Text('$bookCount books', style: theme.textTheme.bodySmall),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: LibrettoTheme.primary.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _ServerTypeIcon(type: server.type, size: 40),
                     const SizedBox(width: 16),
-                  ],
-                  Text(
-                    server.url,
-                    style: theme.textTheme.bodySmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: LibrettoTheme.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Continue',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            server.name,
+                            style: theme.textTheme.headlineMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            server.type.toUpperCase(),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: LibrettoTheme.primary,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    _StatusDot(isOnline: isOnline),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    if (bookCount != null) ...[
+                      Icon(
+                        Icons.library_books_outlined,
+                        size: 16,
+                        color: LibrettoTheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 6),
+                      Text('$bookCount books', style: theme.textTheme.bodySmall),
+                      const SizedBox(width: 16),
+                    ],
+                    Text(
+                      server.url,
+                      style: theme.textTheme.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: LibrettoTheme.primary,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Continue',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -165,41 +169,45 @@ class ServerCard extends StatelessWidget {
           child: const Icon(Icons.delete, color: Colors.white),
         ),
         onDismissed: (_) => onDelete?.call(),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: LibrettoTheme.cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: LibrettoTheme.divider),
-            ),
-            child: Row(
-              children: [
-                _ServerTypeIcon(type: server.type, size: 32),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        server.name,
-                        style: theme.textTheme.titleMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        server.url,
-                        style: theme.textTheme.bodySmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Ink(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: LibrettoTheme.cardColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: LibrettoTheme.divider),
+              ),
+              child: Row(
+                children: [
+                  _ServerTypeIcon(type: server.type, size: 32),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          server.name,
+                          style: theme.textTheme.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          server.url,
+                          style: theme.textTheme.bodySmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                _StatusDot(isOnline: isOnline),
-              ],
+                  _StatusDot(isOnline: isOnline),
+                ],
+              ),
             ),
           ),
         ),
@@ -217,10 +225,10 @@ class _ServerTypeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (IconData icon, Color color) = switch (type) {
-      'jellyfin' => (Icons.play_circle_filled, const Color(0xFF00A4DC)),
-      'emby' => (Icons.play_circle_outline, const Color(0xFF4CAF50)),
-      'audiobookshelf' => (Icons.headphones, const Color(0xFFE8A87C)),
-      'plex' => (Icons.tv, const Color(0xFFE5A00D)),
+      'jellyfin' => (Icons.play_circle_filled, LibrettoTheme.jellyfinColor),
+      'emby' => (Icons.play_circle_outline, LibrettoTheme.embyColor),
+      'audiobookshelf' => (Icons.headphones, LibrettoTheme.audiobookshelfColor),
+      'plex' => (Icons.tv, LibrettoTheme.plexColor),
       _ => (Icons.dns, LibrettoTheme.primary),
     };
 

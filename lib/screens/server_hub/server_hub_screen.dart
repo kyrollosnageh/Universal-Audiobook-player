@@ -20,16 +20,35 @@ class ServerHubScreen extends ConsumerStatefulWidget {
   ConsumerState<ServerHubScreen> createState() => _ServerHubScreenState();
 }
 
-class _ServerHubScreenState extends ConsumerState<ServerHubScreen> {
+class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
+    with SingleTickerProviderStateMixin {
   final Map<String, bool> _onlineStatus = {};
+  bool _isCheckingStatus = true;
+  late final AnimationController _shimmerController;
+  late final Animation<double> _shimmerAnimation;
 
   @override
   void initState() {
     super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    _shimmerAnimation = Tween<double>(begin: 0.3, end: 0.6).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
+    );
+    _shimmerController.repeat(reverse: true);
     _checkServerStatus();
   }
 
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
   Future<void> _checkServerStatus() async {
+    setState(() => _isCheckingStatus = true);
     final servers = await ref.read(savedServersProvider.future);
     final detector = ServerDetector();
 
@@ -44,6 +63,19 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen> {
     }
 
     detector.dispose();
+
+    if (mounted) {
+      setState(() => _isCheckingStatus = false);
+      _shimmerController.stop();
+      final offlineCount =
+          _onlineStatus.values.where((online) => !online).length;
+      final message = offlineCount > 0
+          ? '$offlineCount server${offlineCount > 1 ? 's' : ''} offline'
+          : 'All servers checked';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+      );
+    }
   }
 
   Future<void> _connectToServer(ServerEntry server) async {
@@ -118,7 +150,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen> {
       body: SafeArea(
         child: serversAsync.when(
           data: (servers) => _buildContent(context, theme, servers),
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => _buildLoadingSkeleton(),
           error: (_, __) => Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -198,7 +230,62 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen> {
             ],
           ],
 
-          const SizedBox(height: 80), // FAB clearance
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 80), // FAB clearance + safe area
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton() {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Fake header
+          AnimatedBuilder(
+            animation: _shimmerController,
+            builder: (context, child) => Container(
+              width: 180,
+              height: 28,
+              decoration: BoxDecoration(
+                color: LibrettoTheme.cardColor
+                    .withValues(alpha: _shimmerAnimation.value),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Fake hero card
+          AnimatedBuilder(
+            animation: _shimmerController,
+            builder: (context, child) => Container(
+              width: double.infinity,
+              height: 120,
+              decoration: BoxDecoration(
+                color: LibrettoTheme.cardColor
+                    .withValues(alpha: _shimmerAnimation.value),
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Fake secondary cards
+          for (int i = 0; i < 2; i++) ...[
+            AnimatedBuilder(
+              animation: _shimmerController,
+              builder: (context, child) => Container(
+                width: double.infinity,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: LibrettoTheme.cardColor
+                      .withValues(alpha: _shimmerAnimation.value),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
         ],
       ),
     );
@@ -215,6 +302,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen> {
               Icons.dns_outlined,
               size: 80,
               color: LibrettoTheme.onSurfaceVariant.withValues(alpha: 0.5),
+              semanticLabel: 'No servers configured',
             ),
             const SizedBox(height: 24),
             Text('No servers yet', style: theme.textTheme.headlineMedium),

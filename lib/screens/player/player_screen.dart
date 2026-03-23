@@ -80,9 +80,21 @@ class PlayerScreen extends ConsumerWidget {
 
               // Buffering indicator
               if (state.isBuffering)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8),
-                  child: LinearProgressIndicator(),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const LinearProgressIndicator(),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Buffering...',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: LibrettoTheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
               // Scrubber
@@ -112,20 +124,34 @@ class PlayerScreen extends ConsumerWidget {
               if (state.error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    state.error!,
-                    style: TextStyle(color: theme.colorScheme.error),
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        state.error!,
+                        style: TextStyle(color: theme.colorScheme.error),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton.icon(
+                        onPressed: () => notifier.togglePlayPause(),
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: const Text('Retry'),
+                      ),
+                    ],
                   ),
                 ),
 
-              // Bottom row: speed, sleep timer, bookmarks, chapter list
+              // Bottom row: speed, sleep timer, chapter list
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   SpeedSelector(
                     currentSpeed: state.speed,
-                    onChanged: (speed) => notifier.setSpeed(speed),
+                    onChanged: (speed) {
+                      notifier.setSpeed(speed);
+                      SemanticPlayer.announceSpeedChange(context, speed);
+                    },
                   ),
                   // Sleep timer
                   Semantics(
@@ -144,15 +170,6 @@ class PlayerScreen extends ConsumerWidget {
                       onPressed: () =>
                           _showSleepTimer(context, notifier, state),
                       tooltip: 'Sleep timer',
-                    ),
-                  ),
-                  // Bookmarks (coming soon)
-                  Semantics(
-                    label: 'Bookmarks. Coming soon.',
-                    child: const IconButton(
-                      icon: Icon(Icons.bookmark_outline),
-                      onPressed: null,
-                      tooltip: 'Bookmarks (coming soon)',
                     ),
                   ),
                   // Chapter list
@@ -195,7 +212,7 @@ class PlayerScreen extends ConsumerWidget {
   ) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => SleepTimerSheet(
+      builder: (sheetContext) => SleepTimerSheet(
         currentTimer: state.sleepTimerRemaining,
         onSelect: (duration) {
           if (duration == null) {
@@ -203,6 +220,7 @@ class PlayerScreen extends ConsumerWidget {
           } else {
             notifier.setSleepTimer(duration);
           }
+          SemanticPlayer.announceSleepTimer(context, duration);
         },
       ),
     );
