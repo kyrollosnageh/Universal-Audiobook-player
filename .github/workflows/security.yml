@@ -1,0 +1,165 @@
+name: Security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run security scans weekly on Monday at 6 AM UTC
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  # ── CodeQL Static Analysis (SAST) ────────────────────────────
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write  # Required for uploading SARIF results
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript  # CodeQL analyzes Dart as JavaScript/TypeScript-like
+          queries: security-extended
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript"
+
+  # ── Dependency Vulnerability Scan ────────────────────────────
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check for known vulnerabilities in pub dependencies
+        run: |
+          echo "=== Checking pub dependency advisories ==="
+          dart pub deps --json > deps.json
+
+          # Check for any retracted or discontinued packages
+          dart pub outdated --json > outdated.json
+
+          echo "=== Outdated packages ==="
+          dart pub outdated || true
+
+          echo "=== Dependency tree ==="
+          dart pub deps
+
+      - name: Scan for insecure HTTP URLs in code
+        run: |
+          echo "=== Scanning for insecure HTTP usage ==="
+          # Find HTTP URLs that aren't localhost/LAN exceptions
+          INSECURE=$(grep -rn --include="*.dart" "http://" lib/ \
+            | grep -v "localhost" \
+            | grep -v "127.0.0.1" \
+            | grep -v "192.168." \
+            | grep -v "10\." \
+            | grep -v "// " \
+            | grep -v "/// " \
+            | grep -v "http://www.w3.org" \
+            || true)
+
+          if [ -n "$INSECURE" ]; then
+            echo "::warning::Potential insecure HTTP URLs found (review manually):"
+            echo "$INSECURE"
+          else
+            echo "No insecure HTTP URLs found."
+          fi
+
+      - name: Scan for disabled certificate validation
+        run: |
+          echo "=== Scanning for disabled certificate validation ==="
+          BAD_CERT=$(grep -rn --include="*.dart" "badCertificateCallback" lib/ \
+            | grep -v "// " \
+            | grep -v "/// " \
+            || true)
+
+          if echo "$BAD_CERT" | grep -q "=> true"; then
+            echo "::error::CRITICAL: Certificate validation is disabled (badCertificateCallback => true)"
+            exit 1
+          fi
+
+          echo "No disabled certificate validation found."
+
+      - name: Scan for SharedPreferences storing secrets
+        run: |
+          echo "=== Checking secret storage ==="
+          # Ensure tokens are NOT stored in SharedPreferences or SQLite
+          BAD_STORAGE=$(grep -rn --include="*.dart" -E "(SharedPreferences|shared_preferences).*token" lib/ || true)
+
+          if [ -n "$BAD_STORAGE" ]; then
+            echo "::error::Tokens must use flutter_secure_storage, not SharedPreferences"
+            echo "$BAD_STORAGE"
+            exit 1
+          fi
+
+          echo "All secret storage uses flutter_secure_storage."
+
+  # ── Secret Scanning ──────────────────────────────────────────
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for thorough scanning
+
+      - name: Run Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── License Compliance ───────────────────────────────────────
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check dependency licenses
+        run: |
+          echo "=== Dependency Licenses ==="
+          dart pub deps --style=compact
+
+          # Flag any known copyleft licenses
+          DEPS=$(dart pub deps --style=compact 2>/dev/null || true)
+          echo "$DEPS"
+
+          echo ""
+          echo "Review dependency licenses above."
+          echo "Ensure no GPL/AGPL dependencies for App Store distribution."

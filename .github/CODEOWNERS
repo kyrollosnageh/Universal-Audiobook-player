@@ -1,0 +1,10 @@
+# Default owners for the entire repo
+*                           @kyrollosnageh
+
+# Security-sensitive files require explicit review
+.github/                    @kyrollosnageh
+SECURITY.md                 @kyrollosnageh
+.gitleaks.toml              @kyrollosnageh
+lib/services/auth_service.dart          @kyrollosnageh
+lib/data/server_providers/              @kyrollosnageh
+lib/services/crash_reporting_service.dart @kyrollosnageh

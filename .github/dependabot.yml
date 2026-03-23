@@ -1,0 +1,83 @@
+version: 2
+
+updates:
+  # ── Dart/Flutter (pub) dependencies ────────────────────────────
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "kyrollosnageh"
+    labels:
+      - "dependencies"
+      - "dart"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Group minor/patch updates to reduce PR noise
+    groups:
+      flutter-sdk:
+        patterns:
+          - "flutter*"
+          - "dart*"
+        update-types:
+          - "minor"
+          - "patch"
+      audio-engine:
+        patterns:
+          - "just_audio"
+          - "audio_service"
+          - "audio_session"
+      firebase:
+        patterns:
+          - "firebase_*"
+      networking:
+        patterns:
+          - "dio"
+          - "connectivity_plus"
+      storage:
+        patterns:
+          - "drift"
+          - "sqlite3_flutter_libs"
+          - "flutter_secure_storage"
+          - "path_provider"
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    # Ignore known-breaking major versions until manually reviewed
+    ignore:
+      - dependency-name: "flutter_riverpod"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "drift"
+        update-types: ["version-update:semver-major"]
+
+  # ── GitHub Actions versions ────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kyrollosnageh"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      actions-all:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

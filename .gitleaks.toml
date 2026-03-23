@@ -1,0 +1,53 @@
+# Gitleaks configuration for Libretto
+# https://github.com/gitleaks/gitleaks
+
+title = "Libretto Gitleaks Config"
+
+[extend]
+useDefault = true
+
+# Additional rules specific to this project
+[[rules]]
+id = "emby-api-token"
+description = "Emby/Jellyfin API Token"
+regex = '''(?i)(emby|jellyfin).*(?:token|key|api_key)\s*[:=]\s*["'][a-f0-9]{32}["']'''
+tags = ["token", "emby"]
+
+[[rules]]
+id = "plex-token"
+description = "Plex Authentication Token"
+regex = '''X-Plex-Token\s*[:=]\s*["'][a-zA-Z0-9_-]{20,}["']'''
+tags = ["token", "plex"]
+
+[[rules]]
+id = "audiobookshelf-jwt"
+description = "Audiobookshelf JWT Token"
+regex = '''eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+'''
+tags = ["token", "jwt"]
+
+# Allowlist — files and patterns that are safe to ignore
+[allowlist]
+description = "Known safe patterns"
+paths = [
+  '''test/''',
+  '''\.md$''',
+  '''\.yml$''',
+  '''\.yaml$''',
+  '''\.toml$''',
+]
+regexTarget = "match"
+regexes = [
+  # Test fixtures with fake tokens
+  '''test-token''',
+  '''fake-token''',
+  '''abc123''',
+  '''plex-token''',
+  '''plex-tok''',
+  '''jwt-tok''',
+  '''jf-tok''',
+  '''tok''',
+  # Code patterns that look like secrets but aren't
+  '''StorageKeys\.server''',
+  '''api_key=\{''',
+  '''api_key=\$''',
+]
