@@ -361,6 +361,46 @@ class AudiobookshelfProvider implements ServerProvider {
     }
   }
 
+  // ── Finished Status ──────────────────────────────────────────
+
+  @override
+  Future<void> reportFinished(String bookId, bool isFinished) async {
+    _requireAuth();
+    try {
+      await _dio.patch(
+        '/api/me/progress/$bookId',
+        data: {'isFinished': isFinished},
+      );
+    } on DioException {
+      // Non-critical
+    }
+  }
+
+  @override
+  Future<bool?> getServerFinished(String bookId) async {
+    _requireAuth();
+    try {
+      final response = await _dio.get('/api/me/progress/$bookId');
+      final data = response.data as Map<String, dynamic>;
+      return data['isFinished'] as bool?;
+    } on DioException {
+      return null;
+    }
+  }
+
+  // ── Favorites ──────────────────────────────────────────────────
+
+  @override
+  Future<void> setFavorite(String bookId, bool isFavorite) async {
+    // Audiobookshelf does not have a favorite/rating API.
+    // Favorites are stored locally only for ABS users.
+  }
+
+  @override
+  Future<void> setRating(String bookId, double rating) async {
+    // Audiobookshelf does not have a rating API.
+  }
+
   // ── Series ────────────────────────────────────────────────────
 
   @override

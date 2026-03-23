@@ -41,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -50,7 +50,11 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // Future migrations will go here.
+        if (from < 2) {
+          await m.addColumn(booksTable, booksTable.isFinished);
+          await m.addColumn(booksTable, booksTable.isFavorite);
+          await m.addColumn(booksTable, booksTable.userRating);
+        }
       },
     );
   }

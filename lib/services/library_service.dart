@@ -118,6 +118,20 @@ class LibraryService {
     return entries.map(_bookEntryToBook).toList();
   }
 
+  // ── Favorites & Finished ─────────────────────────────────────────
+
+  /// Get books marked as favorite.
+  Future<List<Book>> getFavoriteBooks(String serverId) async {
+    final entries = await _bookDao.getFavoriteBooks(serverId);
+    return entries.map(_bookEntryToBook).toList();
+  }
+
+  /// Get books marked as finished.
+  Future<List<Book>> getFinishedBooks(String serverId) async {
+    final entries = await _bookDao.getFinishedBooks(serverId);
+    return entries.map(_bookEntryToBook).toList();
+  }
+
   // ── Cached Data ───────────────────────────────────────────────────
 
   /// Get cached books (for instant display on app launch).
@@ -203,6 +217,9 @@ class LibraryService {
       dateAdded: entry.dateAdded,
       lastPlayedAt: entry.lastPlayedAt,
       isDownloaded: entry.isDownloaded,
+      isFinished: entry.isFinished,
+      isFavorite: entry.isFavorite,
+      userRating: entry.userRating,
     );
   }
 
@@ -223,6 +240,9 @@ class LibraryService {
       dateAdded: book.dateAdded,
       lastPlayedAt: book.lastPlayedAt,
       isDownloaded: book.isDownloaded,
+      isFinished: book.isFinished,
+      isFavorite: book.isFavorite,
+      userRating: book.userRating,
       cachedAt: DateTime.now(),
     );
   }

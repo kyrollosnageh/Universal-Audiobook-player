@@ -1,4 +1,5 @@
 import '../data/database/app_database.dart';
+import '../data/database/daos/book_dao.dart';
 import '../data/database/daos/position_dao.dart';
 import '../data/server_providers/server_provider.dart';
 
@@ -12,9 +13,11 @@ import '../data/server_providers/server_provider.dart';
 class SyncService {
   SyncService({
     required AppDatabase database,
-  }) : _positionDao = database.positionDao;
+  })  : _positionDao = database.positionDao,
+        _bookDao = database.bookDao;
 
   final PositionDao _positionDao;
+  final BookDao _bookDao;
 
   /// The threshold (in seconds) beyond which we consider positions
   /// to have "large divergence" and should prompt the user.
@@ -42,11 +45,15 @@ class SyncService {
 
   // ── Get Local Position ────────────────────────────────────────────
 
-  /// Get the locally saved position for a book.
-  Future<Duration?> getLocalPosition(String bookId, String serverId) async {
+  /// Get the locally saved position for a book, including chapter info.
+  Future<SavedPosition?> getLocalPosition(
+      String bookId, String serverId) async {
     final entry = await _positionDao.getPosition(bookId, serverId);
     if (entry == null) return null;
-    return Duration(milliseconds: entry.positionMs);
+    return SavedPosition(
+      position: Duration(milliseconds: entry.positionMs),
+      chapterId: entry.chapterId,
+    );
   }
 
   // ── Sync to Server ────────────────────────────────────────────────
@@ -75,7 +82,8 @@ class SyncService {
     ServerProvider provider, {
     required String bookId,
   }) async {
-    final localPos = await getLocalPosition(bookId, provider.serverUrl);
+    final saved = await getLocalPosition(bookId, provider.serverUrl);
+    final localPos = saved?.position ?? Duration.zero;
     Duration? serverPos;
 
     try {
@@ -83,17 +91,17 @@ class SyncService {
     } catch (_) {
       // Server unreachable — use local
       return PositionResolution(
-        position: localPos ?? Duration.zero,
+        position: localPos,
+        chapterId: saved?.chapterId,
         source: PositionSource.local,
         conflict: false,
       );
     }
 
-    final local = localPos ?? Duration.zero;
     final server = serverPos ?? Duration.zero;
 
     // Both zero — fresh start
-    if (local == Duration.zero && server == Duration.zero) {
+    if (localPos == Duration.zero && server == Duration.zero) {
       return PositionResolution(
         position: Duration.zero,
         source: PositionSource.none,
@@ -102,23 +110,26 @@ class SyncService {
     }
 
     // Check for large divergence
-    final diff = (local.inSeconds - server.inSeconds).abs();
+    final diff = (localPos.inSeconds - server.inSeconds).abs();
     if (diff > _largeDivergenceSeconds &&
-        local != Duration.zero &&
+        localPos != Duration.zero &&
         server != Duration.zero) {
+      final useLocal = localPos > server;
       return PositionResolution(
-        position: local > server ? local : server,
-        source: local > server ? PositionSource.local : PositionSource.server,
+        position: useLocal ? localPos : server,
+        chapterId: useLocal ? saved?.chapterId : null,
+        source: useLocal ? PositionSource.local : PositionSource.server,
         conflict: true,
-        localPosition: local,
+        localPosition: localPos,
         serverPosition: server,
       );
     }
 
     // Use whichever is further ahead
-    if (local >= server) {
+    if (localPos >= server) {
       return PositionResolution(
-        position: local,
+        position: localPos,
+        chapterId: saved?.chapterId,
         source: PositionSource.local,
         conflict: false,
       );
@@ -155,6 +166,66 @@ class SyncService {
 
     return synced;
   }
+
+  // ── Finished Status ───────────────────────────────────────────────
+
+  /// Mark a book as finished locally and sync to server.
+  Future<void> markFinished(
+    ServerProvider provider, {
+    required String bookId,
+    required String serverId,
+    required bool isFinished,
+  }) async {
+    await _bookDao.setFinished(bookId, serverId, isFinished);
+    try {
+      await provider.reportFinished(bookId, isFinished);
+    } catch (_) {
+      // Local state is updated regardless
+    }
+  }
+
+  // ── Favorites ─────────────────────────────────────────────────────
+
+  /// Toggle a book's favorite status locally and sync to server.
+  Future<void> toggleFavorite(
+    ServerProvider provider, {
+    required String bookId,
+    required String serverId,
+    required bool isFavorite,
+  }) async {
+    await _bookDao.setFavorite(bookId, serverId, isFavorite);
+    try {
+      await provider.setFavorite(bookId, isFavorite);
+    } catch (_) {
+      // Local state is updated regardless
+    }
+  }
+
+  /// Set a book's rating locally and sync to server.
+  Future<void> rateBook(
+    ServerProvider provider, {
+    required String bookId,
+    required String serverId,
+    required double rating,
+  }) async {
+    await _bookDao.setRating(bookId, serverId, rating);
+    try {
+      await provider.setRating(bookId, rating);
+    } catch (_) {
+      // Local state is updated regardless
+    }
+  }
+}
+
+/// A locally saved position with optional chapter info.
+class SavedPosition {
+  const SavedPosition({
+    required this.position,
+    this.chapterId,
+  });
+
+  final Duration position;
+  final String? chapterId;
 }
 
 /// Result of position resolution between local and server.
@@ -163,12 +234,16 @@ class PositionResolution {
     required this.position,
     required this.source,
     required this.conflict,
+    this.chapterId,
     this.localPosition,
     this.serverPosition,
   });
 
   /// The resolved position to use.
   final Duration position;
+
+  /// The chapter ID associated with the resolved position.
+  final String? chapterId;
 
   /// Where the position came from.
   final PositionSource source;

@@ -6,6 +6,7 @@ import '../core/constants.dart';
 import '../data/models/auth_result.dart';
 import '../data/models/book.dart';
 import '../services/library_service.dart';
+import '../services/sync_service.dart';
 import 'auth_provider.dart';
 
 /// Library service provider.
@@ -16,11 +17,19 @@ final libraryServiceProvider = Provider<LibraryService>((ref) {
   return service;
 });
 
+/// Sync service provider.
+final syncServiceProvider = Provider<SyncService>((ref) {
+  final db = ref.watch(databaseProvider);
+  return SyncService(database: db);
+});
+
 /// Library state.
 class LibraryState {
   const LibraryState({
     this.books = const [],
     this.continueListening = const [],
+    this.favoriteBooks = const [],
+    this.finishedBooks = const [],
     this.isLoading = false,
     this.isLoadingMore = false,
     this.hasMore = true,
@@ -34,6 +43,8 @@ class LibraryState {
 
   final List<Book> books;
   final List<Book> continueListening;
+  final List<Book> favoriteBooks;
+  final List<Book> finishedBooks;
   final bool isLoading;
   final bool isLoadingMore;
   final bool hasMore;
@@ -47,6 +58,8 @@ class LibraryState {
   LibraryState copyWith({
     List<Book>? books,
     List<Book>? continueListening,
+    List<Book>? favoriteBooks,
+    List<Book>? finishedBooks,
     bool? isLoading,
     bool? isLoadingMore,
     bool? hasMore,
@@ -60,6 +73,8 @@ class LibraryState {
     return LibraryState(
       books: books ?? this.books,
       continueListening: continueListening ?? this.continueListening,
+      favoriteBooks: favoriteBooks ?? this.favoriteBooks,
+      finishedBooks: finishedBooks ?? this.finishedBooks,
       isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       hasMore: hasMore ?? this.hasMore,
@@ -75,9 +90,11 @@ class LibraryState {
 
 class LibraryNotifier extends StateNotifier<LibraryState> {
   LibraryNotifier(this._libraryService, this._ref)
-      : super(const LibraryState());
+      : _syncService = _ref.read(syncServiceProvider),
+        super(const LibraryState());
 
   final LibraryService _libraryService;
+  final SyncService _syncService;
   final Ref _ref;
   Timer? _searchDebounce;
 
@@ -118,10 +135,16 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
         isLoading: false,
       );
 
-      // Refresh continue listening
+      // Refresh shelves
       final freshContinue =
           await _libraryService.getContinueListening(serverId);
-      state = state.copyWith(continueListening: freshContinue);
+      final favorites = await _libraryService.getFavoriteBooks(serverId);
+      final finished = await _libraryService.getFinishedBooks(serverId);
+      state = state.copyWith(
+        continueListening: freshContinue,
+        favoriteBooks: favorites,
+        finishedBooks: finished,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -216,6 +239,67 @@ class LibraryNotifier extends StateNotifier<LibraryState> {
     } catch (_) {
       // Server search failed; local results remain
     }
+  }
+
+  /// Toggle a book's favorite status and sync to server.
+  Future<void> toggleFavorite(Book book) async {
+    final provider = _ref.read(activeServerProvider);
+    if (provider == null) return;
+
+    final newValue = !book.isFavorite;
+    await _syncService.toggleFavorite(
+      provider,
+      bookId: book.id,
+      serverId: book.serverId,
+      isFavorite: newValue,
+    );
+
+    // Update local state
+    _updateBookInState(book.id, (b) => b.copyWith(isFavorite: newValue));
+    final favorites =
+        await _libraryService.getFavoriteBooks(book.serverId);
+    state = state.copyWith(favoriteBooks: favorites);
+  }
+
+  /// Toggle a book's finished status and sync to server.
+  Future<void> toggleFinished(Book book) async {
+    final provider = _ref.read(activeServerProvider);
+    if (provider == null) return;
+
+    final newValue = !book.isFinished;
+    await _syncService.markFinished(
+      provider,
+      bookId: book.id,
+      serverId: book.serverId,
+      isFinished: newValue,
+    );
+
+    // Update local state
+    _updateBookInState(book.id, (b) => b.copyWith(isFinished: newValue));
+    final serverId = book.serverId;
+    final continueListening =
+        await _libraryService.getContinueListening(serverId);
+    final finished = await _libraryService.getFinishedBooks(serverId);
+    state = state.copyWith(
+      continueListening: continueListening,
+      finishedBooks: finished,
+    );
+  }
+
+  /// Helper: update a book in all lists in state.
+  void _updateBookInState(String bookId, Book Function(Book) updater) {
+    state = state.copyWith(
+      books: state.books.map((b) => b.id == bookId ? updater(b) : b).toList(),
+      continueListening: state.continueListening
+          .map((b) => b.id == bookId ? updater(b) : b)
+          .toList(),
+      favoriteBooks: state.favoriteBooks
+          .map((b) => b.id == bookId ? updater(b) : b)
+          .toList(),
+      finishedBooks: state.finishedBooks
+          .map((b) => b.id == bookId ? updater(b) : b)
+          .toList(),
+    );
   }
 
   /// Change sort order.

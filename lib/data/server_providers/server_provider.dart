@@ -79,6 +79,25 @@ abstract class ServerProvider {
   /// Returns null if no position is stored.
   Future<Duration?> getServerPosition(String bookId);
 
+  // ── Finished Status ────────────────────────────────────────────────
+
+  /// Mark a book as finished or unfinished on the server.
+  Future<void> reportFinished(String bookId, bool isFinished);
+
+  /// Get whether a book is marked as finished on the server.
+  /// Returns null if unknown.
+  Future<bool?> getServerFinished(String bookId);
+
+  // ── Favorites ──────────────────────────────────────────────────────
+
+  /// Set or unset a book as a favorite on the server.
+  /// Not all servers support this — implementations that don't should no-op.
+  Future<void> setFavorite(String bookId, bool isFavorite);
+
+  /// Set a user rating for a book (0.0 to 1.0 normalized).
+  /// Not all servers support this — implementations that don't should no-op.
+  Future<void> setRating(String bookId, double rating);
+
   // ── Series ─────────────────────────────────────────────────────────
 
   /// Fetch all series available in the library.

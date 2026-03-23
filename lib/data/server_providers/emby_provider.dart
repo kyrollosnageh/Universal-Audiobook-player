@@ -341,6 +341,73 @@ class EmbyProvider implements ServerProvider {
     }
   }
 
+  // ── Finished Status ──────────────────────────────────────────────
+
+  @override
+  Future<void> reportFinished(String bookId, bool isFinished) async {
+    _requireAuth();
+    try {
+      if (isFinished) {
+        await _dio.post('/Users/$_userId/PlayedItems/$bookId');
+      } else {
+        await _dio.delete('/Users/$_userId/PlayedItems/$bookId');
+      }
+    } on DioException {
+      // Non-critical
+    }
+  }
+
+  @override
+  Future<bool?> getServerFinished(String bookId) async {
+    _requireAuth();
+    try {
+      final response = await _dio.get(
+        EmbyApiPaths.userItems(_userId!),
+        queryParameters: {
+          'Ids': bookId,
+          'Fields': 'UserData',
+        },
+      );
+      final data = response.data as Map<String, dynamic>;
+      final items = (data['Items'] as List<dynamic>?) ?? [];
+      if (items.isEmpty) return null;
+      final item = items.first as Map<String, dynamic>;
+      final userData = item['UserData'] as Map<String, dynamic>?;
+      return userData?['Played'] as bool?;
+    } on DioException {
+      return null;
+    }
+  }
+
+  // ── Favorites ──────────────────────────────────────────────────────
+
+  @override
+  Future<void> setFavorite(String bookId, bool isFavorite) async {
+    _requireAuth();
+    try {
+      if (isFavorite) {
+        await _dio.post('/Users/$_userId/FavoriteItems/$bookId');
+      } else {
+        await _dio.delete('/Users/$_userId/FavoriteItems/$bookId');
+      }
+    } on DioException {
+      // Non-critical
+    }
+  }
+
+  @override
+  Future<void> setRating(String bookId, double rating) async {
+    _requireAuth();
+    try {
+      await _dio.post(
+        '/Users/$_userId/Items/$bookId/Rating',
+        queryParameters: {'likes': rating >= 0.5},
+      );
+    } on DioException {
+      // Non-critical
+    }
+  }
+
   // ── Series ────────────────────────────────────────────────────────
 
   @override

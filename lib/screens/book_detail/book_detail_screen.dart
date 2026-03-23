@@ -86,6 +86,60 @@ class BookDetailScreen extends ConsumerWidget {
               SliverAppBar(
                 expandedHeight: 320,
                 pinned: true,
+                actions: [
+                  // Favorite button
+                  IconButton(
+                    onPressed: () {
+                      final provider = ref.read(activeServerProvider);
+                      if (provider == null) return;
+                      ref
+                          .read(libraryNotifierProvider.notifier)
+                          .toggleFavorite(book);
+                    },
+                    icon: Icon(
+                      book.isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: book.isFavorite
+                          ? LibrettoTheme.secondary
+                          : null,
+                    ),
+                    tooltip: book.isFavorite
+                        ? 'Remove from favorites'
+                        : 'Add to favorites',
+                  ),
+                  // Overflow menu
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      final provider = ref.read(activeServerProvider);
+                      if (provider == null) return;
+                      if (value == 'finished') {
+                        ref
+                            .read(libraryNotifierProvider.notifier)
+                            .toggleFinished(book);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'finished',
+                        child: Row(
+                          children: [
+                            Icon(
+                              book.isFinished
+                                  ? Icons.check_circle
+                                  : Icons.check_circle_outline,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(book.isFinished
+                                ? 'Mark as unfinished'
+                                : 'Mark as finished'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
                     decoration: BoxDecoration(
@@ -194,6 +248,35 @@ class BookDetailScreen extends ConsumerWidget {
                         ),
                       ],
 
+                      // Finished badge
+                      if (book.isFinished) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.check_circle,
+                                  size: 14, color: Colors.green),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Finished',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
                       const SizedBox(height: 16),
 
                       // Series info
@@ -232,10 +315,12 @@ class BookDetailScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: Semantics(
-                              label: book.progress != null &&
-                                      book.progress! > 0
-                                  ? 'Resume ${book.title}'
-                                  : 'Play ${book.title}',
+                              label: book.isFinished
+                                  ? 'Listen again to ${book.title}'
+                                  : book.progress != null &&
+                                          book.progress! > 0
+                                      ? 'Resume ${book.title}'
+                                      : 'Play ${book.title}',
                               child: ElevatedButton.icon(
                                 onPressed: () async {
                                   final chapters =
@@ -266,12 +351,16 @@ class BookDetailScreen extends ConsumerWidget {
                                     );
                                   }
                                 },
-                                icon: const Icon(Icons.play_arrow),
+                                icon: Icon(book.isFinished
+                                    ? Icons.replay
+                                    : Icons.play_arrow),
                                 label: Text(
-                                  book.progress != null &&
-                                          book.progress! > 0
-                                      ? 'Resume'
-                                      : 'Play',
+                                  book.isFinished
+                                      ? 'Listen Again'
+                                      : book.progress != null &&
+                                              book.progress! > 0
+                                          ? 'Resume'
+                                          : 'Play',
                                 ),
                               ),
                             ),

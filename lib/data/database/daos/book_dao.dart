@@ -72,10 +72,51 @@ class BookDao extends DatabaseAccessor<AppDatabase> with _$BookDaoMixin {
           ..where((t) =>
               t.serverId.equals(serverId) &
               t.progress.isBiggerThanValue(0.0) &
-              t.progress.isSmallerThanValue(1.0))
+              t.progress.isSmallerThanValue(1.0) &
+              t.isFinished.equals(false))
           ..orderBy([(t) => OrderingTerm.desc(t.lastPlayedAt)])
           ..limit(20))
         .get();
+  }
+
+  /// Get books marked as finished.
+  Future<List<BookEntry>> getFinishedBooks(String serverId) {
+    return (select(booksTable)
+          ..where(
+              (t) => t.serverId.equals(serverId) & t.isFinished.equals(true))
+          ..orderBy([(t) => OrderingTerm.desc(t.lastPlayedAt)])
+          ..limit(50))
+        .get();
+  }
+
+  /// Get books marked as favorite.
+  Future<List<BookEntry>> getFavoriteBooks(String serverId) {
+    return (select(booksTable)
+          ..where(
+              (t) => t.serverId.equals(serverId) & t.isFavorite.equals(true))
+          ..orderBy([(t) => OrderingTerm.asc(t.title)]))
+        .get();
+  }
+
+  /// Set a book's finished status.
+  Future<void> setFinished(String id, String serverId, bool isFinished) {
+    return (update(booksTable)
+          ..where((t) => t.id.equals(id) & t.serverId.equals(serverId)))
+        .write(BooksTableCompanion(isFinished: Value(isFinished)));
+  }
+
+  /// Set a book's favorite status.
+  Future<void> setFavorite(String id, String serverId, bool isFavorite) {
+    return (update(booksTable)
+          ..where((t) => t.id.equals(id) & t.serverId.equals(serverId)))
+        .write(BooksTableCompanion(isFavorite: Value(isFavorite)));
+  }
+
+  /// Set a book's user rating.
+  Future<void> setRating(String id, String serverId, double? rating) {
+    return (update(booksTable)
+          ..where((t) => t.id.equals(id) & t.serverId.equals(serverId)))
+        .write(BooksTableCompanion(userRating: Value(rating)));
   }
 
   /// Get total number of cached books for a server.
