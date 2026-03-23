@@ -126,7 +126,10 @@ class SeriesViewScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Semantics(
                       header: true,
-                      child: Text('Up Next', style: theme.textTheme.titleMedium),
+                      child: Text(
+                        'Up Next',
+                        style: theme.textTheme.titleMedium,
+                      ),
                     ),
                   ),
                 ),

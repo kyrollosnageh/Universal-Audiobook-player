@@ -253,9 +253,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                       TextButton.icon(
                         onPressed: () {
                           _searchController.clear();
-                          ref
-                              .read(libraryNotifierProvider.notifier)
-                              .search('');
+                          ref.read(libraryNotifierProvider.notifier).search('');
                           setState(() {});
                         },
                         icon: const Icon(Icons.clear),

@@ -7,7 +7,9 @@ class LibrettoTheme {
   // Brand colors
   static const Color primary = Color(0xFF7B68EE); // Medium slate blue
   static const Color primaryVariant = Color(0xFF5B4ACF);
-  static const Color secondary = Color(0xFFFFAB70); // Warm orange (WCAG AA on cardColor)
+  static const Color secondary = Color(
+    0xFFFFAB70,
+  ); // Warm orange (WCAG AA on cardColor)
   static const Color surface = Color(0xFF1E1E2E);
   static const Color background = Color(0xFF13131A);
   static const Color cardColor = Color(0xFF252536);

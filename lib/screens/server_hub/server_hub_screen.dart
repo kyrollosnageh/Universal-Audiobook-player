@@ -67,8 +67,9 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
     if (mounted) {
       setState(() => _isCheckingStatus = false);
       _shimmerController.stop();
-      final offlineCount =
-          _onlineStatus.values.where((online) => !online).length;
+      final offlineCount = _onlineStatus.values
+          .where((online) => !online)
+          .length;
       final message = offlineCount > 0
           ? '$offlineCount server${offlineCount > 1 ? 's' : ''} offline'
           : 'All servers checked';
@@ -230,7 +231,9 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
             ],
           ],
 
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 80), // FAB clearance + safe area
+          SizedBox(
+            height: MediaQuery.of(context).padding.bottom + 80,
+          ), // FAB clearance + safe area
         ],
       ),
     );
@@ -249,8 +252,9 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
               width: 180,
               height: 28,
               decoration: BoxDecoration(
-                color: LibrettoTheme.cardColor
-                    .withValues(alpha: _shimmerAnimation.value),
+                color: LibrettoTheme.cardColor.withValues(
+                  alpha: _shimmerAnimation.value,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -263,8 +267,9 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
               width: double.infinity,
               height: 120,
               decoration: BoxDecoration(
-                color: LibrettoTheme.cardColor
-                    .withValues(alpha: _shimmerAnimation.value),
+                color: LibrettoTheme.cardColor.withValues(
+                  alpha: _shimmerAnimation.value,
+                ),
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
@@ -278,8 +283,9 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
                 width: double.infinity,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: LibrettoTheme.cardColor
-                      .withValues(alpha: _shimmerAnimation.value),
+                  color: LibrettoTheme.cardColor.withValues(
+                    alpha: _shimmerAnimation.value,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),

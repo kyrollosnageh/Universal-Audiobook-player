@@ -106,7 +106,10 @@ class ServerCard extends StatelessWidget {
                         color: LibrettoTheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 6),
-                      Text('$bookCount books', style: theme.textTheme.bodySmall),
+                      Text(
+                        '$bookCount books',
+                        style: theme.textTheme.bodySmall,
+                      ),
                       const SizedBox(width: 16),
                     ],
                     Text(
