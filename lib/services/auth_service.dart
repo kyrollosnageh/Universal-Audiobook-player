@@ -11,6 +11,7 @@ import '../data/models/server_config.dart';
 import '../data/server_providers/server_detector.dart';
 import '../data/server_providers/server_provider.dart';
 import '../data/server_providers/emby_provider.dart';
+import '../data/server_providers/audiobookshelf_provider.dart';
 
 /// Manages authentication, multi-server connections, and HTTPS enforcement.
 ///
@@ -158,6 +159,9 @@ class AuthService {
     if (provider is EmbyProvider) {
       provider.restoreSession(token: token, userId: userId);
     }
+    if (provider is AudiobookshelfProvider) {
+      provider.restoreSession(token: token, userId: userId);
+    }
     // Other providers will be added in later phases
 
     _activeProviders[config.url] = provider;
@@ -241,8 +245,7 @@ class AuthService {
         // JellyfinProvider extends EmbyProvider — Phase 6
         return EmbyProvider(serverUrl: url);
       case ServerType.audiobookshelf:
-        // AudiobookshelfProvider — Phase 5
-        throw UnimplementedError('Audiobookshelf support coming in Phase 5');
+        return AudiobookshelfProvider(serverUrl: url);
       case ServerType.plex:
         // PlexProvider — Phase 6
         throw UnimplementedError('Plex support coming in Phase 6');
