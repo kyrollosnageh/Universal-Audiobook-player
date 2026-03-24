@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants.dart';
 import '../../core/errors.dart';
@@ -33,9 +34,17 @@ class EmbyProvider implements ServerProvider {
 
   static const String _clientName = 'Libretto';
   static const String _deviceName = 'Flutter';
-  static String _deviceId =
-      'libretto-${DateTime.now().millisecondsSinceEpoch.toRadixString(36)}';
+  static String _deviceId = '';
   static const String _clientVersion = '1.0.0';
+
+  static Future<void> initDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    _deviceId = prefs.getString('libretto_device_id') ?? '';
+    if (_deviceId.isEmpty) {
+      _deviceId = 'libretto-${DateTime.now().millisecondsSinceEpoch.toRadixString(36)}';
+      await prefs.setString('libretto_device_id', _deviceId);
+    }
+  }
 
   void _configureDio() {
     _dio.options.baseUrl = _serverUrl;

@@ -68,6 +68,7 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
         } else if (servers.length == 1) {
           // Auto-restore session if exactly one server
           await ref.read(authNotifierProvider.notifier).restoreSession();
+          if (!mounted) return;
           final authState = ref.read(authNotifierProvider);
           if (authState.isAuthenticated) {
             _router.go('/library');
