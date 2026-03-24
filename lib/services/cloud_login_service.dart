@@ -178,19 +178,31 @@ class CloudLoginService {
           options: Options(
             headers: {'X-Application': 'Libretto/1.0.0'},
             contentType: attempt['contentType'] as String,
+            responseType: ResponseType.json,
             validateStatus: (status) => status != null && status < 500,
           ),
           data: attempt['body'],
         );
 
-        if (response.statusCode == 200 && response.data is Map) {
-          final data = response.data as Map<String, dynamic>;
-          final token = data['AccessToken'] as String?;
-          if (token != null && token.isNotEmpty) {
-            return {
-              'accessToken': token,
-              'userId': data['User']?['Id'] as String? ?? '',
-            };
+        if (response.statusCode == 200) {
+          // Dio may not auto-parse if server returns text/html Content-Type
+          dynamic responseData = response.data;
+          if (responseData is String && responseData.isNotEmpty) {
+            try {
+              responseData = jsonDecode(responseData);
+            } catch (_) {
+              continue;
+            }
+          }
+          if (responseData is Map) {
+            final data = responseData as Map<String, dynamic>;
+            final token = data['AccessToken'] as String?;
+            if (token != null && token.isNotEmpty) {
+              return {
+                'accessToken': token,
+                'userId': data['User']?['Id'] as String? ?? '',
+              };
+            }
           }
         }
 
