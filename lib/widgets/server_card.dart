@@ -50,9 +50,7 @@ class ServerCard extends StatelessWidget {
               Navigator.pop(ctx, true);
               onDelete?.call();
             },
-            style: TextButton.styleFrom(
-              foregroundColor: LibrettoTheme.error,
-            ),
+            style: TextButton.styleFrom(foregroundColor: LibrettoTheme.error),
             child: const Text('Remove'),
           ),
         ],
@@ -76,9 +74,7 @@ class ServerCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          onLongPress: onDelete != null
-              ? () => _showDeleteMenu(context)
-              : null,
+          onLongPress: onDelete != null ? () => _showDeleteMenu(context) : null,
           borderRadius: BorderRadius.circular(20),
           child: Ink(
             width: double.infinity,
