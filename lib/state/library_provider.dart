@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/constants.dart';
@@ -179,12 +180,18 @@ class LibraryNotifier extends Notifier<LibraryState> {
       // Save book count to server entry for display on hub
       final activeServer = ref.read(authNotifierProvider).activeServer;
       if (activeServer != null) {
-        final db = ref.read(databaseProvider);
-        db.serverDao.updateServerMeta(
-          activeServer.id,
-          bookCount: result.totalCount,
-          lastConnectedAt: DateTime.now(),
-        );
+        try {
+          final db = ref.read(databaseProvider);
+          await db.serverDao.updateServerMeta(
+            activeServer.id,
+            bookCount: result.totalCount,
+            lastConnectedAt: DateTime.now(),
+          );
+          // Invalidate so hub re-reads from DB next time
+          ref.invalidate(savedServersProvider);
+        } catch (e) {
+          debugPrint('Failed to save book count: $e');
+        }
       }
 
       // Refresh shelves in background (parallel DB reads)
