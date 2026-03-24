@@ -168,8 +168,8 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
         final message = status == 401
             ? 'Invalid username or password.'
             : status == 400
-                ? 'Invalid request. Please check your email/username format.'
-                : 'Could not reach Emby Connect. Check your internet connection.';
+            ? 'Invalid request. Please check your email/username format.'
+            : 'Could not reach Emby Connect. Check your internet connection.';
         setState(() {
           _error = message;
           _embyLoginInProgress = false;
