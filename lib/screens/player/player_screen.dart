@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/responsive.dart';
@@ -6,13 +9,12 @@ import '../../core/responsive.dart';
 import '../../core/extensions.dart';
 import '../../widgets/a11y/semantic_player.dart';
 import '../../core/theme.dart';
+import '../../data/models/unified_chapter.dart';
 import '../../state/player_provider.dart';
 import '../../widgets/book_cover.dart';
 import '../../widgets/chapter_list.dart';
-import '../../widgets/playback_controls.dart';
 import '../../widgets/scrubber.dart';
 import '../../widgets/sleep_timer_sheet.dart';
-import '../../widgets/speed_selector.dart';
 
 /// Full-screen player screen with playback controls.
 class PlayerScreen extends ConsumerWidget {
@@ -31,16 +33,38 @@ class PlayerScreen extends ConsumerWidget {
     final book = state.book!;
 
     return Scaffold(
+      // Transparent so the blurred background shows through the entire screen
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.keyboard_arrow_down),
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
           onPressed: () => Navigator.pop(context),
           tooltip: 'Minimize player',
         ),
-        title: Text(book.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+        title: Text(
+          book.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
-      body: SafeArea(
-        child: _buildPlayerBody(context, ref, theme, state, notifier),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // ── Blurred cover art background ──────────────────────────────────
+          _BlurredBackground(coverUrl: book.coverUrl),
+
+          // ── Dark overlay ─────────────────────────────────────────────────
+          Container(color: Colors.black.withValues(alpha: 0.7)),
+
+          // ── Player content ────────────────────────────────────────────────
+          SafeArea(
+            child: _buildPlayerBody(context, ref, theme, state, notifier),
+          ),
+        ],
       ),
     );
   }
@@ -61,11 +85,26 @@ class PlayerScreen extends ConsumerWidget {
     // Shared widgets
     final coverArt = Semantics(
       label: 'Cover art for ${book.title}',
-      child: BookCover(
-        imageUrl: book.coverUrl,
-        width: coverSize,
-        height: coverSize,
-        borderRadius: 16,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [
+            BoxShadow(
+              offset: Offset(0, 8),
+              blurRadius: 24,
+              color: Colors.black45,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BookCover(
+            imageUrl: book.coverUrl,
+            width: coverSize,
+            height: coverSize,
+            borderRadius: 0, // Clipping is handled by parent ClipRRect
+          ),
+        ),
       ),
     );
 
@@ -74,7 +113,10 @@ class PlayerScreen extends ConsumerWidget {
       children: [
         Text(
           book.title,
-          style: theme.textTheme.headlineMedium,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -83,7 +125,7 @@ class PlayerScreen extends ConsumerWidget {
         if (state.currentChapter != null)
           Text(
             state.currentChapter!.title,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: theme.textTheme.bodyLarge?.copyWith(
               color: LibrettoTheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
@@ -110,7 +152,7 @@ class PlayerScreen extends ConsumerWidget {
           )
         : const SizedBox.shrink();
 
-    final scrubber = Scrubber(
+    final scrubber = _BerryGardenScrubber(
       position: state.position,
       duration: state.duration,
       chapters: state.chapters,
@@ -118,7 +160,7 @@ class PlayerScreen extends ConsumerWidget {
       onSeek: (position) => notifier.seek(position),
     );
 
-    final controls = PlaybackControls(
+    final controls = _BerryGardenControls(
       isPlaying: state.isPlaying,
       onPlayPause: () => notifier.togglePlayPause(),
       onSkipForward: () => notifier.skipForward(),
@@ -152,7 +194,8 @@ class PlayerScreen extends ConsumerWidget {
     final bottomRow = Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        SpeedSelector(
+        // Speed chip — pill-shaped, lime text on cardColor
+        _BerrySpeedChip(
           currentSpeed: state.speed,
           onChanged: (speed) {
             notifier.setSpeed(speed);
@@ -170,7 +213,7 @@ class PlayerScreen extends ConsumerWidget {
                   : Icons.bedtime_outlined,
               color: state.sleepTimerRemaining != null
                   ? LibrettoTheme.primary
-                  : null,
+                  : LibrettoTheme.onSurfaceVariant,
             ),
             onPressed: () => _showSleepTimer(context, notifier, state),
             tooltip: 'Sleep timer',
@@ -179,7 +222,7 @@ class PlayerScreen extends ConsumerWidget {
         Semantics(
           label: 'Chapter list',
           child: IconButton(
-            icon: const Icon(Icons.list),
+            icon: const Icon(Icons.list, color: LibrettoTheme.onSurfaceVariant),
             onPressed: () => _showChapterList(context, ref, state, notifier),
             tooltip: 'Chapters',
           ),
@@ -323,6 +366,275 @@ class PlayerScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Berry Garden sub-widgets (player-screen-local styling, no logic changes)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Blurred cover art that fills the screen background.
+class _BlurredBackground extends StatelessWidget {
+  const _BlurredBackground({required this.coverUrl});
+
+  final String? coverUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    if (coverUrl == null) {
+      return Container(color: LibrettoTheme.background);
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Solid fallback colour shown while image loads / on error
+        Container(color: LibrettoTheme.background),
+        CachedNetworkImage(
+          imageUrl: coverUrl!,
+          fit: BoxFit.cover,
+          // Intentionally low-res for the blur — saves memory
+          memCacheWidth: 200,
+          errorWidget: (_, url, err) =>
+              Container(color: LibrettoTheme.background),
+        ),
+        // Gaussian blur
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+          child: const SizedBox.expand(),
+        ),
+      ],
+    );
+  }
+}
+
+/// Berry Garden play/pause + skip controls.
+class _BerryGardenControls extends StatelessWidget {
+  const _BerryGardenControls({
+    required this.isPlaying,
+    required this.onPlayPause,
+    this.onSkipForward,
+    this.onSkipBackward,
+    this.onNextChapter,
+    this.onPreviousChapter,
+  });
+
+  final bool isPlaying;
+  final VoidCallback onPlayPause;
+  final VoidCallback? onSkipForward;
+  final VoidCallback? onSkipBackward;
+  final VoidCallback? onNextChapter;
+  final VoidCallback? onPreviousChapter;
+
+  @override
+  Widget build(BuildContext context) {
+    const lavender = LibrettoTheme.onSurfaceVariant;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Rewind (skip back)
+        Semantics(
+          label: 'Skip back 15 seconds',
+          child: IconButton(
+            icon: const Icon(Icons.replay_10, color: lavender),
+            iconSize: 32,
+            onPressed: onSkipBackward,
+            tooltip: 'Skip back',
+          ),
+        ),
+
+        // Previous chapter
+        Semantics(
+          label: 'Previous chapter',
+          child: IconButton(
+            icon: const Icon(Icons.skip_previous, color: lavender),
+            iconSize: 36,
+            onPressed: onPreviousChapter,
+            tooltip: 'Previous chapter',
+          ),
+        ),
+
+        // Play / Pause — 64px berry gradient circle
+        const SizedBox(width: 8),
+        Semantics(
+          label: isPlaying ? 'Pause' : 'Play',
+          child: GestureDetector(
+            onTap: onPlayPause,
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    LibrettoTheme.primary,
+                    LibrettoTheme.primaryVariant,
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: LibrettoTheme.primary,
+                    blurRadius: 16,
+                    spreadRadius: 0,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(
+                isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+                size: 36,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+
+        // Next chapter
+        Semantics(
+          label: 'Next chapter',
+          child: IconButton(
+            icon: const Icon(Icons.skip_next, color: lavender),
+            iconSize: 36,
+            onPressed: onNextChapter,
+            tooltip: 'Next chapter',
+          ),
+        ),
+
+        // Skip forward
+        Semantics(
+          label: 'Skip forward 30 seconds',
+          child: IconButton(
+            icon: const Icon(Icons.forward_30, color: lavender),
+            iconSize: 32,
+            onPressed: onSkipForward,
+            tooltip: 'Skip forward',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Berry Garden scrubber: thick lime active track, berry inactive, lavender labels.
+class _BerryGardenScrubber extends StatelessWidget {
+  const _BerryGardenScrubber({
+    required this.position,
+    required this.duration,
+    required this.onSeek,
+    this.chapters = const [],
+    this.bufferedPosition = Duration.zero,
+  });
+
+  final Duration position;
+  final Duration duration;
+  final ValueChanged<Duration> onSeek;
+  final List<UnifiedChapter> chapters;
+  final Duration bufferedPosition;
+
+  @override
+  Widget build(BuildContext context) {
+    // Delegate all logic to the existing Scrubber widget, but wrap it in a
+    // SliderTheme that applies the Berry Garden palette.
+    return SliderTheme(
+      data: SliderTheme.of(context).copyWith(
+        trackHeight: 6,
+        activeTrackColor: LibrettoTheme.secondary, // lime
+        inactiveTrackColor: LibrettoTheme.primary.withValues(
+          alpha: 0.3,
+        ), // berry 30%
+        thumbColor: LibrettoTheme.secondary, // lime
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+        overlayColor: LibrettoTheme.secondary.withValues(alpha: 0.2),
+        trackShape: const RoundedRectSliderTrackShape(),
+      ),
+      child: Scrubber(
+        position: position,
+        duration: duration,
+        chapters: chapters,
+        bufferedPosition: bufferedPosition,
+        onSeek: onSeek,
+      ),
+    );
+  }
+}
+
+/// Pill-shaped speed chip: lime text on cardColor background.
+class _BerrySpeedChip extends StatelessWidget {
+  const _BerrySpeedChip({
+    required this.currentSpeed,
+    required this.onChanged,
+  });
+
+  final double currentSpeed;
+  final ValueChanged<double> onChanged;
+
+  static const List<double> _presets = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+    2.5,
+    3.0,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Playback speed: ${currentSpeed}x. Tap to change.',
+      child: PopupMenuButton<double>(
+        initialValue: currentSpeed,
+        onSelected: onChanged,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: LibrettoTheme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            '${currentSpeed}x',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: LibrettoTheme.secondary, // lime
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        itemBuilder: (context) => _presets.map((speed) {
+          final isSelected = speed == currentSpeed;
+          return PopupMenuItem<double>(
+            value: speed,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 24,
+                  child: isSelected
+                      ? const Icon(
+                          Icons.check,
+                          size: 18,
+                          color: LibrettoTheme.secondary,
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${speed}x',
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : null,
+                    color: isSelected ? LibrettoTheme.secondary : null,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }
