@@ -6,6 +6,10 @@ class AppConstants {
   static const String appName = 'Libretto';
   static const String appVersion = '1.0.0';
 
+  /// App Store URL — update this once the app is published.
+  static const String appStoreUrl =
+      'https://apps.apple.com/app/libretto-audiobook-player/idXXXXXXXXXX';
+
   // Pagination
   static const int defaultPageSize = 50;
   static const int prefetchThreshold = 10;

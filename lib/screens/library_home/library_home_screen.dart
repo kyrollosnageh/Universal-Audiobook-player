@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants.dart';
+import '../../core/responsive.dart';
 import '../../core/extensions.dart';
 import '../../core/theme.dart';
 import '../../data/models/auth_result.dart';
@@ -59,6 +60,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
     final theme = Theme.of(context);
     final textScale = MediaQuery.textScalerOf(context).scale(1.0);
     final useListLayout = textScale > AppConstants.highTextScaleThreshold;
+    final layout = ResponsiveLayout.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -300,10 +302,10 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 180,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: layout.gridMaxExtent,
+                    mainAxisSpacing: layout.isTablet ? 16 : 12,
+                    crossAxisSpacing: layout.isTablet ? 16 : 12,
                     childAspectRatio: 0.6,
                   ),
                   delegate: SliverChildBuilderDelegate(

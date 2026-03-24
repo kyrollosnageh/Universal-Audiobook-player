@@ -30,3 +30,7 @@ credentials.json
 # Generated
 *.freezed.dart
 *.mocks.dart
+
+# Platform (generated at build time via flutter create)
+android/
+ios/

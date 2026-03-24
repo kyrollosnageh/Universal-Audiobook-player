@@ -202,13 +202,13 @@ jobs:
         if: env.KEYSTORE_BASE64 != ''
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: flutter build apk --release --split-per-abi --target-platform android-arm64
+        run: flutter build apk --release
 
       - name: Build debug APK (fallback)
         if: env.KEYSTORE_BASE64 == ''
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: flutter build apk --debug --split-per-abi --target-platform android-arm64
+        run: flutter build apk --debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
@@ -239,14 +239,8 @@ jobs:
           flutter create --org com.kyronageh --platforms ios .
           flutter pub get
 
-      - name: Set iOS deployment target
-        env:
-          IOS_MIN_VERSION: "16.0"
-        run: |
-          sed -i '' "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = ${IOS_MIN_VERSION}/g" ios/Runner.xcodeproj/project.pbxproj
-          grep -q "^platform :ios" ios/Podfile || sed -i '' "1i\\
-          platform :ios, '${IOS_MIN_VERSION}'
-          " ios/Podfile
+      - name: Apply iOS configuration
+        run: bash ios_config/apply_config.sh
 
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs

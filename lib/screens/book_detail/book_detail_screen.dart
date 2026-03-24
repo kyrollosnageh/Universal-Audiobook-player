@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/extensions.dart';
+import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../data/models/book.dart';
 import '../../data/models/unified_chapter.dart';
@@ -84,6 +85,14 @@ class BookDetailScreen extends ConsumerWidget {
           }
 
           final book = detail.book;
+
+          final layout = ResponsiveLayout.of(context);
+
+          if (layout.isTablet) {
+            return _buildTabletLayout(
+              context, ref, theme, book, detail, chaptersAsync,
+            );
+          }
 
           return CustomScrollView(
             slivers: [
@@ -462,6 +471,209 @@ class BookDetailScreen extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildTabletLayout(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeData theme,
+    Book book,
+    BookDetail detail,
+    AsyncValue<List<UnifiedChapter>> chaptersAsync,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left: cover art pinned
+        SizedBox(
+          width: 300,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                const SizedBox(height: 48),
+                Semantics(
+                  label: 'Cover art for ${book.title} by ${book.author}',
+                  child: BookCover(
+                    imageUrl: book.coverUrl,
+                    width: 250,
+                    height: 250,
+                    borderRadius: 12,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Play button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final chapters = chaptersAsync.value ?? [];
+                      final provider = ref.read(activeServerProvider);
+                      if (provider == null) return;
+                      final notifier = ref.read(
+                        playerNotifierProvider.notifier,
+                      );
+                      await notifier.playBook(
+                        book: book,
+                        chapters: chapters,
+                        provider: provider,
+                      );
+                      if (context.mounted) {
+                        unawaited(context.push('/player'));
+                      }
+                    },
+                    icon: Icon(
+                      book.isFinished ? Icons.replay : Icons.play_arrow,
+                    ),
+                    label: Text(
+                      book.isFinished
+                          ? 'Listen Again'
+                          : book.progress != null && book.progress! > 0
+                          ? 'Resume'
+                          : 'Play',
+                    ),
+                  ),
+                ),
+                if (book.progress != null && book.progress! > 0) ...[
+                  const SizedBox(height: 12),
+                  LinearProgressIndicator(
+                    value: book.progress!,
+                    minHeight: 4,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${(book.progress! * 100).toInt()}% complete',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+        const VerticalDivider(width: 1),
+        // Right: metadata + chapters
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(24),
+            children: [
+              Text(book.title, style: theme.textTheme.headlineMedium),
+              const SizedBox(height: 8),
+              if (book.author != null)
+                Text(
+                  'by ${book.author}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: LibrettoTheme.onSurfaceVariant,
+                  ),
+                ),
+              if (book.narrator != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Narrated by ${book.narrator}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: LibrettoTheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+              if (book.duration != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.schedule,
+                      size: 16,
+                      color: LibrettoTheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      book.duration!.toHumanReadable(),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ],
+              if (book.seriesName != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: LibrettoTheme.cardColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.library_books, size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${book.seriesName}'
+                        '${book.seriesIndex != null ? ' #${book.seriesIndex!.toInt()}' : ''}',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              if (detail.description != null) ...[
+                const SizedBox(height: 24),
+                Text('About', style: theme.textTheme.titleMedium),
+                const SizedBox(height: 8),
+                Text(
+                  detail.description!,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+              if (detail.genres.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: detail.genres
+                      .map(
+                        (genre) => Chip(
+                          label: Text(genre),
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+              const SizedBox(height: 24),
+              Text('Chapters', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              chaptersAsync.when(
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (_, _) => const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('Failed to load chapters'),
+                ),
+                data: (chapters) => Column(
+                  children: [
+                    for (var i = 0; i < chapters.length; i++)
+                      ChapterListTile(
+                        chapter: chapters[i],
+                        index: i,
+                        isCurrentChapter: false,
+                        onTap: null,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 80),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
