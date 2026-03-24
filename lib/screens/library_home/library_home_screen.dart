@@ -74,7 +74,10 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
         ),
         title: Text(
           libraryState.filterGenre ??
-              _filterTitle(libraryState.activeFilter, authState.activeServer?.name),
+              _filterTitle(
+                libraryState.activeFilter,
+                authState.activeServer?.name,
+              ),
         ),
         actions: [
           PopupMenuButton<SortOrder>(
