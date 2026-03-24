@@ -206,10 +206,7 @@ class PlayerScreen extends ConsumerWidget {
         child: Row(
           children: [
             // Left: cover art centered vertically
-            Expanded(
-              flex: 4,
-              child: Center(child: coverArt),
-            ),
+            Expanded(flex: 4, child: Center(child: coverArt)),
             const SizedBox(width: 32),
             // Right: title, scrubber, controls
             Expanded(

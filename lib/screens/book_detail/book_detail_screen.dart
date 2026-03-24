@@ -90,7 +90,12 @@ class BookDetailScreen extends ConsumerWidget {
 
           if (layout.isTablet) {
             return _buildTabletLayout(
-              context, ref, theme, book, detail, chaptersAsync,
+              context,
+              ref,
+              theme,
+              book,
+              detail,
+              chaptersAsync,
             );
           }
 
@@ -622,10 +627,7 @@ class BookDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 Text('About', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),
-                Text(
-                  detail.description!,
-                  style: theme.textTheme.bodyMedium,
-                ),
+                Text(detail.description!, style: theme.textTheme.bodyMedium),
               ],
               if (detail.genres.isNotEmpty) ...[
                 const SizedBox(height: 16),
