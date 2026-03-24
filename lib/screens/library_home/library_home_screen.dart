@@ -395,37 +395,109 @@ class _BookGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasProgress = (book.progress ?? 0) > 0;
+
     return Semantics(
       label:
           '${book.title} by ${book.author ?? "Unknown Author"}. '
           '${book.duration?.toHumanReadable() ?? "unknown duration"}. '
           'Tap for details.',
-      child: InkWell(
+      child: GestureDetector(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: BookCover(imageUrl: book.coverUrl, borderRadius: 8),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              book.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            if (book.author != null)
-              Text(
-                book.author!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(LibrettoTheme.radiusSm),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x55000000),
+                blurRadius: 8,
+                offset: Offset(0, 4),
               ),
-          ],
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(LibrettoTheme.radiusSm),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Cover art fills the entire card
+                BookCover(
+                  imageUrl: book.coverUrl,
+                  borderRadius: 0,
+                  fit: BoxFit.cover,
+                ),
+
+                // Gradient overlay at the bottom for title/author legibility
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Color(0xE6000000), // ~90% black at bottom
+                          Colors.transparent,
+                        ],
+                        stops: [0.0, 1.0],
+                      ),
+                    ),
+                    padding: EdgeInsets.fromLTRB(8, 24, 8, hasProgress ? 11 : 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          book.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            height: 1.3,
+                          ),
+                        ),
+                        if (book.author != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            book.author!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xCCFFFFFF), // 80% white
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Lime progress bar at the very bottom edge
+                if (hasProgress)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: SizedBox(
+                      height: 3,
+                      child: LinearProgressIndicator(
+                        value: book.progress!,
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          LibrettoTheme.secondary,
+                        ),
+                        minHeight: 3,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
