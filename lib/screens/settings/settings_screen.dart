@@ -188,57 +188,93 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(LibrettoTheme.spacingLg),
         children: [
           // ── App Info ──
-          _SectionHeader(title: 'About'),
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text(AppConstants.appName),
-            subtitle: Text('Version ${AppConstants.appVersion}'),
+          const _SectionHeader(title: 'About'),
+          _SettingsCard(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text(AppConstants.appName),
+                subtitle: Text('Version ${AppConstants.appVersion}'),
+              ),
+            ],
           ),
 
           const SizedBox(height: LibrettoTheme.spacingLg),
 
           // ── Check for Update ──
-          _SectionHeader(title: 'Updates'),
-          if (_downloading) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: LibrettoTheme.spacingLg,
-                vertical: LibrettoTheme.spacingMd,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Downloading update... ${(_downloadProgress * 100).toInt()}%',
-                    style: Theme.of(context).textTheme.bodyMedium,
+          const _SectionHeader(title: 'Updates'),
+          _SettingsCard(
+            children: [
+              if (_downloading) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: LibrettoTheme.spacingLg,
+                    vertical: LibrettoTheme.spacingMd,
                   ),
-                  const SizedBox(height: LibrettoTheme.spacingSm),
-                  LinearProgressIndicator(value: _downloadProgress),
-                ],
-              ),
-            ),
-          ] else
-            ListTile(
-              leading: _checking
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.system_update),
-              title: const Text('Check for updates'),
-              subtitle: _error != null
-                  ? Text(
-                      _error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Downloading update... ${(_downloadProgress * 100).toInt()}%',
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                    )
-                  : const Text('Download the latest version from GitHub'),
-              enabled: !_checking,
-              onTap: _checkForUpdate,
-            ),
+                      const SizedBox(height: LibrettoTheme.spacingSm),
+                      LinearProgressIndicator(value: _downloadProgress),
+                    ],
+                  ),
+                ),
+              ] else
+                ListTile(
+                  leading: _checking
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.system_update),
+                  title: const Text('Check for updates'),
+                  subtitle: _error != null
+                      ? Text(
+                          _error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        )
+                      : const Text('Download the latest version from GitHub'),
+                  enabled: !_checking,
+                  onTap: _checkForUpdate,
+                ),
+            ],
+          ),
+
+          const SizedBox(height: LibrettoTheme.spacingXxl),
+
+          // ── Version footer ──
+          _VersionFooter(),
+
+          const SizedBox(height: LibrettoTheme.spacingLg),
         ],
+      ),
+    );
+  }
+}
+
+/// Card container grouping related settings items.
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: LibrettoTheme.cardColor,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
       ),
     );
   }
@@ -261,6 +297,32 @@ class _SectionHeader extends StatelessWidget {
           context,
         ).textTheme.titleSmall?.copyWith(color: LibrettoTheme.primary),
       ),
+    );
+  }
+}
+
+class _VersionFooter extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          AppConstants.appName,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: LibrettoTheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'v${AppConstants.appVersion}',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: LibrettoTheme.secondary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }
