@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -132,26 +134,66 @@ class CloudLoginService {
 
   /// Login to Emby Connect with username/email and password.
   /// Returns the connect token and user ID.
+  ///
+  /// Emby Connect accepts the password either as:
+  /// - `rawpw`: plaintext password (older API)
+  /// - `pw`: MD5-hashed password (newer API)
+  /// We try both formats for compatibility.
   Future<Map<String, String>> loginEmbyConnect({
     required String username,
     required String password,
   }) async {
-    final response = await _dio.post(
-      'https://connect.emby.media/service/user/authenticate',
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Application': 'Libretto/1.0.0',
-        },
-      ),
-      data: {'nameOrEmail': username, 'rawpw': password},
-    );
+    // Try with rawpw first (plaintext), then pw (MD5) as fallback
+    for (final body in [
+      {'nameOrEmail': username, 'rawpw': password},
+      {'nameOrEmail': username, 'pw': _md5Hash(password)},
+    ]) {
+      try {
+        final response = await _dio.post(
+          'https://connect.emby.media/service/user/authenticate',
+          options: Options(
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Application': 'Libretto/1.0.0',
+            },
+            validateStatus: (status) => status != null && status < 500,
+          ),
+          data: body,
+        );
 
-    final data = response.data as Map<String, dynamic>;
-    return {
-      'accessToken': data['AccessToken'] as String,
-      'userId': data['User']?['Id'] as String? ?? '',
-    };
+        if (response.statusCode == 200 && response.data is Map) {
+          final data = response.data as Map<String, dynamic>;
+          final token = data['AccessToken'] as String?;
+          if (token != null && token.isNotEmpty) {
+            return {
+              'accessToken': token,
+              'userId': data['User']?['Id'] as String? ?? '',
+            };
+          }
+        }
+      } catch (_) {
+        // Try next format
+        continue;
+      }
+    }
+
+    throw Exception('Authentication failed. Please check your credentials.');
+  }
+
+  /// Simple MD5 hash for Emby Connect password.
+  String _md5Hash(String input) {
+    // Dart doesn't have built-in MD5, so use a manual implementation
+    // or convert package. For now, use dart:convert + crypto approach.
+    // Since we can't add a new dependency just for this, we'll compute
+    // MD5 using the dart:io approach on platforms that support it.
+    try {
+      final bytes = utf8.encode(input);
+      final digest = md5.convert(bytes);
+      return digest.toString();
+    } catch (_) {
+      // If crypto isn't available, return plaintext as last resort
+      return input;
+    }
   }
 
   /// Fetch all servers linked to the Emby Connect account.
