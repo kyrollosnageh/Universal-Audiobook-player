@@ -126,17 +126,23 @@ class LibraryNotifier extends Notifier<LibraryState> {
     state = state.copyWith(isLoading: true, error: null, hasMore: true);
 
     try {
-      // Show cached data instantly
       final serverId = provider.serverUrl;
-      final cached = await _libraryService.getCachedBooks(serverId);
-      final continueListening = await _libraryService.getContinueListening(
-        serverId,
-      );
 
+      // Show cached data instantly (parallel DB reads)
+      final cachedFutures = await Future.wait([
+        _libraryService.getCachedBooks(serverId),
+        _libraryService.getContinueListening(serverId),
+        _libraryService.getFavoriteBooks(serverId),
+        _libraryService.getFinishedBooks(serverId),
+      ]);
+
+      final cached = cachedFutures[0];
       if (cached.isNotEmpty) {
         state = state.copyWith(
           books: cached,
-          continueListening: continueListening,
+          continueListening: cachedFutures[1],
+          favoriteBooks: cachedFutures[2],
+          finishedBooks: cachedFutures[3],
           isLoading: false,
         );
       }
@@ -156,16 +162,16 @@ class LibraryNotifier extends Notifier<LibraryState> {
         isLoading: false,
       );
 
-      // Refresh shelves
-      final freshContinue = await _libraryService.getContinueListening(
-        serverId,
-      );
-      final favorites = await _libraryService.getFavoriteBooks(serverId);
-      final finished = await _libraryService.getFinishedBooks(serverId);
+      // Refresh shelves in background (parallel DB reads)
+      final freshShelves = await Future.wait([
+        _libraryService.getContinueListening(serverId),
+        _libraryService.getFavoriteBooks(serverId),
+        _libraryService.getFinishedBooks(serverId),
+      ]);
       state = state.copyWith(
-        continueListening: freshContinue,
-        favoriteBooks: favorites,
-        finishedBooks: finished,
+        continueListening: freshShelves[0],
+        favoriteBooks: freshShelves[1],
+        finishedBooks: freshShelves[2],
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

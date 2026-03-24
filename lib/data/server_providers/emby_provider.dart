@@ -176,9 +176,9 @@ class EmbyProvider implements ServerProvider {
       'StartIndex': offset,
       'Limit': limit,
       'Fields':
-          'Overview,Genres,Studios,DateCreated,RunTimeTicks,'
-          'UserDataPlayCount,UserDataLastPlayedDate,'
+          'Genres,DateCreated,RunTimeTicks,'
           'SeriesName,IndexNumber',
+      'EnableUserData': true,
       'ImageTypeLimit': 1,
       'EnableImageTypes': 'Primary',
       'SortBy': _mapSortBy(sort),
