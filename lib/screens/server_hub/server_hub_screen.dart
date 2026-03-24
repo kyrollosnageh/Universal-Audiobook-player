@@ -334,16 +334,6 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: Stack(
               children: [
-                // Settings icon in the top-right corner
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: IconButton(
-                    icon: const Icon(Icons.settings),
-                    tooltip: 'Settings',
-                    onPressed: () => context.push('/settings'),
-                  ),
-                ),
                 // Centered content
                 SizedBox(
                   width: double.infinity,
@@ -388,6 +378,16 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
                         ),
                       ],
                     ),
+                  ),
+                ),
+                // Settings icon in the top-right corner (last so it renders on top)
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: IconButton(
+                    icon: const Icon(Icons.settings),
+                    tooltip: 'Settings',
+                    onPressed: () => context.push('/settings'),
                   ),
                 ),
               ],

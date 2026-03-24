@@ -138,27 +138,49 @@ class CloudLoginService {
   /// Emby Connect accepts the password either as:
   /// - `rawpw`: plaintext password (older API)
   /// - `pw`: MD5-hashed password (newer API)
-  /// We try both formats for compatibility.
+  /// We try both formats and content types for compatibility.
   Future<Map<String, String>> loginEmbyConnect({
     required String username,
     required String password,
   }) async {
-    // Try with rawpw first (plaintext), then pw (MD5) as fallback
-    for (final body in [
-      {'nameOrEmail': username, 'rawpw': password},
-      {'nameOrEmail': username, 'pw': _md5Hash(password)},
-    ]) {
+    final md5Password = _md5Hash(password);
+
+    // Try different body/content-type combinations for compatibility
+    final attempts = <Map<String, Object>>[
+      // JSON with rawpw
+      {
+        'contentType': 'application/json',
+        'body': {'nameOrEmail': username, 'rawpw': password},
+      },
+      // JSON with MD5
+      {
+        'contentType': 'application/json',
+        'body': {'nameOrEmail': username, 'pw': md5Password},
+      },
+      // Form-urlencoded with rawpw
+      {
+        'contentType': 'application/x-www-form-urlencoded',
+        'body': {'nameOrEmail': username, 'rawpw': password},
+      },
+      // Form-urlencoded with MD5
+      {
+        'contentType': 'application/x-www-form-urlencoded',
+        'body': {'nameOrEmail': username, 'pw': md5Password},
+      },
+    ];
+
+    DioException? lastDioError;
+
+    for (final attempt in attempts) {
       try {
         final response = await _dio.post(
           'https://connect.emby.media/service/user/authenticate',
           options: Options(
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Application': 'Libretto/1.0.0',
-            },
+            headers: {'X-Application': 'Libretto/1.0.0'},
+            contentType: attempt['contentType'] as String,
             validateStatus: (status) => status != null && status < 500,
           ),
-          data: body,
+          data: attempt['body'],
         );
 
         if (response.statusCode == 200 && response.data is Map) {
@@ -171,11 +193,25 @@ class CloudLoginService {
             };
           }
         }
+
+        // Convert 4xx to DioException so caller gets status-specific errors
+        if (response.statusCode != null && response.statusCode! >= 400) {
+          lastDioError = DioException(
+            requestOptions: response.requestOptions,
+            response: response,
+            type: DioExceptionType.badResponse,
+          );
+        }
+      } on DioException catch (e) {
+        lastDioError = e;
+        continue;
       } catch (_) {
-        // Try next format
         continue;
       }
     }
+
+    // Re-throw the last DioException so the UI can show status-specific errors
+    if (lastDioError != null) throw lastDioError!;
 
     throw Exception('Authentication failed. Please check your credentials.');
   }
