@@ -72,10 +72,9 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: Text(_filterTitle(
-          libraryState.activeFilter,
-          authState.activeServer?.name,
-        )),
+        title: Text(
+          _filterTitle(libraryState.activeFilter, authState.activeServer?.name),
+        ),
         actions: [
           PopupMenuButton<SortOrder>(
             icon: const Icon(Icons.sort),
@@ -177,7 +176,8 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                 child: Center(child: CircularProgressIndicator()),
               )
             // Error state
-            else if (libraryState.error != null && libraryState.displayedBooks.isEmpty)
+            else if (libraryState.error != null &&
+                libraryState.displayedBooks.isEmpty)
               SliverFillRemaining(
                 child: Center(
                   child: Column(
@@ -294,7 +294,8 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               ),
 
             // Pagination loading indicator
-            if (libraryState.isLoadingMore && libraryState.displayedBooks.isNotEmpty)
+            if (libraryState.isLoadingMore &&
+                libraryState.displayedBooks.isNotEmpty)
               const SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),

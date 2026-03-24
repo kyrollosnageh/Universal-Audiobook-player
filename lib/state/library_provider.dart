@@ -24,13 +24,7 @@ final syncServiceProvider = Provider<SyncService>((ref) {
 });
 
 /// Filter for the library drawer navigation.
-enum LibraryFilter {
-  all,
-  recentlyAdded,
-  currentlyReading,
-  favorites,
-  finished,
-}
+enum LibraryFilter { all, recentlyAdded, currentlyReading, favorites, finished }
 
 /// Library state.
 class LibraryState {
@@ -344,7 +338,10 @@ class LibraryNotifier extends Notifier<LibraryState> {
   /// Set the drawer filter.
   void setFilter(LibraryFilter filter) {
     if (filter == LibraryFilter.recentlyAdded) {
-      state = state.copyWith(activeFilter: filter, sort: SortOrder.dateAddedDesc);
+      state = state.copyWith(
+        activeFilter: filter,
+        sort: SortOrder.dateAddedDesc,
+      );
     } else {
       state = state.copyWith(activeFilter: filter);
     }

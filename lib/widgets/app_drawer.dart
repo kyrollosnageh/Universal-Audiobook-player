@@ -64,7 +64,9 @@ class AppDrawer extends ConsumerWidget {
                     label: 'Recently Added',
                     isActive: activeFilter == LibraryFilter.recentlyAdded,
                     onTap: () => _selectFilter(
-                      context, ref, LibraryFilter.recentlyAdded,
+                      context,
+                      ref,
+                      LibraryFilter.recentlyAdded,
                     ),
                   ),
                   _DrawerItem(
@@ -73,7 +75,9 @@ class AppDrawer extends ConsumerWidget {
                     isActive: activeFilter == LibraryFilter.currentlyReading,
                     count: libraryState.continueListening.length,
                     onTap: () => _selectFilter(
-                      context, ref, LibraryFilter.currentlyReading,
+                      context,
+                      ref,
+                      LibraryFilter.currentlyReading,
                     ),
                   ),
                   _DrawerItem(
@@ -81,18 +85,16 @@ class AppDrawer extends ConsumerWidget {
                     label: 'Favorites',
                     isActive: activeFilter == LibraryFilter.favorites,
                     count: libraryState.favoriteBooks.length,
-                    onTap: () => _selectFilter(
-                      context, ref, LibraryFilter.favorites,
-                    ),
+                    onTap: () =>
+                        _selectFilter(context, ref, LibraryFilter.favorites),
                   ),
                   _DrawerItem(
                     icon: Icons.check_circle,
                     label: 'Finished',
                     isActive: activeFilter == LibraryFilter.finished,
                     count: libraryState.finishedBooks.length,
-                    onTap: () => _selectFilter(
-                      context, ref, LibraryFilter.finished,
-                    ),
+                    onTap: () =>
+                        _selectFilter(context, ref, LibraryFilter.finished),
                   ),
                   const Divider(
                     height: 24,
@@ -198,9 +200,7 @@ class _DrawerItem extends StatelessWidget {
             : null,
         selected: isActive,
         selectedTileColor: LibrettoTheme.primary.withValues(alpha: 0.08),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         onTap: onTap,
       ),
     );
