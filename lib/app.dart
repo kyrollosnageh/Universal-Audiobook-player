@@ -91,9 +91,7 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
             onGetStarted: () async {
               final result = await Navigator.push<bool>(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const ServerSetupScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const ServerSetupScreen()),
               );
 
               if (result == true) {

@@ -279,8 +279,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
         final message = status == 401
             ? 'Invalid username or password.'
             : status == 400
-                ? 'Invalid request. Please check your email/username format.'
-                : 'Could not reach Emby Connect. Check your internet connection.';
+            ? 'Invalid request. Please check your email/username format.'
+            : 'Could not reach Emby Connect. Check your internet connection.';
         setState(() {
           _error = message;
           _embyLoginInProgress = false;
@@ -403,8 +403,9 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
     });
 
     try {
-      final servers =
-          await _cloudLoginService.fetchPlexServers(_plexAuthToken!);
+      final servers = await _cloudLoginService.fetchPlexServers(
+        _plexAuthToken!,
+      );
 
       if (mounted) {
         setState(() {
@@ -450,7 +451,9 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
     });
 
     try {
-      await ref.read(authNotifierProvider.notifier).login(
+      await ref
+          .read(authNotifierProvider.notifier)
+          .login(
             url: _urlController.text.trim(),
             username: _usernameController.text.trim(),
             password: _passwordController.text,
@@ -488,7 +491,9 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
     });
 
     try {
-      await ref.read(authNotifierProvider.notifier).login(
+      await ref
+          .read(authNotifierProvider.notifier)
+          .login(
             url: server.url,
             username: '',
             password: '',
@@ -533,11 +538,7 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
-        children: [
-          _buildMethodPage(),
-          _buildStep2Page(),
-          _buildLoginPage(),
-        ],
+        children: [_buildMethodPage(), _buildStep2Page(), _buildLoginPage()],
       ),
     );
   }
@@ -556,8 +557,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
         Text(
           'Choose a method to add your media server.',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: LibrettoTheme.onSurfaceVariant,
-              ),
+            color: LibrettoTheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 24),
         _MethodCard(
@@ -597,12 +598,14 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
     return switch (_method) {
       _ConnectionMethod.manual => _buildManualUrlPage(),
       _ConnectionMethod.scan => _buildScanPage(),
-      _ConnectionMethod.embyConnect => _cloudServers.isNotEmpty
-          ? _buildCloudServerListPage()
-          : _buildEmbyCredentialsPage(),
-      _ConnectionMethod.plex => _cloudServers.isNotEmpty
-          ? _buildCloudServerListPage()
-          : _buildPlexAuthPage(),
+      _ConnectionMethod.embyConnect =>
+        _cloudServers.isNotEmpty
+            ? _buildCloudServerListPage()
+            : _buildEmbyCredentialsPage(),
+      _ConnectionMethod.plex =>
+        _cloudServers.isNotEmpty
+            ? _buildCloudServerListPage()
+            : _buildPlexAuthPage(),
       null => const SizedBox.shrink(),
     };
   }
@@ -620,8 +623,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
         Text(
           'Enter the URL of your media server.',
           style: theme.textTheme.bodyMedium?.copyWith(
-                color: LibrettoTheme.onSurfaceVariant,
-              ),
+            color: LibrettoTheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 24),
         TextField(
@@ -715,18 +718,15 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
             child: Text(
               'Scanning your network...',
               style: theme.textTheme.bodyMedium?.copyWith(
-                    color: LibrettoTheme.onSurfaceVariant,
-                  ),
+                color: LibrettoTheme.onSurfaceVariant,
+              ),
             ),
           ),
           const SizedBox(height: 24),
         ],
 
         if (_discoveredServers.isNotEmpty) ...[
-          Text(
-            'Found on your network',
-            style: theme.textTheme.titleMedium,
-          ),
+          Text('Found on your network', style: theme.textTheme.titleMedium),
           const SizedBox(height: 12),
           for (final server in _discoveredServers) ...[
             _DiscoveredServerCard(
@@ -748,18 +748,15 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
           ),
           const SizedBox(height: 16),
           Center(
-            child: Text(
-              'No servers found',
-              style: theme.textTheme.titleMedium,
-            ),
+            child: Text('No servers found', style: theme.textTheme.titleMedium),
           ),
           const SizedBox(height: 8),
           Center(
             child: Text(
               'Make sure your server is running and on the same network.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                    color: LibrettoTheme.onSurfaceVariant,
-                  ),
+                color: LibrettoTheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -858,7 +855,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                             : Icons.visibility,
                       ),
                       onPressed: () => setState(
-                          () => _obscureEmbyPassword = !_obscureEmbyPassword),
+                        () => _obscureEmbyPassword = !_obscureEmbyPassword,
+                      ),
                     ),
                   ),
                   obscureText: _obscureEmbyPassword,
@@ -898,8 +896,9 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
 
   Widget _buildCloudServerListPage() {
     final theme = Theme.of(context);
-    final providerLabel =
-        _cloudProviderType == ServerType.plex ? 'Plex' : 'Emby';
+    final providerLabel = _cloudProviderType == ServerType.plex
+        ? 'Plex'
+        : 'Emby';
 
     if (_cloudServers.isEmpty) {
       return Center(
@@ -917,8 +916,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
             Text(
               'No $providerLabel servers are linked to this account.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                    color: LibrettoTheme.onSurfaceVariant,
-                  ),
+                color: LibrettoTheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -975,8 +974,11 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
               color: LibrettoTheme.plexColor.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child:
-                const Icon(Icons.tv, color: LibrettoTheme.plexColor, size: 32),
+            child: const Icon(
+              Icons.tv,
+              color: LibrettoTheme.plexColor,
+              size: 32,
+            ),
           ),
         ),
         const SizedBox(height: 24),
@@ -1002,8 +1004,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
             child: Text(
               'Waiting for authentication...',
               style: theme.textTheme.bodyMedium?.copyWith(
-                    color: LibrettoTheme.onSurfaceVariant,
-                  ),
+                color: LibrettoTheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -1011,8 +1013,10 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
             const SizedBox(height: 16),
             Center(
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: LibrettoTheme.cardColor,
                   borderRadius: BorderRadius.circular(16),
@@ -1020,8 +1024,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                 child: Text(
                   _plexCode!,
                   style: theme.textTheme.headlineMedium?.copyWith(
-                        letterSpacing: 4,
-                      ),
+                    letterSpacing: 4,
+                  ),
                 ),
               ),
             ),
@@ -1041,8 +1045,7 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                 _cancelPlexAuth();
                 _goBack();
               },
-              style:
-                  OutlinedButton.styleFrom(minimumSize: const Size(120, 48)),
+              style: OutlinedButton.styleFrom(minimumSize: const Size(120, 48)),
               child: const Text('Cancel'),
             ),
           ),
@@ -1133,7 +1136,8 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
                           : Icons.visibility,
                     ),
                     onPressed: () => setState(
-                        () => _obscureLoginPassword = !_obscureLoginPassword),
+                      () => _obscureLoginPassword = !_obscureLoginPassword,
+                    ),
                   ),
                 ),
                 obscureText: _obscureLoginPassword,
@@ -1159,8 +1163,9 @@ class _ServerSetupScreenState extends ConsumerState<ServerSetupScreen> {
               _BerryButton(
                 label: 'Connect',
                 isLoading: _isConnecting,
-                onPressed:
-                    _isConnecting || _detectedServer == null ? null : _connect,
+                onPressed: _isConnecting || _detectedServer == null
+                    ? null
+                    : _connect,
               ),
             ],
           ),
@@ -1222,10 +1227,7 @@ class _MethodCard extends StatelessWidget {
                 children: [
                   Text(title, style: theme.textTheme.titleMedium),
                   const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall,
-                  ),
+                  Text(subtitle, style: theme.textTheme.bodySmall),
                 ],
               ),
             ),
@@ -1310,8 +1312,7 @@ class _DetectedBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: LibrettoTheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
-        border:
-            Border.all(color: LibrettoTheme.primary.withValues(alpha: 0.3)),
+        border: Border.all(color: LibrettoTheme.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1358,10 +1359,9 @@ class _ErrorBanner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: LibrettoTheme.error),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: LibrettoTheme.error),
             ),
           ),
           IconButton(
@@ -1447,18 +1447,18 @@ class _CloudServerCard extends StatelessWidget {
   final VoidCallback onTap;
 
   Color get _typeColor => switch (server.type) {
-        ServerType.plex => LibrettoTheme.plexColor,
-        ServerType.emby => LibrettoTheme.embyColor,
-        ServerType.jellyfin => LibrettoTheme.jellyfinColor,
-        ServerType.audiobookshelf => LibrettoTheme.audiobookshelfColor,
-      };
+    ServerType.plex => LibrettoTheme.plexColor,
+    ServerType.emby => LibrettoTheme.embyColor,
+    ServerType.jellyfin => LibrettoTheme.jellyfinColor,
+    ServerType.audiobookshelf => LibrettoTheme.audiobookshelfColor,
+  };
 
   IconData get _typeIcon => switch (server.type) {
-        ServerType.plex => Icons.tv,
-        ServerType.emby => Icons.play_circle_outline,
-        ServerType.jellyfin => Icons.play_circle_filled,
-        ServerType.audiobookshelf => Icons.headphones,
-      };
+    ServerType.plex => Icons.tv,
+    ServerType.emby => Icons.play_circle_outline,
+    ServerType.jellyfin => Icons.play_circle_filled,
+    ServerType.audiobookshelf => Icons.headphones,
+  };
 
   @override
   Widget build(BuildContext context) {
