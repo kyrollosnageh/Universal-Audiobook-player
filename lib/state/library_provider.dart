@@ -394,13 +394,16 @@ class LibraryNotifier extends Notifier<LibraryState> {
   Future<void> syncAll() async {
     final provider = ref.read(activeServerProvider);
     if (provider == null) return;
+    if (state.isSyncing) return; // Prevent double-sync
+
+    // Use smaller batches so progress is visible
+    const batchSize = 50;
 
     state = state.copyWith(error: null, hasMore: true);
 
     try {
       final allBooks = <Book>[];
       var offset = 0;
-      const batchSize = AppConstants.backgroundPrefetchBatchSize;
 
       // First fetch to get totalCount before showing the progress bar
       final firstResult = await _libraryService.fetchLibrary(
@@ -421,29 +424,35 @@ class LibraryNotifier extends Notifier<LibraryState> {
         syncedCount: allBooks.length,
       );
 
-      if (firstResult.hasMore) {
+      // Fetch remaining pages
+      offset += batchSize;
+      while (allBooks.length < total) {
+        final result = await _libraryService.fetchLibrary(
+          provider,
+          offset: offset,
+          limit: batchSize,
+          sort: state.sort,
+        );
+        if (result.items.isEmpty) break;
+        allBooks.addAll(result.items);
+
+        state = state.copyWith(
+          books: allBooks,
+          syncProgress: total > 0 ? allBooks.length / total : 1.0,
+          syncedCount: allBooks.length,
+        );
+
         offset += batchSize;
-
-        while (true) {
-          final result = await _libraryService.fetchLibrary(
-            provider,
-            offset: offset,
-            limit: batchSize,
-            sort: state.sort,
-          );
-          allBooks.addAll(result.items);
-
-          state = state.copyWith(
-            books: allBooks,
-            totalCount: result.totalCount,
-            syncProgress: total > 0 ? allBooks.length / total : 1.0,
-            syncedCount: allBooks.length,
-          );
-
-          if (!result.hasMore) break;
-          offset += batchSize;
-        }
       }
+
+      // Show completed state briefly
+      state = state.copyWith(
+        books: allBooks,
+        hasMore: false,
+        syncProgress: 1.0,
+        syncedCount: allBooks.length,
+        totalCount: total,
+      );
 
       // Refresh shelves
       final serverId = provider.serverUrl;
@@ -456,10 +465,11 @@ class LibraryNotifier extends Notifier<LibraryState> {
         continueListening: shelves[0],
         favoriteBooks: shelves[1],
         finishedBooks: shelves[2],
-        hasMore: false,
-        isSyncing: false,
-        syncProgress: 1.0,
       );
+
+      // Keep bar visible for 1.5s so user sees completion
+      await Future.delayed(const Duration(milliseconds: 1500));
+      state = state.copyWith(isSyncing: false);
     } catch (e) {
       state = state.copyWith(
         isSyncing: false,
