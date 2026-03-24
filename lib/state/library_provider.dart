@@ -395,20 +395,14 @@ class LibraryNotifier extends Notifier<LibraryState> {
     final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
-    state = state.copyWith(
-      isSyncing: true,
-      syncProgress: 0.0,
-      syncedCount: 0,
-      error: null,
-      hasMore: true,
-    );
+    state = state.copyWith(error: null, hasMore: true);
 
     try {
       final allBooks = <Book>[];
       var offset = 0;
       const batchSize = AppConstants.backgroundPrefetchBatchSize;
 
-      // First fetch to get totalCount
+      // First fetch to get totalCount before showing the progress bar
       final firstResult = await _libraryService.fetchLibrary(
         provider,
         offset: 0,
@@ -418,9 +412,11 @@ class LibraryNotifier extends Notifier<LibraryState> {
       allBooks.addAll(firstResult.items);
       final total = firstResult.totalCount;
 
+      // Now show the progress bar with real numbers
       state = state.copyWith(
         books: allBooks,
         totalCount: total,
+        isSyncing: true,
         syncProgress: total > 0 ? allBooks.length / total : 1.0,
         syncedCount: allBooks.length,
       );
