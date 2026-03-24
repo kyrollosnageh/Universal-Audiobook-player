@@ -439,7 +439,7 @@ class _BerryGardenControls extends StatelessWidget {
         Semantics(
           label: 'Skip back 15 seconds',
           child: IconButton(
-            icon: const Icon(Icons.replay_10, color: lavender),
+            icon: const Icon(Icons.replay, color: lavender),
             iconSize: 32,
             onPressed: onSkipBackward,
             tooltip: 'Skip back',

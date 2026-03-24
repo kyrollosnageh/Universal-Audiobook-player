@@ -372,61 +372,6 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
   }
 }
 
-class _ContinueListeningCard extends StatelessWidget {
-  const _ContinueListeningCard({required this.book, required this.onTap});
-
-  final Book book;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label:
-          '${book.title} by ${book.author ?? "Unknown Author"}, '
-          '${((book.progress ?? 0) * 100).toInt()}% complete. '
-          'Tap to continue listening.',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: SizedBox(
-          width: 130,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Stack(
-                  children: [
-                    BookCover(imageUrl: book.coverUrl, width: 130, height: 130),
-                    if (book.progress != null)
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: LinearProgressIndicator(
-                          value: book.progress!,
-                          minHeight: 3,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                book.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _BookGridCard extends StatelessWidget {
   const _BookGridCard({required this.book, required this.onTap});
 

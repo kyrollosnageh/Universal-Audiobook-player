@@ -39,7 +39,7 @@ class ResponsiveLayout {
   static ResponsiveLayout of(BuildContext context) {
     final mq = MediaQuery.of(context);
     return ResponsiveLayout._(
-      screenWidth: mq.size.shortestSide >= 600 ? mq.size.width : mq.size.width,
+      screenWidth: mq.size.width,
       isLandscape: mq.orientation == Orientation.landscape,
     );
   }
