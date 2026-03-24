@@ -41,7 +41,8 @@ class EmbyProvider implements ServerProvider {
     final prefs = await SharedPreferences.getInstance();
     _deviceId = prefs.getString('libretto_device_id') ?? '';
     if (_deviceId.isEmpty) {
-      _deviceId = 'libretto-${DateTime.now().millisecondsSinceEpoch.toRadixString(36)}';
+      _deviceId =
+          'libretto-${DateTime.now().millisecondsSinceEpoch.toRadixString(36)}';
       await prefs.setString('libretto_device_id', _deviceId);
     }
   }

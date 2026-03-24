@@ -75,7 +75,9 @@ class PlayerState {
       isPlaying: isPlaying ?? this.isPlaying,
       isBuffering: isBuffering ?? this.isBuffering,
       speed: speed ?? this.speed,
-      sleepTimerRemaining: clearSleepTimer ? null : (sleepTimerRemaining ?? this.sleepTimerRemaining),
+      sleepTimerRemaining: clearSleepTimer
+          ? null
+          : (sleepTimerRemaining ?? this.sleepTimerRemaining),
       error: error,
     );
   }
@@ -309,7 +311,6 @@ class PlayerNotifier extends Notifier<PlayerState> {
       }
     });
   }
-
 }
 
 final playerNotifierProvider = NotifierProvider<PlayerNotifier, PlayerState>(

@@ -510,7 +510,6 @@ class LibraryNotifier extends Notifier<LibraryState> {
       );
     }
   }
-
 }
 
 final libraryNotifierProvider = NotifierProvider<LibraryNotifier, LibraryState>(

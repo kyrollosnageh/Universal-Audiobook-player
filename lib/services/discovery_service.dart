@@ -234,14 +234,16 @@ class DiscoveryService {
     var remaining = streams.length;
 
     for (final stream in streams) {
-      subs.add(stream.listen(
-        controller.add,
-        onError: (_) {},
-        onDone: () {
-          remaining--;
-          if (remaining == 0) controller.close();
-        },
-      ));
+      subs.add(
+        stream.listen(
+          controller.add,
+          onError: (_) {},
+          onDone: () {
+            remaining--;
+            if (remaining == 0) controller.close();
+          },
+        ),
+      );
     }
 
     controller.onCancel = () {

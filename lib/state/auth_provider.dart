@@ -65,7 +65,9 @@ class AuthState {
       isLoading: isLoading ?? this.isLoading,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       error: error,
-      activeServer: clearActiveServer ? null : (activeServer ?? this.activeServer),
+      activeServer: clearActiveServer
+          ? null
+          : (activeServer ?? this.activeServer),
     );
   }
 }

@@ -365,7 +365,10 @@ class BookDetailScreen extends ConsumerWidget {
                     var chapters = chaptersAsync.value;
                     if (chapters == null || chapters.isEmpty) {
                       final chapterService = ref.read(chapterServiceProvider);
-                      chapters = await chapterService.getChapters(provider, bookId);
+                      chapters = await chapterService.getChapters(
+                        provider,
+                        bookId,
+                      );
                     }
 
                     final notifier = ref.read(playerNotifierProvider.notifier);
@@ -485,7 +488,10 @@ class BookDetailScreen extends ConsumerWidget {
                     var chapters = chaptersAsync.value;
                     if (chapters == null || chapters.isEmpty) {
                       final chapterService = ref.read(chapterServiceProvider);
-                      chapters = await chapterService.getChapters(provider, bookId);
+                      chapters = await chapterService.getChapters(
+                        provider,
+                        bookId,
+                      );
                     }
 
                     final notifier = ref.read(playerNotifierProvider.notifier);
@@ -743,10 +749,7 @@ class _PillChip extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _PlayButton extends StatelessWidget {
-  const _PlayButton({
-    required this.book,
-    required this.onPressed,
-  });
+  const _PlayButton({required this.book, required this.onPressed});
 
   final Book book;
   final VoidCallback onPressed;

@@ -183,8 +183,7 @@ class LibraryService {
     return _bookDao.clearServerBooks(serverId);
   }
 
-  void dispose() {
-  }
+  void dispose() {}
 
   // ── Mapping ───────────────────────────────────────────────────────
 
