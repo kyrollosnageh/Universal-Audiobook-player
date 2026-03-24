@@ -77,39 +77,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/libretto-release.jks
-          cat > android/key.properties << PROPS
-          storePassword=$KEYSTORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=libretto-release.jks
-          PROPS
-
-      - name: Configure release signing in build.gradle
-        run: |
-          cd android/app
-          # Read key.properties in build.gradle
-          sed -i '/android {/i \
-          def keystoreProperties = new Properties()\n\
-          def keystorePropertiesFile = rootProject.file("key.properties")\n\
-          if (keystorePropertiesFile.exists()) {\n\
-              keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n\
-          }' build.gradle
-
-          # Add signingConfigs block before buildTypes
-          sed -i '/buildTypes {/i \
-          signingConfigs {\n\
-              release {\n\
-                  keyAlias keystoreProperties["keyAlias"]\n\
-                  keyPassword keystoreProperties["keyPassword"]\n\
-                  storeFile file(keystoreProperties["storeFile"])\n\
-                  storePassword keystoreProperties["storePassword"]\n\
-              }\n\
-          }' build.gradle
-
-          # Update release buildType to use release signing
-          sed -i 's/signingConfig signingConfigs.debug/signingConfig signingConfigs.release/' build.gradle
+        run: bash android_config/setup_signing.sh
 
       - name: Run code generation
         run: dart run build_runner build --delete-conflicting-outputs
