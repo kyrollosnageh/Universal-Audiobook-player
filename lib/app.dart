@@ -27,12 +27,19 @@ class LibrettoApp extends ConsumerStatefulWidget {
 
 class _LibrettoAppState extends ConsumerState<LibrettoApp> {
   bool? _onboardingComplete;
-  int? _serverCount;
+  late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
+    _router = _createRouter();
     _loadInitialState();
+  }
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
   }
 
   Future<void> _loadInitialState() async {
@@ -45,36 +52,25 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
     if (mounted) {
       setState(() {
         _onboardingComplete = onboarded;
-        _serverCount = servers.length;
       });
-    }
 
-    // Auto-restore session if exactly one server
-    if (servers.length == 1) {
-      await ref.read(authNotifierProvider.notifier).restoreSession();
+      // Navigate based on initial state
+      if (!onboarded) {
+        _router.go('/welcome');
+      } else if (servers.length == 1) {
+        // Auto-restore session if exactly one server
+        await ref.read(authNotifierProvider.notifier).restoreSession();
+        final authState = ref.read(authNotifierProvider);
+        if (authState.isAuthenticated) {
+          _router.go('/library');
+        }
+      }
     }
   }
 
-  String _initialLocation(AuthState authState) {
-    // Still loading initial state
-    if (_onboardingComplete == null) return '/hub';
-
-    // First launch — show welcome
-    if (_onboardingComplete == false) return '/welcome';
-
-    // Authenticated with auto-restored session — go to library
-    if (authState.isAuthenticated) return '/library';
-
-    // Has servers — show hub
-    return '/hub';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
-
-    final router = GoRouter(
-      initialLocation: _initialLocation(authState),
+  GoRouter _createRouter() {
+    return GoRouter(
+      initialLocation: '/hub',
       routes: [
         GoRoute(
           path: '/welcome',
@@ -90,7 +86,7 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
               if (result == true) {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setBool(_onboardingCompleteKey, true);
-                if (context.mounted) context.go('/library');
+                if (context.mounted) _router.go('/library');
               }
             },
           ),
@@ -125,14 +121,16 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
         ),
       ],
       redirect: (context, state) {
+        final authState = ref.read(authNotifierProvider);
         final isAuth = authState.isAuthenticated;
         final location = state.matchedLocation;
 
         // Allow welcome, hub, and settings without auth
         if (location == '/welcome' ||
             location == '/hub' ||
-            location == '/settings')
+            location == '/settings') {
           return null;
+        }
 
         // Require auth for everything else
         if (!isAuth) return '/hub';
@@ -140,12 +138,27 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
         return null;
       },
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Watch auth state to trigger redirect evaluation on login/logout
+    ref.listen(authNotifierProvider, (previous, next) {
+      if (next.isAuthenticated && !(previous?.isAuthenticated ?? false)) {
+        // Just logged in — navigate to library
+        _router.go('/library');
+      } else if (!next.isAuthenticated &&
+          (previous?.isAuthenticated ?? false)) {
+        // Just logged out — navigate to hub
+        _router.go('/hub');
+      }
+    });
 
     return MaterialApp.router(
       title: 'Libretto',
       debugShowCheckedModeBanner: false,
       theme: LibrettoTheme.darkTheme(),
-      routerConfig: router,
+      routerConfig: _router,
     );
   }
 }
