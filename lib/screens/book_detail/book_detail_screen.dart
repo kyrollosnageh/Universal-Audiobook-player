@@ -23,24 +23,20 @@ final chapterServiceProvider = Provider<ChapterService>((ref) {
 });
 
 /// Book detail provider — fetches on demand.
-/// Uses keepAlive to cache results for the session.
 final bookDetailProvider = FutureProvider.family<BookDetail?, String>((
   ref,
   bookId,
 ) async {
-  ref.keepAlive();
   final provider = ref.watch(activeServerProvider);
   if (provider == null) return null;
   return provider.getBookDetail(bookId);
 });
 
 /// Chapters provider — fetches on demand.
-/// Uses keepAlive to cache results for the session.
 final chaptersProvider = FutureProvider.family<List<UnifiedChapter>, String>((
   ref,
   bookId,
 ) async {
-  ref.keepAlive();
   final provider = ref.watch(activeServerProvider);
   if (provider == null) return [];
   final chapterService = ref.watch(chapterServiceProvider);
@@ -362,10 +358,27 @@ class BookDetailScreen extends ConsumerWidget {
                 // Full-width play button — pill shape with berry gradient
                 _PlayButton(
                   book: book,
-                  chaptersAsync: chaptersAsync,
-                  bookId: bookId,
-                  ref: ref,
-                  context: context,
+                  onPressed: () async {
+                    final provider = ref.read(activeServerProvider);
+                    if (provider == null) return;
+
+                    var chapters = chaptersAsync.value;
+                    if (chapters == null || chapters.isEmpty) {
+                      final chapterService = ref.read(chapterServiceProvider);
+                      chapters = await chapterService.getChapters(provider, bookId);
+                    }
+
+                    final notifier = ref.read(playerNotifierProvider.notifier);
+                    await notifier.playBook(
+                      book: book,
+                      chapters: chapters,
+                      provider: provider,
+                    );
+
+                    if (context.mounted) {
+                      unawaited(context.push('/player'));
+                    }
+                  },
                 ),
 
                 // Description with Read more / Read less
@@ -465,10 +478,27 @@ class BookDetailScreen extends ConsumerWidget {
                 // Full-width play button with berry gradient
                 _PlayButton(
                   book: book,
-                  chaptersAsync: chaptersAsync,
-                  bookId: bookId,
-                  ref: ref,
-                  context: context,
+                  onPressed: () async {
+                    final provider = ref.read(activeServerProvider);
+                    if (provider == null) return;
+
+                    var chapters = chaptersAsync.value;
+                    if (chapters == null || chapters.isEmpty) {
+                      final chapterService = ref.read(chapterServiceProvider);
+                      chapters = await chapterService.getChapters(provider, bookId);
+                    }
+
+                    final notifier = ref.read(playerNotifierProvider.notifier);
+                    await notifier.playBook(
+                      book: book,
+                      chapters: chapters,
+                      provider: provider,
+                    );
+
+                    if (context.mounted) {
+                      unawaited(context.push('/player'));
+                    }
+                  },
                 ),
                 if (book.progress != null && book.progress! > 0) ...[
                   const SizedBox(height: 12),
@@ -715,20 +745,14 @@ class _PillChip extends StatelessWidget {
 class _PlayButton extends StatelessWidget {
   const _PlayButton({
     required this.book,
-    required this.chaptersAsync,
-    required this.bookId,
-    required this.ref,
-    required this.context,
+    required this.onPressed,
   });
 
   final Book book;
-  final AsyncValue<List<UnifiedChapter>> chaptersAsync;
-  final String bookId;
-  final WidgetRef ref;
-  final BuildContext context;
+  final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext _) {
+  Widget build(BuildContext context) {
     final label = book.isFinished
         ? 'Listen Again'
         : (book.progress != null && book.progress! > 0 ? 'Resume' : 'Play');
@@ -762,28 +786,7 @@ class _PlayButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            onPressed: () async {
-              final provider = ref.read(activeServerProvider);
-              if (provider == null) return;
-
-              // Ensure chapters are loaded before playing
-              var chapters = chaptersAsync.value;
-              if (chapters == null || chapters.isEmpty) {
-                final chapterService = ref.read(chapterServiceProvider);
-                chapters = await chapterService.getChapters(provider, bookId);
-              }
-
-              final notifier = ref.read(playerNotifierProvider.notifier);
-              await notifier.playBook(
-                book: book,
-                chapters: chapters,
-                provider: provider,
-              );
-
-              if (context.mounted) {
-                unawaited(context.push('/player'));
-              }
-            },
+            onPressed: onPressed,
             icon: Icon(icon),
             label: Text(label),
           ),

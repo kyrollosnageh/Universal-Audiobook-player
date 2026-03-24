@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
-
 import '../core/constants.dart';
 import '../data/database/app_database.dart';
 import '../data/database/daos/book_dao.dart';
@@ -20,8 +18,6 @@ class LibraryService {
   LibraryService({required AppDatabase database}) : _bookDao = database.bookDao;
 
   final BookDao _bookDao;
-
-  CancelToken? _searchCancelToken;
 
   // ── Library Fetching ──────────────────────────────────────────────
 
@@ -68,15 +64,10 @@ class LibraryService {
   }
 
   /// Search the server (call after 300ms debounce).
-  /// Cancels any previous in-flight search request.
   Future<PaginatedResult<Book>> searchServer(
     ServerProvider provider,
     String query,
   ) async {
-    // Cancel previous search
-    _searchCancelToken?.cancel();
-    _searchCancelToken = CancelToken();
-
     final result = await provider.fetchLibrary(
       searchTerm: query,
       limit: AppConstants.searchResultLimit,
@@ -193,7 +184,6 @@ class LibraryService {
   }
 
   void dispose() {
-    _searchCancelToken?.cancel();
   }
 
   // ── Mapping ───────────────────────────────────────────────────────

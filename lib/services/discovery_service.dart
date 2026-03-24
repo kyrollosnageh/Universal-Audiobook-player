@@ -230,18 +230,25 @@ class DiscoveryService {
   /// Merge multiple streams into one.
   Stream<T> _mergeStreams<T>(List<Stream<T>> streams) async* {
     final controller = StreamController<T>();
+    final subs = <StreamSubscription<T>>[];
     var remaining = streams.length;
 
     for (final stream in streams) {
-      stream.listen(
+      subs.add(stream.listen(
         controller.add,
         onError: (_) {},
         onDone: () {
           remaining--;
           if (remaining == 0) controller.close();
         },
-      );
+      ));
     }
+
+    controller.onCancel = () {
+      for (final sub in subs) {
+        sub.cancel();
+      }
+    };
 
     yield* controller.stream;
   }
