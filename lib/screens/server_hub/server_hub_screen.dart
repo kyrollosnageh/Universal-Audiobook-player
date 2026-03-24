@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../data/database/app_database.dart';
 import '../../widgets/cloud_login_sheet.dart';
@@ -191,6 +192,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
       orElse: () => servers.first,
     );
     final otherServers = servers.where((s) => s.id != activeServer.id).toList();
+    final layout = ResponsiveLayout.of(context);
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -231,15 +233,35 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
             const SizedBox(height: 32),
             Text('Other Servers', style: theme.textTheme.titleMedium),
             const SizedBox(height: 12),
-            for (final server in otherServers) ...[
-              ServerCard(
-                server: server,
-                isOnline: _onlineStatus[server.id],
-                onTap: () => _connectToServer(server),
-                onDelete: () => _removeServer(server),
-              ),
-              const SizedBox(height: 8),
-            ],
+            if (layout.isTablet)
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: layout.isLargeTablet ? 3 : 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 2.5,
+                children: otherServers
+                    .map(
+                      (server) => ServerCard(
+                        server: server,
+                        isOnline: _onlineStatus[server.id],
+                        onTap: () => _connectToServer(server),
+                        onDelete: () => _removeServer(server),
+                      ),
+                    )
+                    .toList(),
+              )
+            else
+              for (final server in otherServers) ...[
+                ServerCard(
+                  server: server,
+                  isOnline: _onlineStatus[server.id],
+                  onTap: () => _connectToServer(server),
+                  onDelete: () => _removeServer(server),
+                ),
+                const SizedBox(height: 8),
+              ],
           ],
 
           SizedBox(
