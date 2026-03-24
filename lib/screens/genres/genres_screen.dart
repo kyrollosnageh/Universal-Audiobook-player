@@ -23,6 +23,9 @@ class GenresScreen extends ConsumerWidget {
             .toList()
           ..sort();
 
+    // Currently active genre filter (if any)
+    final activeGenre = libraryState.filterGenre;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Genres')),
       body: genres.isEmpty
@@ -56,8 +59,8 @@ class GenresScreen extends ConsumerWidget {
             )
           : GridView.builder(
               padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 200,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 childAspectRatio: 2.2,
@@ -68,10 +71,12 @@ class GenresScreen extends ConsumerWidget {
                 final bookCount = libraryState.books
                     .where((b) => b.genre == genre)
                     .length;
+                final isSelected = genre == activeGenre;
 
                 return _GenreCard(
                   genre: genre,
                   bookCount: bookCount,
+                  isSelected: isSelected,
                   onTap: () {
                     ref
                         .read(libraryNotifierProvider.notifier)
@@ -90,39 +95,50 @@ class _GenreCard extends StatelessWidget {
     required this.genre,
     required this.bookCount,
     required this.onTap,
+    this.isSelected = false,
   });
 
   final String genre;
   final int bookCount;
   final VoidCallback onTap;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Card(
-      color: LibrettoTheme.cardColor,
+      color: isSelected
+          ? LibrettoTheme.primary.withValues(alpha: 0.15)
+          : LibrettoTheme.cardColor,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: LibrettoTheme.divider, width: 1),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isSelected ? LibrettoTheme.primary : LibrettoTheme.divider,
+          width: 1,
+        ),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 genre,
                 style: theme.textTheme.titleSmall?.copyWith(
-                  color: LibrettoTheme.onSurface,
+                  color: isSelected
+                      ? LibrettoTheme.primary
+                      : LibrettoTheme.onSurface,
+                  fontWeight: FontWeight.bold,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
@@ -130,6 +146,7 @@ class _GenreCard extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: LibrettoTheme.onSurfaceVariant,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
