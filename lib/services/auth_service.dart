@@ -161,8 +161,7 @@ class AuthService {
     // Restore the session without re-authenticating
     if (provider is EmbyProvider) {
       provider.restoreSession(token: token, userId: userId);
-    }
-    if (provider is AudiobookshelfProvider) {
+    } else if (provider is AudiobookshelfProvider) {
       provider.restoreSession(token: token, userId: userId);
     } else if (provider is PlexProvider) {
       provider.restoreSession(token: token, userId: userId);
