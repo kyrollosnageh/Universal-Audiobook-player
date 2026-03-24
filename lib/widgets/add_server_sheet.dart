@@ -207,7 +207,8 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
         Navigator.pop(context, true);
       } else {
         setState(() {
-          _error = authState.error ?? 'Login failed. Please check your credentials.';
+          _error =
+              authState.error ?? 'Login failed. Please check your credentials.';
           _isConnecting = false;
         });
       }
