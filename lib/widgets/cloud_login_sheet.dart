@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -161,10 +162,25 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
         connectToken: result['accessToken']!,
         userId: result['userId']!,
       );
+    } on DioException catch (e) {
+      if (mounted) {
+        final status = e.response?.statusCode;
+        final message = status == 401
+            ? 'Invalid username or password.'
+            : status == 400
+                ? 'Invalid request. Please check your email/username format.'
+                : 'Could not reach Emby Connect. Check your internet connection.';
+        setState(() {
+          _error = message;
+          _embyLoginInProgress = false;
+        });
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Login failed. Check your credentials and try again.';
+          _error = e.toString().contains('Authentication failed')
+              ? 'Invalid username or password. Please try again.'
+              : 'Login failed. Please try again.';
           _embyLoginInProgress = false;
         });
       }
