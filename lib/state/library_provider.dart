@@ -43,6 +43,9 @@ class LibraryState {
     this.filterGenre,
     this.filterAuthor,
     this.activeFilter = LibraryFilter.all,
+    this.isSyncing = false,
+    this.syncProgress = 0.0,
+    this.syncedCount = 0,
   });
 
   final List<Book> books;
@@ -59,6 +62,9 @@ class LibraryState {
   final String? filterGenre;
   final String? filterAuthor;
   final LibraryFilter activeFilter;
+  final bool isSyncing;
+  final double syncProgress;
+  final int syncedCount;
 
   LibraryState copyWith({
     List<Book>? books,
@@ -77,6 +83,9 @@ class LibraryState {
     LibraryFilter? activeFilter,
     bool clearGenre = false,
     bool clearAuthor = false,
+    bool? isSyncing,
+    double? syncProgress,
+    int? syncedCount,
   }) {
     return LibraryState(
       books: books ?? this.books,
@@ -93,6 +102,9 @@ class LibraryState {
       filterGenre: clearGenre ? null : (filterGenre ?? this.filterGenre),
       filterAuthor: clearAuthor ? null : (filterAuthor ?? this.filterAuthor),
       activeFilter: activeFilter ?? this.activeFilter,
+      isSyncing: isSyncing ?? this.isSyncing,
+      syncProgress: syncProgress ?? this.syncProgress,
+      syncedCount: syncedCount ?? this.syncedCount,
     );
   }
 
@@ -383,34 +395,59 @@ class LibraryNotifier extends Notifier<LibraryState> {
     final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
-    state = state.copyWith(isLoading: true, error: null, hasMore: true);
+    state = state.copyWith(
+      isSyncing: true,
+      syncProgress: 0.0,
+      syncedCount: 0,
+      error: null,
+      hasMore: true,
+    );
 
     try {
       final allBooks = <Book>[];
       var offset = 0;
       const batchSize = AppConstants.backgroundPrefetchBatchSize;
 
-      while (true) {
-        final result = await _libraryService.fetchLibrary(
-          provider,
-          offset: offset,
-          limit: batchSize,
-          sort: state.sort,
-        );
-        allBooks.addAll(result.items);
+      // First fetch to get totalCount
+      final firstResult = await _libraryService.fetchLibrary(
+        provider,
+        offset: 0,
+        limit: batchSize,
+        sort: state.sort,
+      );
+      allBooks.addAll(firstResult.items);
+      final total = firstResult.totalCount;
 
-        // Update UI progressively
-        state = state.copyWith(
-          books: allBooks,
-          totalCount: result.totalCount,
-          isLoading: false,
-        );
+      state = state.copyWith(
+        books: allBooks,
+        totalCount: total,
+        syncProgress: total > 0 ? allBooks.length / total : 1.0,
+        syncedCount: allBooks.length,
+      );
 
-        if (!result.hasMore) break;
+      if (firstResult.hasMore) {
         offset += batchSize;
-      }
 
-      state = state.copyWith(books: allBooks, hasMore: false, isLoading: false);
+        while (true) {
+          final result = await _libraryService.fetchLibrary(
+            provider,
+            offset: offset,
+            limit: batchSize,
+            sort: state.sort,
+          );
+          allBooks.addAll(result.items);
+
+          state = state.copyWith(
+            books: allBooks,
+            totalCount: result.totalCount,
+            syncProgress: total > 0 ? allBooks.length / total : 1.0,
+            syncedCount: allBooks.length,
+          );
+
+          if (!result.hasMore) break;
+          offset += batchSize;
+        }
+      }
 
       // Refresh shelves
       final serverId = provider.serverUrl;
@@ -423,9 +460,16 @@ class LibraryNotifier extends Notifier<LibraryState> {
         continueListening: shelves[0],
         favoriteBooks: shelves[1],
         finishedBooks: shelves[2],
+        hasMore: false,
+        isSyncing: false,
+        syncProgress: 1.0,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(
+        isSyncing: false,
+        syncProgress: 0.0,
+        error: e.toString(),
+      );
     }
   }
 

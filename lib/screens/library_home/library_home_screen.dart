@@ -110,6 +110,38 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
             ],
           ),
         ],
+        bottom: libraryState.isSyncing
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(32),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: libraryState.syncProgress,
+                          backgroundColor:
+                              LibrettoTheme.primary.withValues(alpha: 0.2),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            LibrettoTheme.secondary,
+                          ),
+                          minHeight: 6,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Syncing ${libraryState.syncedCount} / ${libraryState.totalCount} books...',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: LibrettoTheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : null,
       ),
       drawer: const AppDrawer(),
       body: RefreshIndicator(
