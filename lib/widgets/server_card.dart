@@ -30,6 +30,36 @@ class ServerCard extends StatelessWidget {
     return _buildCompactCard(context, theme);
   }
 
+  void _showDeleteMenu(BuildContext context) {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: LibrettoTheme.surface,
+        title: Text('Remove ${server.name}?'),
+        content: const Text(
+          'This will remove the server from your saved list. '
+          'You can add it again later.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx, true);
+              onDelete?.call();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: LibrettoTheme.error,
+            ),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeroCard(BuildContext context, ThemeData theme) {
     return Semantics(
       label:
@@ -46,6 +76,9 @@ class ServerCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
+          onLongPress: onDelete != null
+              ? () => _showDeleteMenu(context)
+              : null,
           borderRadius: BorderRadius.circular(20),
           child: Ink(
             width: double.infinity,
@@ -176,6 +209,9 @@ class ServerCard extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
+            onLongPress: onDelete != null
+                ? () => _showDeleteMenu(context)
+                : null,
             borderRadius: BorderRadius.circular(16),
             child: Ink(
               padding: const EdgeInsets.all(16),
