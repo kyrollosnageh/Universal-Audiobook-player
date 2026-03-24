@@ -61,46 +61,88 @@ class BookDetailScreen extends ConsumerWidget {
     final chaptersAsync = ref.watch(chaptersProvider(bookId));
     final theme = Theme.of(context);
 
+    // Find the book in the already-loaded library for instant display
+    final libraryState = ref.watch(libraryNotifierProvider);
+    final cachedBook = libraryState.books
+        .cast<Book?>()
+        .firstWhere((b) => b?.id == bookId, orElse: () => null);
+
     return Scaffold(
       body: detailAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              const Text('Failed to load book details'),
-              const SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  '$err',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
+        loading: () {
+          if (cachedBook != null) {
+            // Show instantly with data we already have
+            return _buildBody(
+              context, ref, theme, cachedBook,
+              BookDetail(book: cachedBook), chaptersAsync,
+              isLoading: true,
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+        error: (err, _) {
+          // Even on error, show cached book if available
+          if (cachedBook != null) {
+            return _buildBody(
+              context, ref, theme, cachedBook,
+              BookDetail(book: cachedBook), chaptersAsync,
+              isLoading: false,
+            );
+          }
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: theme.colorScheme.error,
                 ),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(bookDetailProvider(bookId)),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 16),
+                const Text('Failed to load book details'),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    '$err',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => ref.invalidate(bookDetailProvider(bookId)),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        },
         data: (detail) {
           if (detail == null) {
             return const Center(child: Text('Book not found'));
           }
 
           final book = detail.book;
+          return _buildBody(
+            context, ref, theme, book, detail, chaptersAsync,
+          );
+        },
+      ),
+    );
+  }
 
+  Widget _buildBody(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeData theme,
+    Book book,
+    BookDetail detail,
+    AsyncValue<List<UnifiedChapter>> chaptersAsync, {
+    bool isLoading = false,
+  }) {
           final layout = ResponsiveLayout.of(context);
 
           if (layout.isTablet) {
