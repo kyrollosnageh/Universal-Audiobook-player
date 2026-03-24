@@ -11,6 +11,7 @@ import '../../data/models/book.dart';
 import '../../state/auth_provider.dart';
 import '../../state/library_provider.dart';
 import '../../state/player_provider.dart';
+import '../../widgets/app_drawer.dart';
 import '../../widgets/book_cover.dart';
 
 /// Library home screen with Continue Listening, search, filters, and grid.
@@ -64,9 +65,18 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(authState.activeServer?.name ?? 'Library'),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            tooltip: 'Open navigation menu',
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+        title: Text(_filterTitle(
+          libraryState.activeFilter,
+          authState.activeServer?.name,
+        )),
         actions: [
-          // Sort menu
           PopupMenuButton<SortOrder>(
             icon: const Icon(Icons.sort),
             tooltip: 'Sort library',
@@ -96,13 +106,9 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
-            onPressed: () => context.push('/settings'),
-          ),
         ],
       ),
+      drawer: const AppDrawer(),
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(libraryNotifierProvider.notifier).loadLibrary();
@@ -143,46 +149,6 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               ),
             ),
 
-            // Continue Listening
-            if (libraryState.continueListening.isNotEmpty &&
-                libraryState.searchQuery == null) ...[
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: Semantics(
-                    header: true,
-                    child: Text(
-                      'Continue Listening',
-                      style: theme.textTheme.titleLarge,
-                    ),
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 200,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: libraryState.continueListening.length,
-                    itemBuilder: (context, index) {
-                      final book = libraryState.continueListening[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: _ContinueListeningCard(
-                          book: book,
-                          onTap: () => context.push('/book/${book.id}'),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(
-                child: Divider(indent: 16, endIndent: 16),
-              ),
-            ],
-
             // Library header
             SliverToBoxAdapter(
               child: Padding(
@@ -190,27 +156,28 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                 child: Row(
                   children: [
                     Text(
-                      libraryState.searchQuery != null ? 'Results' : 'Library',
+                      libraryState.searchQuery != null
+                          ? 'Results'
+                          : _filterTitle(libraryState.activeFilter, null),
                       style: theme.textTheme.titleLarge,
                     ),
                     const Spacer(),
-                    if (libraryState.totalCount > 0)
-                      Text(
-                        '${libraryState.totalCount} books',
-                        style: theme.textTheme.bodySmall,
-                      ),
+                    Text(
+                      '${libraryState.displayedBooks.length} books',
+                      style: theme.textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),
             ),
 
             // Loading state
-            if (libraryState.isLoading && libraryState.books.isEmpty)
+            if (libraryState.isLoading && libraryState.displayedBooks.isEmpty)
               const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()),
               )
             // Error state
-            else if (libraryState.error != null && libraryState.books.isEmpty)
+            else if (libraryState.error != null && libraryState.displayedBooks.isEmpty)
               SliverFillRemaining(
                 child: Center(
                   child: Column(
@@ -237,7 +204,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                 ),
               )
             // Empty state — search vs general
-            else if (libraryState.books.isEmpty &&
+            else if (libraryState.displayedBooks.isEmpty &&
                 libraryState.searchQuery != null &&
                 libraryState.searchQuery!.isNotEmpty)
               SliverFillRemaining(
@@ -270,7 +237,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                   ),
                 ),
               )
-            else if (libraryState.books.isEmpty)
+            else if (libraryState.displayedBooks.isEmpty)
               const SliverFillRemaining(
                 child: Center(child: Text('No audiobooks found')),
               )
@@ -279,7 +246,7 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    if (index >= libraryState.books.length) {
+                    if (index >= libraryState.displayedBooks.length) {
                       return const Center(
                         child: Padding(
                           padding: EdgeInsets.all(16),
@@ -287,14 +254,14 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                         ),
                       );
                     }
-                    final book = libraryState.books[index];
+                    final book = libraryState.displayedBooks[index];
                     return _BookListTile(
                       book: book,
                       onTap: () => context.push('/book/${book.id}'),
                     );
                   },
                   childCount:
-                      libraryState.books.length +
+                      libraryState.displayedBooks.length +
                       (libraryState.isLoadingMore ? 1 : 0),
                 ),
               )
@@ -310,24 +277,24 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      if (index >= libraryState.books.length) {
+                      if (index >= libraryState.displayedBooks.length) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      final book = libraryState.books[index];
+                      final book = libraryState.displayedBooks[index];
                       return _BookGridCard(
                         book: book,
                         onTap: () => context.push('/book/${book.id}'),
                       );
                     },
                     childCount:
-                        libraryState.books.length +
+                        libraryState.displayedBooks.length +
                         (libraryState.isLoadingMore ? 1 : 0),
                   ),
                 ),
               ),
 
             // Pagination loading indicator
-            if (libraryState.isLoadingMore && libraryState.books.isNotEmpty)
+            if (libraryState.isLoadingMore && libraryState.displayedBooks.isNotEmpty)
               const SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -558,4 +525,14 @@ class _MiniPlayer extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _filterTitle(LibraryFilter filter, String? serverName) {
+  return switch (filter) {
+    LibraryFilter.all => serverName ?? 'Library',
+    LibraryFilter.recentlyAdded => 'Recently Added',
+    LibraryFilter.currentlyReading => 'Currently Reading',
+    LibraryFilter.favorites => 'Favorites',
+    LibraryFilter.finished => 'Finished',
+  };
 }

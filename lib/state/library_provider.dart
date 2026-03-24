@@ -23,6 +23,15 @@ final syncServiceProvider = Provider<SyncService>((ref) {
   return SyncService(database: db);
 });
 
+/// Filter for the library drawer navigation.
+enum LibraryFilter {
+  all,
+  recentlyAdded,
+  currentlyReading,
+  favorites,
+  finished,
+}
+
 /// Library state.
 class LibraryState {
   const LibraryState({
@@ -39,6 +48,7 @@ class LibraryState {
     this.sort = SortOrder.titleAsc,
     this.filterGenre,
     this.filterAuthor,
+    this.activeFilter = LibraryFilter.all,
   });
 
   final List<Book> books;
@@ -54,6 +64,7 @@ class LibraryState {
   final SortOrder sort;
   final String? filterGenre;
   final String? filterAuthor;
+  final LibraryFilter activeFilter;
 
   LibraryState copyWith({
     List<Book>? books,
@@ -69,6 +80,7 @@ class LibraryState {
     SortOrder? sort,
     String? filterGenre,
     String? filterAuthor,
+    LibraryFilter? activeFilter,
   }) {
     return LibraryState(
       books: books ?? this.books,
@@ -84,7 +96,19 @@ class LibraryState {
       sort: sort ?? this.sort,
       filterGenre: filterGenre,
       filterAuthor: filterAuthor,
+      activeFilter: activeFilter ?? this.activeFilter,
     );
+  }
+
+  /// Books filtered by the active drawer filter.
+  List<Book> get displayedBooks {
+    return switch (activeFilter) {
+      LibraryFilter.all => books,
+      LibraryFilter.recentlyAdded => books,
+      LibraryFilter.currentlyReading => continueListening,
+      LibraryFilter.favorites => favoriteBooks,
+      LibraryFilter.finished => finishedBooks,
+    };
   }
 }
 
@@ -314,6 +338,16 @@ class LibraryNotifier extends Notifier<LibraryState> {
   /// Set author filter.
   void setAuthorFilter(String? author) {
     state = state.copyWith(filterAuthor: author);
+    loadLibrary();
+  }
+
+  /// Set the drawer filter.
+  void setFilter(LibraryFilter filter) {
+    if (filter == LibraryFilter.recentlyAdded) {
+      state = state.copyWith(activeFilter: filter, sort: SortOrder.dateAddedDesc);
+    } else {
+      state = state.copyWith(activeFilter: filter);
+    }
     loadLibrary();
   }
 
