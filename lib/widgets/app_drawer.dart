@@ -22,28 +22,37 @@ class AppDrawer extends ConsumerWidget {
       child: SafeArea(
         child: Column(
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Libretto',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: LibrettoTheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  if (authState.activeServer != null)
+            // Header with gradient background
+            DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [LibrettoTheme.background, LibrettoTheme.cardColor],
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      authState.activeServer!.name,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: LibrettoTheme.onSurfaceVariant,
+                      'Libretto',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: LibrettoTheme.primary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                ],
+                    const SizedBox(height: 4),
+                    if (authState.activeServer != null)
+                      Text(
+                        authState.activeServer!.name,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: LibrettoTheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             const Divider(height: 1, color: LibrettoTheme.divider),
@@ -213,17 +222,14 @@ class _DrawerItem extends StatelessWidget {
             ? Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: isActive
-                      ? LibrettoTheme.primary.withValues(alpha: 0.15)
-                      : LibrettoTheme.cardColor,
+                  color: LibrettoTheme.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '$count',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isActive
-                        ? LibrettoTheme.primary
-                        : LibrettoTheme.onSurfaceVariant,
+                    color: LibrettoTheme.background,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               )
