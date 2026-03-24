@@ -220,9 +220,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
             isOnline: _onlineStatus[activeServer.id],
             bookCount: _bookCounts[activeServer.id],
             onTap: () => _connectToServer(activeServer),
-            onDelete: otherServers.isNotEmpty
-                ? () => _removeServer(activeServer)
-                : null,
+            onDelete: () => _removeServer(activeServer),
           ),
 
           // Other servers
