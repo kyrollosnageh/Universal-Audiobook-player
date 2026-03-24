@@ -11,7 +11,7 @@ class AppConstants {
       'https://apps.apple.com/app/libretto-audiobook-player/idXXXXXXXXXX';
 
   // Pagination
-  static const int defaultPageSize = 50;
+  static const int defaultPageSize = 100;
   static const int prefetchThreshold = 10;
   static const int backgroundPrefetchBatchSize = 200;
 

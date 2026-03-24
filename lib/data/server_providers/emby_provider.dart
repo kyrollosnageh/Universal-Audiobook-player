@@ -42,6 +42,7 @@ class EmbyProvider implements ServerProvider {
     _dio.options.connectTimeout = const Duration(seconds: 5);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
     _dio.options.headers['Content-Type'] = 'application/json';
+    _dio.options.headers['Accept-Encoding'] = 'gzip';
 
     // Add auth interceptor
     _dio.interceptors.add(
@@ -290,11 +291,11 @@ class EmbyProvider implements ServerProvider {
   }
 
   @override
-  Uri getCoverArtUrl(String itemId, {int maxWidth = 300}) {
+  Uri getCoverArtUrl(String itemId, {int maxWidth = 200}) {
     final uri = Uri.parse('$_serverUrl${EmbyApiPaths.itemImage(itemId)}');
     return uri.withQueryParams({
       'maxWidth': maxWidth.toString(),
-      'quality': '90',
+      'quality': '80',
       'api_key': _token ?? '',
     });
   }

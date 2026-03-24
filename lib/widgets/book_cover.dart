@@ -33,6 +33,8 @@ class BookCover extends StatelessWidget {
               width: width,
               height: height,
               fit: fit,
+              memCacheWidth: (width ?? 180).toInt() * 2,
+              fadeInDuration: const Duration(milliseconds: 150),
               placeholder: (context, url) => _Placeholder(
                 width: width,
                 height: height,
