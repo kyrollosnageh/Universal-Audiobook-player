@@ -201,13 +201,41 @@ class ServerCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          server.url,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: LibrettoTheme.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            if (bookCount != null) ...[
+                              Icon(
+                                Icons.library_books_outlined,
+                                size: 12,
+                                color: LibrettoTheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$bookCount books',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: LibrettoTheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '·',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: LibrettoTheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            Expanded(
+                              child: Text(
+                                server.url,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: LibrettoTheme.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

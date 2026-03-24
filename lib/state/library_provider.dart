@@ -176,6 +176,17 @@ class LibraryNotifier extends Notifier<LibraryState> {
         isLoading: false,
       );
 
+      // Save book count to server entry for display on hub
+      final activeServer = ref.read(authNotifierProvider).activeServer;
+      if (activeServer != null) {
+        final db = ref.read(databaseProvider);
+        db.serverDao.updateServerMeta(
+          activeServer.id,
+          bookCount: result.totalCount,
+          lastConnectedAt: DateTime.now(),
+        );
+      }
+
       // Refresh shelves in background (parallel DB reads)
       final freshShelves = await Future.wait([
         _libraryService.getContinueListening(serverId),

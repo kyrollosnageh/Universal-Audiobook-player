@@ -25,6 +25,7 @@ class ServerHubScreen extends ConsumerStatefulWidget {
 class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
     with SingleTickerProviderStateMixin {
   final Map<String, bool> _onlineStatus = {};
+  final Map<String, int> _bookCounts = {};
   bool _isCheckingStatus = true;
   late final AnimationController _shimmerController;
   late final Animation<double> _shimmerAnimation;
@@ -56,6 +57,10 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
 
     for (final server in servers) {
       if (!mounted) break;
+      // Use stored book count if available
+      if (server.bookCount != null) {
+        _bookCounts[server.id] = server.bookCount!;
+      }
       try {
         await detector.detect(server.url);
         if (mounted) setState(() => _onlineStatus[server.id] = true);
@@ -190,6 +195,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
       onRefresh: () async {
         ref.invalidate(savedServersProvider);
         _onlineStatus.clear();
+        _bookCounts.clear();
         await _checkServerStatus();
       },
       child: ListView(
@@ -214,6 +220,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
             server: activeServer,
             isHero: true,
             isOnline: _onlineStatus[activeServer.id],
+            bookCount: _bookCounts[activeServer.id],
             onTap: () => _connectToServer(activeServer),
             onDelete: otherServers.isNotEmpty
                 ? () => _removeServer(activeServer)
@@ -238,6 +245,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
                       (server) => ServerCard(
                         server: server,
                         isOnline: _onlineStatus[server.id],
+                        bookCount: _bookCounts[server.id],
                         onTap: () => _connectToServer(server),
                         onDelete: () => _removeServer(server),
                       ),
@@ -249,6 +257,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
                 ServerCard(
                   server: server,
                   isOnline: _onlineStatus[server.id],
+                  bookCount: _bookCounts[server.id],
                   onTap: () => _connectToServer(server),
                   onDelete: () => _removeServer(server),
                 ),
@@ -339,6 +348,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
       onRefresh: () async {
         ref.invalidate(savedServersProvider);
         _onlineStatus.clear();
+        _bookCounts.clear();
         await _checkServerStatus();
       },
       child: LayoutBuilder(
