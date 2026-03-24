@@ -7,12 +7,11 @@ import 'package:go_router/go_router.dart';
 import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../data/database/app_database.dart';
-import '../../widgets/cloud_login_sheet.dart';
 import '../../data/models/server_config.dart';
 import '../../data/server_providers/server_detector.dart';
 import '../../state/auth_provider.dart';
-import '../../widgets/add_server_sheet.dart';
 import '../../widgets/server_card.dart';
+import '../server_setup/server_setup_screen.dart';
 
 /// Server hub screen — shows saved servers with a hero card for the last-used server.
 class ServerHubScreen extends ConsumerStatefulWidget {
@@ -117,11 +116,9 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
   }
 
   Future<void> _showAddServerSheet() async {
-    final result = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const AddServerSheet(),
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const ServerSetupScreen()),
     );
 
     if (result == true && mounted) {
@@ -322,16 +319,21 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
     );
   }
 
-  void _showCloudLoginSheet() {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const CloudLoginSheet(),
-    ).then((_) {
-      // Refresh server list after cloud login sheet closes
+  Future<void> _showCloudLoginSheet() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (_) => const ServerSetupScreen()),
+    );
+
+    if (mounted) {
       ref.invalidate(savedServersProvider);
-    });
+      if (result == true) {
+        final authState = ref.read(authNotifierProvider);
+        if (authState.isAuthenticated) {
+          context.go('/library');
+        }
+      }
+    }
   }
 
   Widget _buildEmptyState(ThemeData theme) {

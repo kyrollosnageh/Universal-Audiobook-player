@@ -12,9 +12,9 @@ import 'screens/player/player_screen.dart';
 import 'screens/series/series_view_screen.dart';
 import 'screens/genres/genres_screen.dart';
 import 'screens/settings/settings_screen.dart';
+import 'screens/server_setup/server_setup_screen.dart';
 import 'data/database/app_database.dart';
 import 'state/auth_provider.dart';
-import 'widgets/add_server_sheet.dart';
 
 /// Key for tracking whether onboarding has been completed.
 const _onboardingCompleteKey = 'onboarding_complete';
@@ -89,11 +89,11 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
           path: '/welcome',
           builder: (context, state) => WelcomeScreen(
             onGetStarted: () async {
-              final result = await showModalBottomSheet<bool>(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => const AddServerSheet(),
+              final result = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ServerSetupScreen(),
+                ),
               );
 
               if (result == true) {
@@ -107,6 +107,10 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
         GoRoute(
           path: '/hub',
           builder: (context, state) => const ServerHubScreen(),
+        ),
+        GoRoute(
+          path: '/setup',
+          builder: (context, state) => const ServerSetupScreen(),
         ),
         GoRoute(
           path: '/library',
@@ -142,9 +146,10 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
         final isAuth = authState.isAuthenticated;
         final location = state.matchedLocation;
 
-        // Allow welcome, hub, and settings without auth
+        // Allow welcome, hub, setup, and settings without auth
         if (location == '/welcome' ||
             location == '/hub' ||
+            location == '/setup' ||
             location == '/settings') {
           return null;
         }
