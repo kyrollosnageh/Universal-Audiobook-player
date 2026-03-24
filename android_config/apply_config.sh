@@ -45,4 +45,14 @@ cp android_config/network_security_config.xml android/app/src/main/res/xml/
 # 5. Copy ProGuard rules
 cp android_config/proguard-rules.pro android/app/
 
+# 6. Set minSdkVersion to 21 (Android 5.0) for broader device support
+if [[ "$GRADLE_FILE" == *.kts ]]; then
+  sed -i "s/minSdk = flutter.minSdkVersion/minSdk = 21/" "$GRADLE_FILE"
+  # Fallback: if the pattern doesn't match, try the numeric pattern
+  sed -i 's/minSdk = [0-9]\{2,\}/minSdk = 21/' "$GRADLE_FILE"
+else
+  sed -i "s/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/" "$GRADLE_FILE"
+  sed -i 's/minSdkVersion [0-9]\{2,\}/minSdkVersion 21/' "$GRADLE_FILE"
+fi
+
 echo "=== Android configuration applied ==="
