@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/constants.dart';
@@ -102,11 +103,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: const Icon(Icons.download),
               label: const Text('Update'),
             )
+          else if (Platform.isIOS)
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                launchUrl(
+                  Uri.parse(AppConstants.appStoreUrl),
+                  mode: LaunchMode.externalApplication,
+                );
+              },
+              icon: const Icon(Icons.open_in_new),
+              label: const Text('Open App Store'),
+            )
           else
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.pop(context);
-                // Copy release URL to clipboard for iOS/desktop users
                 Clipboard.setData(
                   ClipboardData(
                     text:
