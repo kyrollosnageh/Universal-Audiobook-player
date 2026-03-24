@@ -410,11 +410,7 @@ class LibraryNotifier extends Notifier<LibraryState> {
         offset += batchSize;
       }
 
-      state = state.copyWith(
-        books: allBooks,
-        hasMore: false,
-        isLoading: false,
-      );
+      state = state.copyWith(books: allBooks, hasMore: false, isLoading: false);
 
       // Refresh shelves
       final serverId = provider.serverUrl;

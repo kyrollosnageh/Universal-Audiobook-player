@@ -15,17 +15,16 @@ class GenresScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     // Extract unique genres from all loaded books
-    final genres = libraryState.books
-        .where((b) => b.genre != null && b.genre!.isNotEmpty)
-        .map((b) => b.genre!)
-        .toSet()
-        .toList()
-      ..sort();
+    final genres =
+        libraryState.books
+            .where((b) => b.genre != null && b.genre!.isNotEmpty)
+            .map((b) => b.genre!)
+            .toSet()
+            .toList()
+          ..sort();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Genres'),
-      ),
+      appBar: AppBar(title: const Text('Genres')),
       body: genres.isEmpty
           ? Center(
               child: Column(
@@ -34,7 +33,9 @@ class GenresScreen extends ConsumerWidget {
                   Icon(
                     Icons.category_outlined,
                     size: 64,
-                    color: LibrettoTheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    color: LibrettoTheme.onSurfaceVariant.withValues(
+                      alpha: 0.5,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -72,7 +73,8 @@ class GenresScreen extends ConsumerWidget {
                   genre: genre,
                   bookCount: bookCount,
                   onTap: () {
-                    ref.read(libraryNotifierProvider.notifier)
+                    ref
+                        .read(libraryNotifierProvider.notifier)
                         .setGenreFilter(genre);
                     context.go('/library');
                   },
@@ -103,10 +105,7 @@ class _GenreCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: LibrettoTheme.divider,
-          width: 1,
-        ),
+        side: BorderSide(color: LibrettoTheme.divider, width: 1),
       ),
       child: InkWell(
         onTap: onTap,
