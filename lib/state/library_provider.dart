@@ -504,9 +504,7 @@ class LibraryNotifier extends Notifier<LibraryState> {
             sort: state.sort,
           );
 
-          debugPrint(
-            'Sync batch: got ${result.items.length}, offset=$offset',
-          );
+          debugPrint('Sync batch: got ${result.items.length}, offset=$offset');
 
           if (result.items.isEmpty) break;
           allBooks.addAll(result.items);
