@@ -323,9 +323,10 @@ class LibraryNotifier extends Notifier<LibraryState> {
     loadLibrary();
   }
 
-  /// Set genre filter.
+  /// Set genre filter. Resets active filter to "all" so the grid shows
+  /// the server-filtered results.
   void setGenreFilter(String? genre) {
-    state = state.copyWith(filterGenre: genre);
+    state = state.copyWith(filterGenre: genre, activeFilter: LibraryFilter.all);
     loadLibrary();
   }
 

@@ -495,6 +495,8 @@ class EmbyProvider implements ServerProvider {
       lastPlayedAt: userData?['LastPlayedDate'] != null
           ? DateTime.tryParse(userData!['LastPlayedDate'] as String)
           : null,
+      isFavorite: userData?['IsFavorite'] as bool? ?? false,
+      isFinished: userData?['Played'] as bool? ?? false,
     );
   }
 
