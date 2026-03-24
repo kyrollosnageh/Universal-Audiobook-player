@@ -213,8 +213,9 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
     });
 
     try {
-      final servers =
-          await _cloudLoginService.fetchPlexServers(_plexAuthToken!);
+      final servers = await _cloudLoginService.fetchPlexServers(
+        _plexAuthToken!,
+      );
 
       if (mounted) {
         setState(() {
@@ -246,9 +247,12 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
     });
 
     try {
-      await ref.read(authNotifierProvider.notifier).login(
+      await ref
+          .read(authNotifierProvider.notifier)
+          .login(
             url: server.url,
-            username: '', // Cloud-authenticated — token is already set server-side.
+            username:
+                '', // Cloud-authenticated — token is already set server-side.
             password: '',
             serverType: server.type,
             serverName: server.name,
@@ -365,9 +369,7 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
         decoration: BoxDecoration(
           color: LibrettoTheme.error.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(LibrettoTheme.radiusSm),
-          border: Border.all(
-            color: LibrettoTheme.error.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: LibrettoTheme.error.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -380,9 +382,9 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
             Expanded(
               child: Text(
                 _error!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LibrettoTheme.error,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: LibrettoTheme.error),
               ),
             ),
             IconButton(
@@ -465,11 +467,7 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
             color: LibrettoTheme.plexColor.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
-            Icons.tv,
-            color: LibrettoTheme.plexColor,
-            size: 32,
-          ),
+          child: const Icon(Icons.tv, color: LibrettoTheme.plexColor, size: 32),
         ),
       ),
       const SizedBox(height: LibrettoTheme.spacingXl),
@@ -511,9 +509,7 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
         Center(
           child: OutlinedButton(
             onPressed: _cancelPlexAuth,
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(120, 48),
-            ),
+            style: OutlinedButton.styleFrom(minimumSize: const Size(120, 48)),
             child: const Text('Cancel'),
           ),
         ),
@@ -551,9 +547,9 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
           onPressed: _embyLoginInProgress
               ? null
               : () => setState(() {
-                    _step = _CloudLoginStep.providerSelection;
-                    _error = null;
-                  }),
+                  _step = _CloudLoginStep.providerSelection;
+                  _error = null;
+                }),
           icon: const Icon(Icons.arrow_back, size: 18),
           label: const Text('Back'),
         ),
@@ -662,8 +658,9 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
 
   List<Widget> _buildServerList(BuildContext context) {
     final theme = Theme.of(context);
-    final providerLabel =
-        _selectedProviderType == ServerType.plex ? 'Plex' : 'Emby';
+    final providerLabel = _selectedProviderType == ServerType.plex
+        ? 'Plex'
+        : 'Emby';
 
     if (_servers.isEmpty) {
       return [
@@ -677,10 +674,7 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
         ),
         const SizedBox(height: LibrettoTheme.spacingLg),
         Center(
-          child: Text(
-            'No servers found',
-            style: theme.textTheme.titleMedium,
-          ),
+          child: Text('No servers found', style: theme.textTheme.titleMedium),
         ),
         const SizedBox(height: LibrettoTheme.spacingSm),
         Center(
@@ -723,10 +717,7 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
         ),
       ),
       const SizedBox(height: LibrettoTheme.spacingSm),
-      Text(
-        '$providerLabel Servers',
-        style: theme.textTheme.titleMedium,
-      ),
+      Text('$providerLabel Servers', style: theme.textTheme.titleMedium),
       const SizedBox(height: LibrettoTheme.spacingXs),
       Text(
         '${_servers.length} server${_servers.length == 1 ? '' : 's'} found on your account.',
@@ -746,8 +737,9 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
           width: double.infinity,
           height: 48,
           child: OutlinedButton.icon(
-            onPressed:
-                _addingServers.isNotEmpty ? null : () => _addAllServers(),
+            onPressed: _addingServers.isNotEmpty
+                ? null
+                : () => _addAllServers(),
             icon: const Icon(Icons.add_circle_outline),
             label: const Text('Add All'),
           ),
@@ -842,18 +834,18 @@ class _CloudServerTile extends StatelessWidget {
   final VoidCallback onAdd;
 
   Color get _typeColor => switch (server.type) {
-        ServerType.plex => LibrettoTheme.plexColor,
-        ServerType.emby => LibrettoTheme.embyColor,
-        ServerType.jellyfin => LibrettoTheme.jellyfinColor,
-        ServerType.audiobookshelf => LibrettoTheme.audiobookshelfColor,
-      };
+    ServerType.plex => LibrettoTheme.plexColor,
+    ServerType.emby => LibrettoTheme.embyColor,
+    ServerType.jellyfin => LibrettoTheme.jellyfinColor,
+    ServerType.audiobookshelf => LibrettoTheme.audiobookshelfColor,
+  };
 
   IconData get _typeIcon => switch (server.type) {
-        ServerType.plex => Icons.tv,
-        ServerType.emby => Icons.play_circle_outline,
-        ServerType.jellyfin => Icons.play_circle_filled,
-        ServerType.audiobookshelf => Icons.headphones,
-      };
+    ServerType.plex => Icons.tv,
+    ServerType.emby => Icons.play_circle_outline,
+    ServerType.jellyfin => Icons.play_circle_filled,
+    ServerType.audiobookshelf => Icons.headphones,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -915,8 +907,9 @@ class _CloudServerTile extends StatelessWidget {
                     Text(
                       'v${server.version}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: LibrettoTheme.onSurfaceVariant
-                            .withValues(alpha: 0.7),
+                        color: LibrettoTheme.onSurfaceVariant.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],

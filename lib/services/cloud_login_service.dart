@@ -47,10 +47,7 @@ class CloudLoginService {
     );
 
     final data = response.data as Map<String, dynamic>;
-    return {
-      'id': data['id'] as int,
-      'code': data['code'] as String,
-    };
+    return {'id': data['id'] as int, 'code': data['code'] as String};
   }
 
   /// Get the Plex auth URL the user should open in their browser.
@@ -93,10 +90,7 @@ class CloudLoginService {
           'X-Plex-Token': authToken,
         },
       ),
-      queryParameters: {
-        'includeHttps': '1',
-        'includeRelay': '0',
-      },
+      queryParameters: {'includeHttps': '1', 'includeRelay': '0'},
     );
 
     final resources = response.data as List<dynamic>;
@@ -119,13 +113,15 @@ class CloudLoginService {
       }
 
       if (bestUrl != null) {
-        servers.add(CloudServer(
-          name: resource['name'] as String? ?? 'Plex Server',
-          url: bestUrl,
-          type: ServerType.plex,
-          version: resource['productVersion'] as String?,
-          isOnline: resource['presence'] == true,
-        ));
+        servers.add(
+          CloudServer(
+            name: resource['name'] as String? ?? 'Plex Server',
+            url: bestUrl,
+            type: ServerType.plex,
+            version: resource['productVersion'] as String?,
+            isOnline: resource['presence'] == true,
+          ),
+        );
       }
     }
 
@@ -148,10 +144,7 @@ class CloudLoginService {
           'X-Application': 'Libretto/1.0.0',
         },
       ),
-      data: {
-        'nameOrEmail': username,
-        'rawpw': password,
-      },
+      data: {'nameOrEmail': username, 'rawpw': password},
     );
 
     final data = response.data as Map<String, dynamic>;
@@ -190,11 +183,13 @@ class CloudLoginService {
       final url = entry['Url'] as String? ?? entry['LocalAddress'] as String?;
       if (url == null || url.isEmpty) continue;
 
-      servers.add(CloudServer(
-        name: entry['Name'] as String? ?? 'Emby Server',
-        url: url,
-        type: ServerType.emby,
-      ));
+      servers.add(
+        CloudServer(
+          name: entry['Name'] as String? ?? 'Emby Server',
+          url: url,
+          type: ServerType.emby,
+        ),
+      );
     }
 
     return servers;

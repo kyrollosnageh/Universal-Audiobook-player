@@ -335,7 +335,8 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         TextButton.icon(
-                          onPressed: () => setState(() => _showManualEntry = true),
+                          onPressed: () =>
+                              setState(() => _showManualEntry = true),
                           icon: const Icon(Icons.edit),
                           label: const Text('Enter URL'),
                         ),

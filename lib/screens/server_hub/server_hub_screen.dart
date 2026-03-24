@@ -356,8 +356,9 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
                         Icon(
                           Icons.dns_outlined,
                           size: 80,
-                          color: LibrettoTheme.onSurfaceVariant
-                              .withValues(alpha: 0.5),
+                          color: LibrettoTheme.onSurfaceVariant.withValues(
+                            alpha: 0.5,
+                          ),
                           semanticLabel: 'No servers configured',
                         ),
                         const SizedBox(height: 24),
