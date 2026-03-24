@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme.dart';
+import '../data/models/book.dart';
 import '../state/auth_provider.dart';
 import '../state/library_provider.dart';
 
@@ -95,6 +96,22 @@ class AppDrawer extends ConsumerWidget {
                     count: libraryState.finishedBooks.length,
                     onTap: () =>
                         _selectFilter(context, ref, LibraryFilter.finished),
+                  ),
+                  const Divider(
+                    height: 24,
+                    indent: 16,
+                    endIndent: 16,
+                    color: LibrettoTheme.divider,
+                  ),
+                  // Genres section
+                  _GenresSection(
+                    books: libraryState.books,
+                    activeGenre: libraryState.filterGenre,
+                    onGenreSelected: (genre) {
+                      ref.read(libraryNotifierProvider.notifier)
+                          .setGenreFilter(genre);
+                      Navigator.pop(context);
+                    },
                   ),
                   const Divider(
                     height: 24,
@@ -203,6 +220,73 @@ class _DrawerItem extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         onTap: onTap,
       ),
+    );
+  }
+}
+
+class _GenresSection extends StatelessWidget {
+  const _GenresSection({
+    required this.books,
+    required this.activeGenre,
+    required this.onGenreSelected,
+  });
+
+  final List<Book> books;
+  final String? activeGenre;
+  final ValueChanged<String?> onGenreSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    // Extract unique genres from loaded books
+    final genres = books
+        .where((b) => b.genre != null && b.genre!.isNotEmpty)
+        .map((b) => b.genre!)
+        .toSet()
+        .toList()
+      ..sort();
+
+    if (genres.isEmpty) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+
+    return ExpansionTile(
+      leading: Icon(
+        Icons.category,
+        color: activeGenre != null
+            ? LibrettoTheme.primary
+            : LibrettoTheme.onSurfaceVariant,
+        size: 22,
+      ),
+      title: Text(
+        activeGenre ?? 'Genres',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: activeGenre != null
+              ? LibrettoTheme.primary
+              : LibrettoTheme.onSurface,
+          fontWeight: activeGenre != null ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+      tilePadding: const EdgeInsets.symmetric(horizontal: 28),
+      childrenPadding: const EdgeInsets.only(left: 24),
+      iconColor: LibrettoTheme.onSurfaceVariant,
+      collapsedIconColor: LibrettoTheme.onSurfaceVariant,
+      children: [
+        if (activeGenre != null)
+          _DrawerItem(
+            icon: Icons.clear,
+            label: 'All Genres',
+            isActive: false,
+            onTap: () => onGenreSelected(null),
+          ),
+        ...genres.map(
+          (genre) => _DrawerItem(
+            icon: Icons.label_outline,
+            label: genre,
+            isActive: activeGenre == genre,
+            onTap: () => onGenreSelected(genre),
+          ),
+        ),
+      ],
     );
   }
 }
