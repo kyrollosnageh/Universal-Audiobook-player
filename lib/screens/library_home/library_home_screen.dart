@@ -114,7 +114,10 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
             ? PreferredSize(
                 preferredSize: const Size.fromHeight(32),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -122,8 +125,9 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: libraryState.syncProgress,
-                          backgroundColor:
-                              LibrettoTheme.primary.withValues(alpha: 0.2),
+                          backgroundColor: LibrettoTheme.primary.withValues(
+                            alpha: 0.2,
+                          ),
                           valueColor: const AlwaysStoppedAnimation<Color>(
                             LibrettoTheme.secondary,
                           ),
