@@ -3,8 +3,8 @@ set -e
 
 echo "=== Setting up release signing ==="
 
-# Decode keystore
-echo "$KEYSTORE_BASE64" | base64 --decode > android/app/libretto-release.jks
+# Decode keystore (strip any whitespace/newlines from the base64 string)
+echo "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > android/app/libretto-release.jks
 
 # Create key.properties (trimmed — no leading spaces)
 cat > android/key.properties <<PROPS
