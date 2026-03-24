@@ -426,11 +426,17 @@ class BookDetailScreen extends ConsumerWidget {
                                   : 'Play ${book.title}',
                               child: ElevatedButton.icon(
                                 onPressed: () async {
-                                  final chapters = chaptersAsync.value ?? [];
                                   final provider = ref.read(
                                     activeServerProvider,
                                   );
                                   if (provider == null) return;
+
+                                  // Ensure chapters are loaded before playing
+                                  var chapters = chaptersAsync.value;
+                                  if (chapters == null || chapters.isEmpty) {
+                                    final chapterService = ref.read(chapterServiceProvider);
+                                    chapters = await chapterService.getChapters(provider, bookId);
+                                  }
 
                                   final notifier = ref.read(
                                     playerNotifierProvider.notifier,
@@ -570,9 +576,16 @@ class BookDetailScreen extends ConsumerWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () async {
-                      final chapters = chaptersAsync.value ?? [];
                       final provider = ref.read(activeServerProvider);
                       if (provider == null) return;
+
+                      // Ensure chapters are loaded before playing
+                      var chapters = chaptersAsync.value;
+                      if (chapters == null || chapters.isEmpty) {
+                        final chapterService = ref.read(chapterServiceProvider);
+                        chapters = await chapterService.getChapters(provider, bookId);
+                      }
+
                       final notifier = ref.read(
                         playerNotifierProvider.notifier,
                       );
