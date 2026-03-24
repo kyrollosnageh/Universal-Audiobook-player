@@ -166,18 +166,40 @@ class LibraryNotifier extends Notifier<LibraryState> {
         );
       }
 
-      // Fetch fresh data from server
-      final result = await _libraryService.fetchLibrary(
-        provider,
-        sort: state.sort,
-        genre: state.filterGenre,
-        author: state.filterAuthor,
-      );
+      // Fetch ALL books from server (paginated)
+      final allBooks = <Book>[];
+      var offset = 0;
+      const pageSize = 100;
+      int totalCount = 0;
+
+      while (true) {
+        final result = await _libraryService.fetchLibrary(
+          provider,
+          offset: offset,
+          limit: pageSize,
+          sort: state.sort,
+          genre: state.filterGenre,
+          author: state.filterAuthor,
+        );
+        allBooks.addAll(result.items);
+        totalCount = result.totalCount;
+
+        // Update UI progressively
+        state = state.copyWith(
+          books: allBooks,
+          totalCount: totalCount,
+          hasMore: result.hasMore,
+          isLoading: allBooks.isEmpty, // only show spinner until first page
+        );
+
+        if (!result.hasMore || result.items.isEmpty) break;
+        offset += pageSize;
+      }
 
       state = state.copyWith(
-        books: result.items,
-        totalCount: result.totalCount,
-        hasMore: result.hasMore,
+        books: allBooks,
+        totalCount: totalCount,
+        hasMore: false,
         isLoading: false,
       );
 
@@ -188,7 +210,7 @@ class LibraryNotifier extends Notifier<LibraryState> {
           final db = ref.read(databaseProvider);
           await db.serverDao.updateServerMeta(
             activeServer.id,
-            bookCount: result.totalCount,
+            bookCount: totalCount,
             lastConnectedAt: DateTime.now(),
           );
           // Invalidate so hub re-reads from DB next time

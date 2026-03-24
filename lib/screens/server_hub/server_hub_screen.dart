@@ -62,11 +62,21 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
       }
       try {
         await detector.detect(server.url);
-        if (mounted) setState(() => _onlineStatus[server.id] = true);
+        if (mounted) {
+          setState(() {
+            _onlineStatus[server.id] = true;
+          });
+        }
       } catch (_) {
-        if (mounted) setState(() => _onlineStatus[server.id] = false);
+        if (mounted) {
+          setState(() {
+            _onlineStatus[server.id] = false;
+          });
+        }
       }
     }
+    // Trigger rebuild so book counts show
+    if (mounted) setState(() {});
 
     detector.dispose();
 

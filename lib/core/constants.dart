@@ -4,7 +4,7 @@ class AppConstants {
 
   // App info
   static const String appName = 'Libretto';
-  static const String appVersion = '1.0.21';
+  static const String appVersion = '1.0.43';
 
   /// App Store URL — update this once the app is published.
   static const String appStoreUrl =
