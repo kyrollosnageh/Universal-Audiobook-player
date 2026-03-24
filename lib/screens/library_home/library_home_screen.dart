@@ -124,7 +124,9 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
-                          value: libraryState.syncProgress,
+                          value: libraryState.totalCount > 0
+                              ? libraryState.syncProgress
+                              : null, // null = indeterminate animation
                           backgroundColor: LibrettoTheme.primary.withValues(
                             alpha: 0.2,
                           ),
@@ -136,7 +138,9 @@ class _LibraryHomeScreenState extends ConsumerState<LibraryHomeScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Syncing ${libraryState.syncedCount} / ${libraryState.totalCount} books...',
+                        libraryState.totalCount > 0
+                            ? 'Syncing ${libraryState.syncedCount} / ${libraryState.totalCount} books...'
+                            : 'Starting sync...',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: LibrettoTheme.onSurfaceVariant,
                         ),
