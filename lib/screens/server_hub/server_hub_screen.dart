@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
 import '../../data/database/app_database.dart';
+import '../../widgets/cloud_login_sheet.dart';
 import '../../data/models/server_config.dart';
 import '../../data/server_providers/server_detector.dart';
 import '../../state/auth_provider.dart';
@@ -307,35 +308,90 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
     );
   }
 
+  void _showCloudLoginSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const CloudLoginSheet(),
+    ).then((_) {
+      // Refresh server list after cloud login sheet closes
+      ref.invalidate(savedServersProvider);
+    });
+  }
+
   Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.dns_outlined,
-              size: 80,
-              color: LibrettoTheme.onSurfaceVariant.withValues(alpha: 0.5),
-              semanticLabel: 'No servers configured',
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(savedServersProvider);
+        _onlineStatus.clear();
+        await _checkServerStatus();
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Stack(
+              children: [
+                // Settings icon in the top-right corner
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: IconButton(
+                    icon: const Icon(Icons.settings),
+                    tooltip: 'Settings',
+                    onPressed: () => context.push('/settings'),
+                  ),
+                ),
+                // Centered content
+                SizedBox(
+                  width: double.infinity,
+                  height: constraints.maxHeight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.dns_outlined,
+                          size: 80,
+                          color: LibrettoTheme.onSurfaceVariant
+                              .withValues(alpha: 0.5),
+                          semanticLabel: 'No servers configured',
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'No servers added',
+                          style: theme.textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Please add a server to load your audiobooks',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: LibrettoTheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        ElevatedButton.icon(
+                          onPressed: _showAddServerSheet,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add Server'),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: _showCloudLoginSheet,
+                          icon: const Icon(Icons.cloud),
+                          label: const Text('Sign in to Plex or Emby'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            Text('No servers yet', style: theme.textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            Text(
-              'Add your first server to get started',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: LibrettoTheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: _showAddServerSheet,
-              icon: const Icon(Icons.add),
-              label: const Text('Add Server'),
-            ),
-          ],
+          ),
         ),
       ),
     );
