@@ -23,20 +23,24 @@ final chapterServiceProvider = Provider<ChapterService>((ref) {
 });
 
 /// Book detail provider — fetches on demand.
+/// Uses keepAlive to cache results for the session.
 final bookDetailProvider = FutureProvider.family<BookDetail?, String>((
   ref,
   bookId,
 ) async {
+  ref.keepAlive();
   final provider = ref.watch(activeServerProvider);
   if (provider == null) return null;
   return provider.getBookDetail(bookId);
 });
 
 /// Chapters provider — fetches on demand.
+/// Uses keepAlive to cache results for the session.
 final chaptersProvider = FutureProvider.family<List<UnifiedChapter>, String>((
   ref,
   bookId,
 ) async {
+  ref.keepAlive();
   final provider = ref.watch(activeServerProvider);
   if (provider == null) return [];
   final chapterService = ref.watch(chapterServiceProvider);

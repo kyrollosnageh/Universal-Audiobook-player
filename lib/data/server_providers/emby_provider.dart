@@ -39,8 +39,8 @@ class EmbyProvider implements ServerProvider {
 
   void _configureDio() {
     _dio.options.baseUrl = _serverUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 15);
-    _dio.options.receiveTimeout = const Duration(seconds: 30);
+    _dio.options.connectTimeout = const Duration(seconds: 5);
+    _dio.options.receiveTimeout = const Duration(seconds: 10);
     _dio.options.headers['Content-Type'] = 'application/json';
 
     // Add auth interceptor
@@ -217,22 +217,36 @@ class EmbyProvider implements ServerProvider {
 
   // ── Book Details ──────────────────────────────────────────────────
 
+  /// Cache for the last fetched detail response, keyed by bookId.
+  /// Avoids duplicate API calls when detail + chapters are requested
+  /// for the same book.
+  final Map<String, Map<String, dynamic>> _detailCache = {};
+
+  Future<Map<String, dynamic>> _fetchDetailData(String bookId) async {
+    if (_detailCache.containsKey(bookId)) return _detailCache[bookId]!;
+
+    final response = await _dio.get(
+      EmbyApiPaths.userItemDetail(_userId!, bookId),
+      queryParameters: {
+        'Fields':
+            'Overview,Genres,Studios,DateCreated,RunTimeTicks,'
+            'MediaSources,Chapters,People,Tags,'
+            'SeriesName,IndexNumber',
+        'EnableUserData': true,
+      },
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    _detailCache[bookId] = data;
+    return data;
+  }
+
   @override
   Future<BookDetail> getBookDetail(String bookId) async {
     _requireAuth();
 
     try {
-      final response = await _dio.get(
-        EmbyApiPaths.userItemDetail(_userId!, bookId),
-        queryParameters: {
-          'Fields':
-              'Overview,Genres,Studios,DateCreated,RunTimeTicks,'
-              'MediaSources,Chapters,People,Tags,'
-              'SeriesName,IndexNumber,UserDataPlayCount',
-        },
-      );
-
-      final data = response.data as Map<String, dynamic>;
+      final data = await _fetchDetailData(bookId);
       return _mapItemToBookDetail(data);
     } on DioException catch (e) {
       throw ServerUnreachableException(
@@ -246,12 +260,7 @@ class EmbyProvider implements ServerProvider {
     _requireAuth();
 
     try {
-      final response = await _dio.get(
-        EmbyApiPaths.userItemDetail(_userId!, bookId),
-        queryParameters: {'Fields': 'Chapters,MediaSources,RunTimeTicks'},
-      );
-
-      final data = response.data as Map<String, dynamic>;
+      final data = await _fetchDetailData(bookId);
       return _parseChapters(data, bookId);
     } on DioException catch (e) {
       throw ChapterParsingException(
