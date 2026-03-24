@@ -194,14 +194,18 @@ class ServerCard extends StatelessWidget {
                       children: [
                         Text(
                           server.name,
-                          style: theme.textTheme.titleMedium,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           server.url,
-                          style: theme.textTheme.bodySmall,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: LibrettoTheme.onSurfaceVariant,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -255,8 +259,8 @@ class _StatusDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (isOnline) {
-      true => const Color(0xFF4CAF50),
-      false => const Color(0xFFCF6679),
+      true => LibrettoTheme.secondary,
+      false => LibrettoTheme.error,
       null => LibrettoTheme.onSurfaceVariant,
     };
 

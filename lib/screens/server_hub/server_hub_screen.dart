@@ -360,9 +360,7 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
                         Icon(
                           Icons.dns_outlined,
                           size: 80,
-                          color: LibrettoTheme.onSurfaceVariant.withValues(
-                            alpha: 0.5,
-                          ),
+                          color: LibrettoTheme.onSurfaceVariant,
                           semanticLabel: 'No servers configured',
                         ),
                         const SizedBox(height: 24),
@@ -379,22 +377,60 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
                           ),
                         ),
                         const SizedBox(height: 32),
-                        ElevatedButton.icon(
-                          onPressed: _showAddServerSheet,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add Server'),
+                        // Berry gradient pill "Add Server" button
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                LibrettoTheme.primary,
+                                LibrettoTheme.primaryVariant,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: ElevatedButton.icon(
+                            onPressed: _showAddServerSheet,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Add Server'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              foregroundColor: LibrettoTheme.onPrimary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 28,
+                                vertical: 14,
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 12),
+                        // Outlined button with berry border
                         OutlinedButton.icon(
                           onPressed: _showCloudLoginSheet,
                           icon: const Icon(Icons.cloud),
                           label: const Text('Sign in to Plex or Emby'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: LibrettoTheme.primary,
+                            side: const BorderSide(
+                              color: LibrettoTheme.primary,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 28,
+                              vertical: 14,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                // Settings icon in the top-right corner (last so it renders on top)
+                // Settings icon always visible in the top-right corner
                 Positioned(
                   top: 16,
                   right: 16,
