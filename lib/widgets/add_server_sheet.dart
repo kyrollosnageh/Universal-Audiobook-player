@@ -10,6 +10,7 @@ import '../data/models/server_config.dart';
 import '../data/server_providers/server_detector.dart';
 import '../services/discovery_service.dart';
 import '../state/auth_provider.dart';
+import 'cloud_login_sheet.dart';
 
 /// Bottom sheet for adding a new server via auto-discovery or manual URL.
 class AddServerSheet extends ConsumerStatefulWidget {
@@ -328,12 +329,31 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
                       ),
                     ),
 
-                  // Manual entry section
+                  // Action buttons
                   if (!_showManualEntry)
-                    TextButton.icon(
-                      onPressed: () => setState(() => _showManualEntry = true),
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Enter URL manually'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton.icon(
+                          onPressed: () => setState(() => _showManualEntry = true),
+                          icon: const Icon(Icons.edit),
+                          label: const Text('Enter URL'),
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            showModalBottomSheet<void>(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => const CloudLoginSheet(),
+                            );
+                          },
+                          icon: const Icon(Icons.cloud),
+                          label: const Text('Cloud login'),
+                        ),
+                      ],
                     )
                   else ...[
                     const Divider(),
