@@ -108,7 +108,8 @@ class AppDrawer extends ConsumerWidget {
                     books: libraryState.books,
                     activeGenre: libraryState.filterGenre,
                     onGenreSelected: (genre) {
-                      ref.read(libraryNotifierProvider.notifier)
+                      ref
+                          .read(libraryNotifierProvider.notifier)
                           .setGenreFilter(genre);
                       Navigator.pop(context);
                     },
@@ -238,12 +239,13 @@ class _GenresSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Extract unique genres from loaded books
-    final genres = books
-        .where((b) => b.genre != null && b.genre!.isNotEmpty)
-        .map((b) => b.genre!)
-        .toSet()
-        .toList()
-      ..sort();
+    final genres =
+        books
+            .where((b) => b.genre != null && b.genre!.isNotEmpty)
+            .map((b) => b.genre!)
+            .toSet()
+            .toList()
+          ..sort();
 
     if (genres.isEmpty) return const SizedBox.shrink();
 
