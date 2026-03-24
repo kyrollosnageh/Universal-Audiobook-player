@@ -75,6 +75,8 @@ class LibraryState {
     String? filterGenre,
     String? filterAuthor,
     LibraryFilter? activeFilter,
+    bool clearGenre = false,
+    bool clearAuthor = false,
   }) {
     return LibraryState(
       books: books ?? this.books,
@@ -88,8 +90,8 @@ class LibraryState {
       error: error,
       searchQuery: searchQuery ?? this.searchQuery,
       sort: sort ?? this.sort,
-      filterGenre: filterGenre,
-      filterAuthor: filterAuthor,
+      filterGenre: clearGenre ? null : (filterGenre ?? this.filterGenre),
+      filterAuthor: clearAuthor ? null : (filterAuthor ?? this.filterAuthor),
       activeFilter: activeFilter ?? this.activeFilter,
     );
   }
@@ -179,7 +181,10 @@ class LibraryNotifier extends Notifier<LibraryState> {
   }
 
   /// Load the next page (infinite scroll).
+  /// Only applies to server-paginated filters (all, recentlyAdded).
   Future<void> loadMore() async {
+    if (state.activeFilter != LibraryFilter.all &&
+        state.activeFilter != LibraryFilter.recentlyAdded) return;
     if (state.isLoadingMore || !state.hasMore) return;
 
     final provider = ref.read(activeServerProvider);
@@ -332,27 +337,41 @@ class LibraryNotifier extends Notifier<LibraryState> {
   /// Set genre filter. Resets active filter to "all" so the grid shows
   /// the server-filtered results.
   void setGenreFilter(String? genre) {
-    state = state.copyWith(filterGenre: genre, activeFilter: LibraryFilter.all);
+    if (genre == null) {
+      state = state.copyWith(clearGenre: true, activeFilter: LibraryFilter.all);
+    } else {
+      state = state.copyWith(filterGenre: genre, activeFilter: LibraryFilter.all);
+    }
     loadLibrary();
   }
 
   /// Set author filter.
   void setAuthorFilter(String? author) {
-    state = state.copyWith(filterAuthor: author);
+    if (author == null) {
+      state = state.copyWith(clearAuthor: true);
+    } else {
+      state = state.copyWith(filterAuthor: author);
+    }
     loadLibrary();
   }
 
   /// Set the drawer filter.
+  /// Client-side filters (favorites, finished, currentlyReading) don't
+  /// need a server round-trip — the data is already loaded.
   void setFilter(LibraryFilter filter) {
     if (filter == LibraryFilter.recentlyAdded) {
       state = state.copyWith(
         activeFilter: filter,
         sort: SortOrder.dateAddedDesc,
       );
+      loadLibrary();
+    } else if (filter == LibraryFilter.all) {
+      state = state.copyWith(activeFilter: filter);
+      loadLibrary();
     } else {
+      // currentlyReading, favorites, finished — data already in state
       state = state.copyWith(activeFilter: filter);
     }
-    loadLibrary();
   }
 
   void dispose() {
