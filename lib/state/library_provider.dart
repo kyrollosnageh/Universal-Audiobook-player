@@ -123,7 +123,7 @@ class LibraryNotifier extends Notifier<LibraryState> {
     final provider = ref.read(activeServerProvider);
     if (provider == null) return;
 
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, error: null, hasMore: true);
 
     try {
       // Show cached data instantly

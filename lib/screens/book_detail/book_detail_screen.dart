@@ -71,6 +71,17 @@ class BookDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               const Text('Failed to load book details'),
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  '$err',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () => ref.invalidate(bookDetailProvider(bookId)),
