@@ -169,7 +169,7 @@ class LibraryNotifier extends Notifier<LibraryState> {
       // Fetch ALL books from server (paginated)
       final allBooks = <Book>[];
       var offset = 0;
-      const pageSize = 100;
+      const pageSize = 10000;
       int totalCount = 0;
 
       while (true) {
@@ -181,6 +181,13 @@ class LibraryNotifier extends Notifier<LibraryState> {
           genre: state.filterGenre,
           author: state.filterAuthor,
         );
+
+        debugPrint(
+          'Library fetch: got ${result.items.length} items, '
+          'total=${result.totalCount}, offset=$offset, '
+          'hasMore=${result.hasMore}',
+        );
+
         allBooks.addAll(result.items);
         totalCount = result.totalCount;
 
@@ -188,17 +195,17 @@ class LibraryNotifier extends Notifier<LibraryState> {
         state = state.copyWith(
           books: allBooks,
           totalCount: totalCount,
-          hasMore: result.hasMore,
-          isLoading: allBooks.isEmpty, // only show spinner until first page
+          isLoading: allBooks.isEmpty,
         );
 
-        if (!result.hasMore || result.items.isEmpty) break;
+        // Stop if: got fewer than requested, or no items, or we have them all
+        if (result.items.length < pageSize || result.items.isEmpty) break;
         offset += pageSize;
       }
 
       state = state.copyWith(
         books: allBooks,
-        totalCount: totalCount,
+        totalCount: allBooks.length > totalCount ? allBooks.length : totalCount,
         hasMore: false,
         isLoading: false,
       );
@@ -445,7 +452,7 @@ class LibraryNotifier extends Notifier<LibraryState> {
     if (state.isSyncing) return; // Prevent double-sync
 
     // Use smaller batches so progress is visible
-    const batchSize = 50;
+    const batchSize = 10000;
 
     // Show syncing state immediately with indeterminate progress
     state = state.copyWith(
@@ -468,35 +475,53 @@ class LibraryNotifier extends Notifier<LibraryState> {
         sort: state.sort,
       );
       allBooks.addAll(firstResult.items);
-      final total = firstResult.totalCount;
+      // Use the larger of totalCount or what we'll accumulate
+      var total = firstResult.totalCount;
+      if (total == 0) total = firstResult.items.length;
+
+      debugPrint(
+        'Sync first batch: got ${firstResult.items.length}, '
+        'totalCount=$total',
+      );
 
       // Update with real numbers
       state = state.copyWith(
         books: allBooks,
         totalCount: total,
-        syncProgress: total > 0 ? allBooks.length / total : 1.0,
+        syncProgress: total > 0 ? allBooks.length / total : 0.0,
         syncedCount: allBooks.length,
       );
 
-      // Fetch remaining pages
-      offset += batchSize;
-      while (allBooks.length < total) {
-        final result = await _libraryService.fetchLibrary(
-          provider,
-          offset: offset,
-          limit: batchSize,
-          sort: state.sort,
-        );
-        if (result.items.isEmpty) break;
-        allBooks.addAll(result.items);
-
-        state = state.copyWith(
-          books: allBooks,
-          syncProgress: total > 0 ? allBooks.length / total : 1.0,
-          syncedCount: allBooks.length,
-        );
-
+      // Fetch remaining pages — stop when we get fewer than requested
+      if (firstResult.items.length >= batchSize) {
         offset += batchSize;
+
+        while (true) {
+          final result = await _libraryService.fetchLibrary(
+            provider,
+            offset: offset,
+            limit: batchSize,
+            sort: state.sort,
+          );
+
+          debugPrint(
+            'Sync batch: got ${result.items.length}, offset=$offset',
+          );
+
+          if (result.items.isEmpty) break;
+          allBooks.addAll(result.items);
+          if (result.totalCount > total) total = result.totalCount;
+
+          state = state.copyWith(
+            books: allBooks,
+            totalCount: total,
+            syncProgress: total > 0 ? allBooks.length / total : 1.0,
+            syncedCount: allBooks.length,
+          );
+
+          if (result.items.length < batchSize) break;
+          offset += batchSize;
+        }
       }
 
       // Show completed state briefly
