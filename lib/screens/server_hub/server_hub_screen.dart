@@ -154,19 +154,11 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
         child: serversAsync.when(
           data: (servers) => _buildContent(context, theme, servers),
           loading: () => _buildLoadingSkeleton(),
-          error: (_, __) => Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Error loading servers'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.invalidate(savedServersProvider),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
+          error: (error, __) {
+            // Log the error for debugging and fall back to empty state
+            debugPrint('Server loading error: $error');
+            return _buildEmptyState(theme);
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(

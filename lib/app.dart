@@ -11,6 +11,7 @@ import 'screens/book_detail/book_detail_screen.dart';
 import 'screens/player/player_screen.dart';
 import 'screens/series/series_view_screen.dart';
 import 'screens/settings/settings_screen.dart';
+import 'data/database/app_database.dart';
 import 'state/auth_provider.dart';
 import 'widgets/add_server_sheet.dart';
 
@@ -43,28 +44,38 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
   }
 
   Future<void> _loadInitialState() async {
-    final prefs = await SharedPreferences.getInstance();
-    final onboarded = prefs.getBool(_onboardingCompleteKey) ?? false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final onboarded = prefs.getBool(_onboardingCompleteKey) ?? false;
 
-    // Check how many servers exist
-    final servers = await ref.read(savedServersProvider.future);
+      // Check how many servers exist
+      List<ServerEntry> servers = [];
+      try {
+        servers = await ref.read(savedServersProvider.future);
+      } catch (e) {
+        debugPrint('Failed to load servers: $e');
+      }
 
-    if (mounted) {
-      setState(() {
-        _onboardingComplete = onboarded;
-      });
+      if (mounted) {
+        setState(() {
+          _onboardingComplete = onboarded;
+        });
 
-      // Navigate based on initial state
-      if (!onboarded) {
-        _router.go('/welcome');
-      } else if (servers.length == 1) {
-        // Auto-restore session if exactly one server
-        await ref.read(authNotifierProvider.notifier).restoreSession();
-        final authState = ref.read(authNotifierProvider);
-        if (authState.isAuthenticated) {
-          _router.go('/library');
+        // Navigate based on initial state
+        if (!onboarded) {
+          _router.go('/welcome');
+        } else if (servers.length == 1) {
+          // Auto-restore session if exactly one server
+          await ref.read(authNotifierProvider.notifier).restoreSession();
+          final authState = ref.read(authNotifierProvider);
+          if (authState.isAuthenticated) {
+            _router.go('/library');
+          }
         }
       }
+    } catch (e) {
+      debugPrint('Failed to load initial state: $e');
+      // App will show /hub as default, which is safe
     }
   }
 
