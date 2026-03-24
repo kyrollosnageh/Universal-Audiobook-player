@@ -63,6 +63,15 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
           restore-keys: gradle-${{ runner.os }}-
 
+      - name: Inject version from release tag
+        run: |
+          TAG="${{ needs.release.outputs.tag_name }}"
+          VERSION="${TAG#v}"
+          BUILD=$(echo "$VERSION" | tr -d '.')
+          echo "Setting version to $VERSION+$BUILD"
+          sed -i "s/^version: .*/version: ${VERSION}+${BUILD}/" pubspec.yaml
+          sed -i "s/static const String appVersion = .*/static const String appVersion = '${VERSION}';/" lib/core/constants.dart
+
       - name: Generate Android platform files
         run: |
           flutter create --org com.kyronageh --platforms android .
@@ -134,6 +143,15 @@ jobs:
         with:
           channel: stable
           cache: true
+
+      - name: Inject version from release tag
+        run: |
+          TAG="${{ needs.release.outputs.tag_name }}"
+          VERSION="${TAG#v}"
+          BUILD=$(echo "$VERSION" | tr -d '.')
+          echo "Setting version to $VERSION+$BUILD"
+          sed -i '' "s/^version: .*/version: ${VERSION}+${BUILD}/" pubspec.yaml
+          sed -i '' "s/static const String appVersion = .*/static const String appVersion = '${VERSION}';/" lib/core/constants.dart
 
       - name: Generate iOS platform files
         run: |

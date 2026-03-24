@@ -1,7 +1,7 @@
 name: libretto
 description: Universal Audiobook Player — connect to Emby, Jellyfin, Audiobookshelf, and Plex.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.21+21
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
