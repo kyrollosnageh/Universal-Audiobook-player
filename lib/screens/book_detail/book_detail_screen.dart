@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,6 @@ import '../../state/auth_provider.dart';
 import '../../state/library_provider.dart';
 import '../../state/player_provider.dart';
 import '../../widgets/book_cover.dart';
-import '../../widgets/chapter_list.dart';
 import 'package:go_router/go_router.dart';
 
 /// Chapter service provider.
@@ -158,9 +158,9 @@ class BookDetailScreen extends ConsumerWidget {
 
           return CustomScrollView(
             slivers: [
-              // Collapsing app bar with cover art
+              // Collapsing app bar with blurred cover backdrop
               SliverAppBar(
-                expandedHeight: 320,
+                expandedHeight: 340,
                 pinned: true,
                 actions: [
                   // Favorite button
@@ -235,34 +235,10 @@ class BookDetailScreen extends ConsumerWidget {
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          LibrettoTheme.primary.withValues(alpha: 0.3),
-                          LibrettoTheme.background,
-                        ],
-                      ),
-                    ),
-                    child: SafeArea(
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 48),
-                          child: Semantics(
-                            label:
-                                'Cover art for ${book.title} by ${book.author}',
-                            child: BookCover(
-                              imageUrl: book.coverUrl,
-                              width: 200,
-                              height: 200,
-                              borderRadius: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  background: _HeroBackdrop(
+                    coverUrl: book.coverUrl,
+                    title: book.title,
+                    author: book.author,
                   ),
                 ),
               ),
@@ -277,53 +253,24 @@ class BookDetailScreen extends ConsumerWidget {
                       // Title
                       Text(
                         book.title,
-                        style: theme.textTheme.headlineMedium,
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                         semanticsLabel: book.title,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
 
-                      // Author
-                      if (book.author != null) ...[
-                        Text(
-                          'by ${book.author}',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: LibrettoTheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                      ],
+                      // Metadata chips: author / narrator / duration
+                      _MetadataChips(book: book),
 
-                      // Narrator
-                      if (book.narrator != null)
-                        Text(
-                          'Narrated by ${book.narrator}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: LibrettoTheme.onSurfaceVariant,
-                          ),
-                        ),
-
-                      const SizedBox(height: 16),
-
-                      // Duration + progress
-                      Row(
-                        children: [
-                          if (book.duration != null) ...[
-                            const Icon(
-                              Icons.schedule,
-                              size: 16,
-                              color: LibrettoTheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              book.duration!.toHumanReadable(),
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            const SizedBox(width: 16),
-                          ],
-                          if (book.progress != null && book.progress! > 0) ...[
+                      // Progress bar
+                      if (book.progress != null && book.progress! > 0) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
                             const Icon(
                               Icons.play_circle_outline,
-                              size: 16,
+                              size: 14,
                               color: LibrettoTheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 4),
@@ -332,12 +279,8 @@ class BookDetailScreen extends ConsumerWidget {
                               style: theme.textTheme.bodySmall,
                             ),
                           ],
-                        ],
-                      ),
-
-                      // Progress bar
-                      if (book.progress != null && book.progress! > 0) ...[
-                        const SizedBox(height: 8),
+                        ),
+                        const SizedBox(height: 6),
                         LinearProgressIndicator(
                           value: book.progress!,
                           minHeight: 4,
@@ -347,7 +290,7 @@ class BookDetailScreen extends ConsumerWidget {
 
                       // Finished badge
                       if (book.isFinished) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -411,73 +354,22 @@ class BookDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 16),
                       ],
 
-                      // Action buttons
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 8,
-                        children: [
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(minWidth: 140),
-                            child: Semantics(
-                              label: book.isFinished
-                                  ? 'Listen again to ${book.title}'
-                                  : book.progress != null && book.progress! > 0
-                                  ? 'Resume ${book.title}'
-                                  : 'Play ${book.title}',
-                              child: ElevatedButton.icon(
-                                onPressed: () async {
-                                  final provider = ref.read(
-                                    activeServerProvider,
-                                  );
-                                  if (provider == null) return;
-
-                                  // Ensure chapters are loaded before playing
-                                  var chapters = chaptersAsync.value;
-                                  if (chapters == null || chapters.isEmpty) {
-                                    final chapterService = ref.read(chapterServiceProvider);
-                                    chapters = await chapterService.getChapters(provider, bookId);
-                                  }
-
-                                  final notifier = ref.read(
-                                    playerNotifierProvider.notifier,
-                                  );
-                                  await notifier.playBook(
-                                    book: book,
-                                    chapters: chapters,
-                                    provider: provider,
-                                  );
-
-                                  if (context.mounted) {
-                                    unawaited(context.push('/player'));
-                                  }
-                                },
-                                icon: Icon(
-                                  book.isFinished
-                                      ? Icons.replay
-                                      : Icons.play_arrow,
-                                ),
-                                label: Text(
-                                  book.isFinished
-                                      ? 'Listen Again'
-                                      : book.progress != null &&
-                                            book.progress! > 0
-                                      ? 'Resume'
-                                      : 'Play',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      // Full-width play button — pill shape with berry gradient
+                      _PlayButton(
+                        book: book,
+                        chaptersAsync: chaptersAsync,
+                        bookId: bookId,
+                        ref: ref,
+                        context: context,
                       ),
 
-                      // Description
+                      // Description with Read more / Read less
                       if (detail.description != null) ...[
                         const SizedBox(height: 24),
                         Text('About', style: theme.textTheme.titleMedium),
                         const SizedBox(height: 8),
-                        Text(
-                          detail.description!,
-                          style: theme.textTheme.bodyMedium,
+                        _ExpandableDescription(
+                          description: detail.description!,
                         ),
                       ],
 
@@ -523,7 +415,7 @@ class BookDetailScreen extends ConsumerWidget {
                 ),
                 data: (chapters) => SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    return ChapterListTile(
+                    return _BerryChapterTile(
                       chapter: chapters[index],
                       index: index,
                       isCurrentChapter: false,
@@ -537,10 +429,7 @@ class BookDetailScreen extends ConsumerWidget {
               const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           );
-        },
-      ),
-    );
-  }
+        }
 
   Widget _buildTabletLayout(
     BuildContext context,
@@ -567,48 +456,17 @@ class BookDetailScreen extends ConsumerWidget {
                     imageUrl: book.coverUrl,
                     width: 250,
                     height: 250,
-                    borderRadius: 12,
+                    borderRadius: LibrettoTheme.heroCardRadius,
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Play button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final provider = ref.read(activeServerProvider);
-                      if (provider == null) return;
-
-                      // Ensure chapters are loaded before playing
-                      var chapters = chaptersAsync.value;
-                      if (chapters == null || chapters.isEmpty) {
-                        final chapterService = ref.read(chapterServiceProvider);
-                        chapters = await chapterService.getChapters(provider, bookId);
-                      }
-
-                      final notifier = ref.read(
-                        playerNotifierProvider.notifier,
-                      );
-                      await notifier.playBook(
-                        book: book,
-                        chapters: chapters,
-                        provider: provider,
-                      );
-                      if (context.mounted) {
-                        unawaited(context.push('/player'));
-                      }
-                    },
-                    icon: Icon(
-                      book.isFinished ? Icons.replay : Icons.play_arrow,
-                    ),
-                    label: Text(
-                      book.isFinished
-                          ? 'Listen Again'
-                          : book.progress != null && book.progress! > 0
-                          ? 'Resume'
-                          : 'Play',
-                    ),
-                  ),
+                // Full-width play button with berry gradient
+                _PlayButton(
+                  book: book,
+                  chaptersAsync: chaptersAsync,
+                  bookId: bookId,
+                  ref: ref,
+                  context: context,
                 ),
                 if (book.progress != null && book.progress! > 0) ...[
                   const SizedBox(height: 12),
@@ -633,41 +491,14 @@ class BookDetailScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              Text(book.title, style: theme.textTheme.headlineMedium),
-              const SizedBox(height: 8),
-              if (book.author != null)
-                Text(
-                  'by ${book.author}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: LibrettoTheme.onSurfaceVariant,
-                  ),
+              Text(
+                book.title,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-              if (book.narrator != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  'Narrated by ${book.narrator}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: LibrettoTheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-              if (book.duration != null) ...[
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.schedule,
-                      size: 16,
-                      color: LibrettoTheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      book.duration!.toHumanReadable(),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ],
+              ),
+              const SizedBox(height: 12),
+              _MetadataChips(book: book),
               if (book.seriesName != null) ...[
                 const SizedBox(height: 12),
                 Container(
@@ -697,7 +528,7 @@ class BookDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 Text('About', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),
-                Text(detail.description!, style: theme.textTheme.bodyMedium),
+                _ExpandableDescription(description: detail.description!),
               ],
               if (detail.genres.isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -732,7 +563,7 @@ class BookDetailScreen extends ConsumerWidget {
                 data: (chapters) => Column(
                   children: [
                     for (var i = 0; i < chapters.length; i++)
-                      ChapterListTile(
+                      _BerryChapterTile(
                         chapter: chapters[i],
                         index: i,
                         isCurrentChapter: false,
@@ -746,6 +577,368 @@ class BookDetailScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hero backdrop — blurred cover art behind the main cover
+// ---------------------------------------------------------------------------
+
+class _HeroBackdrop extends StatelessWidget {
+  const _HeroBackdrop({
+    required this.coverUrl,
+    required this.title,
+    this.author,
+  });
+
+  final String? coverUrl;
+  final String title;
+  final String? author;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Blurred backdrop image
+        if (coverUrl != null)
+          ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            child: Image.network(
+              coverUrl!,
+              fit: BoxFit.cover,
+              // Suppress errors — dark overlay hides any broken state
+              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+            ),
+          ),
+        // Dark overlay
+        Container(
+          color: LibrettoTheme.background.withValues(alpha: 0.6),
+        ),
+        // Foreground: centred cover art
+        SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 48),
+              child: Semantics(
+                label: 'Cover art for $title${author != null ? ' by $author' : ''}',
+                child: BookCover(
+                  imageUrl: coverUrl,
+                  width: 200,
+                  height: 200,
+                  borderRadius: LibrettoTheme.heroCardRadius,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Metadata chips row — author / narrator / duration
+// ---------------------------------------------------------------------------
+
+class _MetadataChips extends StatelessWidget {
+  const _MetadataChips({required this.book});
+
+  final Book book;
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <Widget>[];
+
+    if (book.author != null) {
+      chips.add(_PillChip(
+        icon: Icons.person_outline,
+        label: book.author!,
+      ));
+    }
+
+    if (book.narrator != null) {
+      chips.add(_PillChip(
+        icon: Icons.mic_none,
+        label: book.narrator!,
+      ));
+    }
+
+    if (book.duration != null) {
+      chips.add(_PillChip(
+        icon: Icons.schedule,
+        label: book.duration!.toHumanReadable(),
+      ));
+    }
+
+    if (chips.isEmpty) return const SizedBox.shrink();
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 6,
+      children: chips,
+    );
+  }
+}
+
+class _PillChip extends StatelessWidget {
+  const _PillChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: LibrettoTheme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: LibrettoTheme.secondary),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              color: LibrettoTheme.onSurfaceVariant,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Full-width pill play button with berry gradient
+// ---------------------------------------------------------------------------
+
+class _PlayButton extends StatelessWidget {
+  const _PlayButton({
+    required this.book,
+    required this.chaptersAsync,
+    required this.bookId,
+    required this.ref,
+    required this.context,
+  });
+
+  final Book book;
+  final AsyncValue<List<UnifiedChapter>> chaptersAsync;
+  final String bookId;
+  final WidgetRef ref;
+  final BuildContext context;
+
+  @override
+  Widget build(BuildContext _) {
+    final label = book.isFinished
+        ? 'Listen Again'
+        : (book.progress != null && book.progress! > 0 ? 'Resume' : 'Play');
+    final icon = book.isFinished ? Icons.replay : Icons.play_arrow;
+    final semanticsLabel = book.isFinished
+        ? 'Listen again to ${book.title}'
+        : book.progress != null && book.progress! > 0
+            ? 'Resume ${book.title}'
+            : 'Play ${book.title}';
+
+    return Semantics(
+      label: semanticsLabel,
+      child: SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [LibrettoTheme.primary, LibrettoTheme.primaryVariant],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              foregroundColor: LibrettoTheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            onPressed: () async {
+              final provider = ref.read(activeServerProvider);
+              if (provider == null) return;
+
+              // Ensure chapters are loaded before playing
+              var chapters = chaptersAsync.value;
+              if (chapters == null || chapters.isEmpty) {
+                final chapterService = ref.read(chapterServiceProvider);
+                chapters = await chapterService.getChapters(provider, bookId);
+              }
+
+              final notifier = ref.read(playerNotifierProvider.notifier);
+              await notifier.playBook(
+                book: book,
+                chapters: chapters,
+                provider: provider,
+              );
+
+              if (context.mounted) {
+                unawaited(context.push('/player'));
+              }
+            },
+            icon: Icon(icon),
+            label: Text(label),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Expandable description (max 4 lines + Read more / Read less)
+// ---------------------------------------------------------------------------
+
+class _ExpandableDescription extends StatefulWidget {
+  const _ExpandableDescription({required this.description});
+
+  final String description;
+
+  @override
+  State<_ExpandableDescription> createState() =>
+      _ExpandableDescriptionState();
+}
+
+class _ExpandableDescriptionState extends State<_ExpandableDescription> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.description,
+          style: theme.textTheme.bodyMedium,
+          maxLines: _expanded ? null : 4,
+          overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 4),
+        GestureDetector(
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Text(
+            _expanded ? 'Read less' : 'Read more',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: LibrettoTheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Berry-styled chapter tile (inline, only used in this screen)
+// ---------------------------------------------------------------------------
+
+class _BerryChapterTile extends StatelessWidget {
+  const _BerryChapterTile({
+    required this.chapter,
+    required this.index,
+    required this.isCurrentChapter,
+    this.onTap,
+  });
+
+  final UnifiedChapter chapter;
+  final int index;
+  final bool isCurrentChapter;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Semantics(
+      label:
+          'Chapter ${index + 1}: ${chapter.title}, '
+          'duration ${chapter.duration.toHms()}'
+          '${isCurrentChapter ? ', currently playing' : ''}',
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          color: isCurrentChapter
+              ? LibrettoTheme.primary.withValues(alpha: 0.15)
+              : Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              // Berry number circle / equalizer icon
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: isCurrentChapter
+                    ? const DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: LibrettoTheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.equalizer,
+                            color: LibrettoTheme.onPrimary,
+                            size: 16,
+                          ),
+                        ),
+                      )
+                    : DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: LibrettoTheme.primary.withValues(alpha: 0.18),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: LibrettoTheme.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 12),
+              // Chapter title
+              Expanded(
+                child: Text(
+                  chapter.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: isCurrentChapter ? LibrettoTheme.primary : null,
+                    fontWeight:
+                        isCurrentChapter ? FontWeight.w600 : null,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Duration in lavender
+              Text(
+                chapter.duration.toHms(),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: LibrettoTheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
