@@ -10,6 +10,7 @@ import 'screens/library_home/library_home_screen.dart';
 import 'screens/book_detail/book_detail_screen.dart';
 import 'screens/player/player_screen.dart';
 import 'screens/series/series_view_screen.dart';
+import 'screens/genres/genres_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'data/database/app_database.dart';
 import 'state/auth_provider.dart';
@@ -125,6 +126,10 @@ class _LibrettoAppState extends ConsumerState<LibrettoApp> {
             seriesId: state.pathParameters['seriesId']!,
             seriesName: state.uri.queryParameters['name'],
           ),
+        ),
+        GoRoute(
+          path: '/genres',
+          builder: (context, state) => const GenresScreen(),
         ),
         GoRoute(
           path: '/settings',

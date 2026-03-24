@@ -378,6 +378,61 @@ class LibraryNotifier extends Notifier<LibraryState> {
     }
   }
 
+  /// Sync all books from the server by fetching every page.
+  Future<void> syncAll() async {
+    final provider = ref.read(activeServerProvider);
+    if (provider == null) return;
+
+    state = state.copyWith(isLoading: true, error: null, hasMore: true);
+
+    try {
+      final allBooks = <Book>[];
+      var offset = 0;
+      const batchSize = AppConstants.backgroundPrefetchBatchSize;
+
+      while (true) {
+        final result = await _libraryService.fetchLibrary(
+          provider,
+          offset: offset,
+          limit: batchSize,
+          sort: state.sort,
+        );
+        allBooks.addAll(result.items);
+
+        // Update UI progressively
+        state = state.copyWith(
+          books: allBooks,
+          totalCount: result.totalCount,
+          isLoading: false,
+        );
+
+        if (!result.hasMore) break;
+        offset += batchSize;
+      }
+
+      state = state.copyWith(
+        books: allBooks,
+        hasMore: false,
+        isLoading: false,
+      );
+
+      // Refresh shelves
+      final serverId = provider.serverUrl;
+      final shelves = await Future.wait([
+        _libraryService.getContinueListening(serverId),
+        _libraryService.getFavoriteBooks(serverId),
+        _libraryService.getFinishedBooks(serverId),
+      ]);
+      state = state.copyWith(
+        continueListening: shelves[0],
+        favoriteBooks: shelves[1],
+        finishedBooks: shelves[2],
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
   void dispose() {
     _searchDebounce?.cancel();
   }
