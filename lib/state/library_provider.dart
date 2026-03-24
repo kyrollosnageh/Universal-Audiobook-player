@@ -184,7 +184,8 @@ class LibraryNotifier extends Notifier<LibraryState> {
   /// Only applies to server-paginated filters (all, recentlyAdded).
   Future<void> loadMore() async {
     if (state.activeFilter != LibraryFilter.all &&
-        state.activeFilter != LibraryFilter.recentlyAdded) return;
+        state.activeFilter != LibraryFilter.recentlyAdded)
+      return;
     if (state.isLoadingMore || !state.hasMore) return;
 
     final provider = ref.read(activeServerProvider);
@@ -340,7 +341,10 @@ class LibraryNotifier extends Notifier<LibraryState> {
     if (genre == null) {
       state = state.copyWith(clearGenre: true, activeFilter: LibraryFilter.all);
     } else {
-      state = state.copyWith(filterGenre: genre, activeFilter: LibraryFilter.all);
+      state = state.copyWith(
+        filterGenre: genre,
+        activeFilter: LibraryFilter.all,
+      );
     }
     loadLibrary();
   }
