@@ -82,6 +82,7 @@ class LibraryState {
     String? filterGenre,
     String? filterAuthor,
     LibraryFilter? activeFilter,
+    bool clearSearch = false,
     bool clearGenre = false,
     bool clearAuthor = false,
     bool? isSyncing,
@@ -98,7 +99,7 @@ class LibraryState {
       hasMore: hasMore ?? this.hasMore,
       totalCount: totalCount ?? this.totalCount,
       error: error,
-      searchQuery: searchQuery ?? this.searchQuery,
+      searchQuery: clearSearch ? null : (searchQuery ?? this.searchQuery),
       sort: sort ?? this.sort,
       filterGenre: clearGenre ? null : (filterGenre ?? this.filterGenre),
       filterAuthor: clearAuthor ? null : (filterAuthor ?? this.filterAuthor),
@@ -130,6 +131,9 @@ class LibraryNotifier extends Notifier<LibraryState> {
   LibraryState build() {
     _libraryService = ref.read(libraryServiceProvider);
     _syncService = ref.read(syncServiceProvider);
+    ref.onDispose(() {
+      _searchDebounce?.cancel();
+    });
     return const LibraryState();
   }
 
@@ -246,7 +250,11 @@ class LibraryNotifier extends Notifier<LibraryState> {
 
   /// Search with hybrid local-first + server strategy.
   void search(String query) {
-    state = state.copyWith(searchQuery: query.isEmpty ? null : query);
+    if (query.isEmpty) {
+      state = state.copyWith(clearSearch: true);
+    } else {
+      state = state.copyWith(searchQuery: query);
+    }
 
     if (query.isEmpty) {
       loadLibrary();
@@ -503,9 +511,6 @@ class LibraryNotifier extends Notifier<LibraryState> {
     }
   }
 
-  void dispose() {
-    _searchDebounce?.cancel();
-  }
 }
 
 final libraryNotifierProvider = NotifierProvider<LibraryNotifier, LibraryState>(

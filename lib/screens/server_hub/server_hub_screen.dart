@@ -98,17 +98,8 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
 
     try {
       await ref.read(authServiceProvider).switchServer(config);
-      ref
-          .read(authNotifierProvider.notifier)
-          .login(
-            url: server.url,
-            username: '', // Will use stored credentials
-            password: '',
-            serverType: config.type,
-            serverName: server.name,
-          );
 
-      // Try restoring session first (faster — no re-auth)
+      // Try restoring session (faster — no re-auth)
       final provider = await ref
           .read(authServiceProvider)
           .restoreSession(config);
@@ -143,8 +134,8 @@ class _ServerHubScreenState extends ConsumerState<ServerHubScreen>
     }
   }
 
-  void _removeServer(ServerEntry server) {
-    ref.read(authServiceProvider).removeServer(server.id, server.url);
+  Future<void> _removeServer(ServerEntry server) async {
+    await ref.read(authServiceProvider).removeServer(server.id, server.url);
     ref.invalidate(savedServersProvider);
     setState(() => _onlineStatus.remove(server.id));
   }

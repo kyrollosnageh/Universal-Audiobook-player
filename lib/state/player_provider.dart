@@ -62,6 +62,7 @@ class PlayerState {
     bool? isBuffering,
     double? speed,
     Duration? sleepTimerRemaining,
+    bool clearSleepTimer = false,
     String? error,
   }) {
     return PlayerState(
@@ -74,7 +75,7 @@ class PlayerState {
       isPlaying: isPlaying ?? this.isPlaying,
       isBuffering: isBuffering ?? this.isBuffering,
       speed: speed ?? this.speed,
-      sleepTimerRemaining: sleepTimerRemaining ?? this.sleepTimerRemaining,
+      sleepTimerRemaining: clearSleepTimer ? null : (sleepTimerRemaining ?? this.sleepTimerRemaining),
       error: error,
     );
   }
@@ -89,6 +90,15 @@ class PlayerNotifier extends Notifier<PlayerState> {
   PlayerState build() {
     _playbackService = ref.read(playbackServiceProvider);
     _syncService = ref.read(syncServiceProvider);
+    ref.onDispose(() {
+      _positionSub?.cancel();
+      _durationSub?.cancel();
+      _bufferedSub?.cancel();
+      _playerStateSub?.cancel();
+      _processingSub?.cancel();
+      _stopPositionTracking();
+      _savePositionImmediately();
+    });
     return const PlayerState();
   }
 
@@ -191,7 +201,7 @@ class PlayerNotifier extends Notifier<PlayerState> {
   void cancelSleepTimer() {
     _playbackService.cancelSleepTimer();
     _sleepTimerPollTimer?.cancel();
-    state = state.copyWith(sleepTimerRemaining: null);
+    state = state.copyWith(clearSleepTimer: true);
   }
 
   Future<void> stop() async {
@@ -300,15 +310,6 @@ class PlayerNotifier extends Notifier<PlayerState> {
     });
   }
 
-  void dispose() {
-    _positionSub?.cancel();
-    _durationSub?.cancel();
-    _bufferedSub?.cancel();
-    _playerStateSub?.cancel();
-    _processingSub?.cancel();
-    _stopPositionTracking();
-    _savePositionImmediately();
-  }
 }
 
 final playerNotifierProvider = NotifierProvider<PlayerNotifier, PlayerState>(
