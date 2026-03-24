@@ -8,9 +8,7 @@ class LibrettoTheme {
   // Brand colors
   static const Color primary = Color(0xFFE91E80); // Magenta / berry
   static const Color primaryVariant = Color(0xFFC4176B);
-  static const Color secondary = Color(
-    0xFFA8E824,
-  ); // Lime green accent
+  static const Color secondary = Color(0xFFA8E824); // Lime green accent
   static const Color surface = Color(0xFF232340);
   static const Color background = Color(0xFF1A1A2E);
   static const Color cardColor = Color(0xFF2D2B55);

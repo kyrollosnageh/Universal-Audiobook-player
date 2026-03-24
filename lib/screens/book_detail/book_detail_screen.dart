@@ -63,9 +63,10 @@ class BookDetailScreen extends ConsumerWidget {
 
     // Find the book in the already-loaded library for instant display
     final libraryState = ref.watch(libraryNotifierProvider);
-    final cachedBook = libraryState.books
-        .cast<Book?>()
-        .firstWhere((b) => b?.id == bookId, orElse: () => null);
+    final cachedBook = libraryState.books.cast<Book?>().firstWhere(
+      (b) => b?.id == bookId,
+      orElse: () => null,
+    );
 
     return Scaffold(
       body: detailAsync.when(
@@ -73,8 +74,12 @@ class BookDetailScreen extends ConsumerWidget {
           if (cachedBook != null) {
             // Show instantly with data we already have
             return _buildBody(
-              context, ref, theme, cachedBook,
-              BookDetail(book: cachedBook), chaptersAsync,
+              context,
+              ref,
+              theme,
+              cachedBook,
+              BookDetail(book: cachedBook),
+              chaptersAsync,
               isLoading: true,
             );
           }
@@ -84,8 +89,12 @@ class BookDetailScreen extends ConsumerWidget {
           // Even on error, show cached book if available
           if (cachedBook != null) {
             return _buildBody(
-              context, ref, theme, cachedBook,
-              BookDetail(book: cachedBook), chaptersAsync,
+              context,
+              ref,
+              theme,
+              cachedBook,
+              BookDetail(book: cachedBook),
+              chaptersAsync,
               isLoading: false,
             );
           }
@@ -126,9 +135,7 @@ class BookDetailScreen extends ConsumerWidget {
           }
 
           final book = detail.book;
-          return _buildBody(
-            context, ref, theme, book, detail, chaptersAsync,
-          );
+          return _buildBody(context, ref, theme, book, detail, chaptersAsync);
         },
       ),
     );
@@ -143,293 +150,288 @@ class BookDetailScreen extends ConsumerWidget {
     AsyncValue<List<UnifiedChapter>> chaptersAsync, {
     bool isLoading = false,
   }) {
-          final layout = ResponsiveLayout.of(context);
+    final layout = ResponsiveLayout.of(context);
 
-          if (layout.isTablet) {
-            return _buildTabletLayout(
-              context,
-              ref,
-              theme,
-              book,
-              detail,
-              chaptersAsync,
-            );
-          }
+    if (layout.isTablet) {
+      return _buildTabletLayout(
+        context,
+        ref,
+        theme,
+        book,
+        detail,
+        chaptersAsync,
+      );
+    }
 
-          return CustomScrollView(
-            slivers: [
-              // Collapsing app bar with blurred cover backdrop
-              SliverAppBar(
-                expandedHeight: 340,
-                pinned: true,
-                actions: [
-                  // Favorite button
-                  IconButton(
-                    onPressed: () {
-                      final provider = ref.read(activeServerProvider);
-                      if (provider == null) return;
-                      ref
-                          .read(libraryNotifierProvider.notifier)
-                          .toggleFavorite(book);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            book.isFavorite
-                                ? 'Removed from favorites'
-                                : 'Added to favorites',
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    icon: Icon(
-                      book.isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: book.isFavorite ? LibrettoTheme.secondary : null,
+    return CustomScrollView(
+      slivers: [
+        // Collapsing app bar with blurred cover backdrop
+        SliverAppBar(
+          expandedHeight: 340,
+          pinned: true,
+          actions: [
+            // Favorite button
+            IconButton(
+              onPressed: () {
+                final provider = ref.read(activeServerProvider);
+                if (provider == null) return;
+                ref.read(libraryNotifierProvider.notifier).toggleFavorite(book);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      book.isFavorite
+                          ? 'Removed from favorites'
+                          : 'Added to favorites',
                     ),
-                    tooltip: book.isFavorite
-                        ? 'Remove from favorites'
-                        : 'Add to favorites',
+                    duration: const Duration(seconds: 2),
                   ),
-                  // Overflow menu
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      final provider = ref.read(activeServerProvider);
-                      if (provider == null) return;
-                      if (value == 'finished') {
-                        ref
-                            .read(libraryNotifierProvider.notifier)
-                            .toggleFinished(book);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              book.isFinished
-                                  ? 'Marked as unfinished'
-                                  : 'Marked as finished',
-                            ),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'finished',
-                        child: Row(
-                          children: [
-                            Icon(
-                              book.isFinished
-                                  ? Icons.check_circle
-                                  : Icons.check_circle_outline,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              book.isFinished
-                                  ? 'Mark as unfinished'
-                                  : 'Mark as finished',
-                            ),
-                          ],
-                        ),
+                );
+              },
+              icon: Icon(
+                book.isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: book.isFavorite ? LibrettoTheme.secondary : null,
+              ),
+              tooltip: book.isFavorite
+                  ? 'Remove from favorites'
+                  : 'Add to favorites',
+            ),
+            // Overflow menu
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                final provider = ref.read(activeServerProvider);
+                if (provider == null) return;
+                if (value == 'finished') {
+                  ref
+                      .read(libraryNotifierProvider.notifier)
+                      .toggleFinished(book);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        book.isFinished
+                            ? 'Marked as unfinished'
+                            : 'Marked as finished',
+                      ),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'finished',
+                  child: Row(
+                    children: [
+                      Icon(
+                        book.isFinished
+                            ? Icons.check_circle
+                            : Icons.check_circle_outline,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        book.isFinished
+                            ? 'Mark as unfinished'
+                            : 'Mark as finished',
                       ),
                     ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+          flexibleSpace: FlexibleSpaceBar(
+            background: _HeroBackdrop(
+              coverUrl: book.coverUrl,
+              title: book.title,
+              author: book.author,
+            ),
+          ),
+        ),
+
+        // Book metadata
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Text(
+                  book.title,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  semanticsLabel: book.title,
+                ),
+                const SizedBox(height: 12),
+
+                // Metadata chips: author / narrator / duration
+                _MetadataChips(book: book),
+
+                // Progress bar
+                if (book.progress != null && book.progress! > 0) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.play_circle_outline,
+                        size: 14,
+                        color: LibrettoTheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${(book.progress! * 100).toInt()}% complete',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  LinearProgressIndicator(
+                    value: book.progress!,
+                    minHeight: 4,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ],
-                flexibleSpace: FlexibleSpaceBar(
-                  background: _HeroBackdrop(
-                    coverUrl: book.coverUrl,
-                    title: book.title,
-                    author: book.author,
-                  ),
-                ),
-              ),
 
-              // Book metadata
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title
-                      Text(
-                        book.title,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                // Finished badge
+                if (book.isFinished) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          size: 14,
+                          color: Colors.green,
                         ),
-                        semanticsLabel: book.title,
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Metadata chips: author / narrator / duration
-                      _MetadataChips(book: book),
-
-                      // Progress bar
-                      if (book.progress != null && book.progress! > 0) ...[
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.play_circle_outline,
-                              size: 14,
-                              color: LibrettoTheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${(book.progress! * 100).toInt()}% complete',
-                              style: theme.textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        LinearProgressIndicator(
-                          value: book.progress!,
-                          minHeight: 4,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ],
-
-                      // Finished badge
-                      if (book.isFinished) ...[
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.check_circle,
-                                size: 14,
-                                color: Colors.green,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Finished',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
+                        const SizedBox(width: 4),
+                        Text(
+                          'Finished',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.green,
                           ),
                         ),
                       ],
-
-                      const SizedBox(height: 16),
-
-                      // Series info
-                      if (book.seriesName != null) ...[
-                        Semantics(
-                          label:
-                              'Part of series: ${book.seriesName}'
-                              '${book.seriesIndex != null ? ', book ${book.seriesIndex}' : ''}',
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: LibrettoTheme.cardColor,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.library_books, size: 16),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '${book.seriesName}'
-                                  '${book.seriesIndex != null ? ' #${book.seriesIndex!.toInt()}' : ''}',
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-
-                      // Full-width play button — pill shape with berry gradient
-                      _PlayButton(
-                        book: book,
-                        chaptersAsync: chaptersAsync,
-                        bookId: bookId,
-                        ref: ref,
-                        context: context,
-                      ),
-
-                      // Description with Read more / Read less
-                      if (detail.description != null) ...[
-                        const SizedBox(height: 24),
-                        Text('About', style: theme.textTheme.titleMedium),
-                        const SizedBox(height: 8),
-                        _ExpandableDescription(
-                          description: detail.description!,
-                        ),
-                      ],
-
-                      // Genres
-                      if (detail.genres.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: detail.genres.map((genre) {
-                            return Chip(
-                              label: Text(genre),
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                            );
-                          }).toList(),
-                        ),
-                      ],
-
-                      const SizedBox(height: 24),
-                      Text('Chapters', style: theme.textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Chapter list
-              chaptersAsync.when(
-                loading: () => const SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: CircularProgressIndicator(),
                     ),
                   ),
-                ),
-                error: (_, _) => const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text('Failed to load chapters'),
-                  ),
-                ),
-                data: (chapters) => SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    return _BerryChapterTile(
-                      chapter: chapters[index],
-                      index: index,
-                      isCurrentChapter: false,
-                      onTap: null,
-                    );
-                  }, childCount: chapters.length),
-                ),
-              ),
+                ],
 
-              // Bottom padding
-              const SliverToBoxAdapter(child: SizedBox(height: 80)),
-            ],
-          );
-        }
+                const SizedBox(height: 16),
+
+                // Series info
+                if (book.seriesName != null) ...[
+                  Semantics(
+                    label:
+                        'Part of series: ${book.seriesName}'
+                        '${book.seriesIndex != null ? ', book ${book.seriesIndex}' : ''}',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: LibrettoTheme.cardColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.library_books, size: 16),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${book.seriesName}'
+                            '${book.seriesIndex != null ? ' #${book.seriesIndex!.toInt()}' : ''}',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Full-width play button — pill shape with berry gradient
+                _PlayButton(
+                  book: book,
+                  chaptersAsync: chaptersAsync,
+                  bookId: bookId,
+                  ref: ref,
+                  context: context,
+                ),
+
+                // Description with Read more / Read less
+                if (detail.description != null) ...[
+                  const SizedBox(height: 24),
+                  Text('About', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  _ExpandableDescription(description: detail.description!),
+                ],
+
+                // Genres
+                if (detail.genres.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: detail.genres.map((genre) {
+                      return Chip(
+                        label: Text(genre),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      );
+                    }).toList(),
+                  ),
+                ],
+
+                const SizedBox(height: 24),
+                Text('Chapters', style: theme.textTheme.titleMedium),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
+
+        // Chapter list
+        chaptersAsync.when(
+          loading: () => const SliverToBoxAdapter(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
+          error: (_, _) => const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Failed to load chapters'),
+            ),
+          ),
+          data: (chapters) => SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return _BerryChapterTile(
+                chapter: chapters[index],
+                index: index,
+                isCurrentChapter: false,
+                onTap: null,
+              );
+            }, childCount: chapters.length),
+          ),
+        ),
+
+        // Bottom padding
+        const SliverToBoxAdapter(child: SizedBox(height: 80)),
+      ],
+    );
+  }
 
   Widget _buildTabletLayout(
     BuildContext context,
@@ -609,20 +611,20 @@ class _HeroBackdrop extends StatelessWidget {
               coverUrl!,
               fit: BoxFit.cover,
               // Suppress errors — dark overlay hides any broken state
-              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox.shrink(),
             ),
           ),
         // Dark overlay
-        Container(
-          color: LibrettoTheme.background.withValues(alpha: 0.6),
-        ),
+        Container(color: LibrettoTheme.background.withValues(alpha: 0.6)),
         // Foreground: centred cover art
         SafeArea(
           child: Center(
             child: Padding(
               padding: const EdgeInsets.only(top: 48),
               child: Semantics(
-                label: 'Cover art for $title${author != null ? ' by $author' : ''}',
+                label:
+                    'Cover art for $title${author != null ? ' by $author' : ''}',
                 child: BookCover(
                   imageUrl: coverUrl,
                   width: 200,
@@ -652,33 +654,25 @@ class _MetadataChips extends StatelessWidget {
     final chips = <Widget>[];
 
     if (book.author != null) {
-      chips.add(_PillChip(
-        icon: Icons.person_outline,
-        label: book.author!,
-      ));
+      chips.add(_PillChip(icon: Icons.person_outline, label: book.author!));
     }
 
     if (book.narrator != null) {
-      chips.add(_PillChip(
-        icon: Icons.mic_none,
-        label: book.narrator!,
-      ));
+      chips.add(_PillChip(icon: Icons.mic_none, label: book.narrator!));
     }
 
     if (book.duration != null) {
-      chips.add(_PillChip(
-        icon: Icons.schedule,
-        label: book.duration!.toHumanReadable(),
-      ));
+      chips.add(
+        _PillChip(
+          icon: Icons.schedule,
+          label: book.duration!.toHumanReadable(),
+        ),
+      );
     }
 
     if (chips.isEmpty) return const SizedBox.shrink();
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 6,
-      children: chips,
-    );
+    return Wrap(spacing: 8, runSpacing: 6, children: chips);
   }
 }
 
@@ -742,8 +736,8 @@ class _PlayButton extends StatelessWidget {
     final semanticsLabel = book.isFinished
         ? 'Listen again to ${book.title}'
         : book.progress != null && book.progress! > 0
-            ? 'Resume ${book.title}'
-            : 'Play ${book.title}';
+        ? 'Resume ${book.title}'
+        : 'Play ${book.title}';
 
     return Semantics(
       label: semanticsLabel,
@@ -809,8 +803,7 @@ class _ExpandableDescription extends StatefulWidget {
   final String description;
 
   @override
-  State<_ExpandableDescription> createState() =>
-      _ExpandableDescriptionState();
+  State<_ExpandableDescription> createState() => _ExpandableDescriptionState();
 }
 
 class _ExpandableDescriptionState extends State<_ExpandableDescription> {
@@ -922,8 +915,7 @@ class _BerryChapterTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: isCurrentChapter ? LibrettoTheme.primary : null,
-                    fontWeight:
-                        isCurrentChapter ? FontWeight.w600 : null,
+                    fontWeight: isCurrentChapter ? FontWeight.w600 : null,
                   ),
                 ),
               ),

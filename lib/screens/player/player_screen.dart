@@ -471,10 +471,7 @@ class _BerryGardenControls extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    LibrettoTheme.primary,
-                    LibrettoTheme.primaryVariant,
-                  ],
+                  colors: [LibrettoTheme.primary, LibrettoTheme.primaryVariant],
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -566,10 +563,7 @@ class _BerryGardenScrubber extends StatelessWidget {
 
 /// Pill-shaped speed chip: lime text on cardColor background.
 class _BerrySpeedChip extends StatelessWidget {
-  const _BerrySpeedChip({
-    required this.currentSpeed,
-    required this.onChanged,
-  });
+  const _BerrySpeedChip({required this.currentSpeed, required this.onChanged});
 
   final double currentSpeed;
   final ValueChanged<double> onChanged;

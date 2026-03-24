@@ -444,7 +444,12 @@ class _BookGridCard extends StatelessWidget {
                         stops: [0.0, 1.0],
                       ),
                     ),
-                    padding: EdgeInsets.fromLTRB(8, 24, 8, hasProgress ? 11 : 8),
+                    padding: EdgeInsets.fromLTRB(
+                      8,
+                      24,
+                      8,
+                      hasProgress ? 11 : 8,
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
