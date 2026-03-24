@@ -62,6 +62,8 @@ class EmbyApiPaths {
   static const String systemInfoPublic = '/System/Info/Public';
   static const String authenticateByName = '/Users/AuthenticateByName';
   static String userItems(String userId) => '/Users/$userId/Items';
+  static String userItemDetail(String userId, String itemId) =>
+      '/Users/$userId/Items/$itemId';
   static String itemDetail(String itemId) => '/Items/$itemId';
   static String audioStream(String itemId) => '/Audio/$itemId/stream';
   static String itemImage(String itemId) => '/Items/$itemId/Images/Primary';

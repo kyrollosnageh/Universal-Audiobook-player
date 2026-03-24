@@ -223,7 +223,7 @@ class EmbyProvider implements ServerProvider {
 
     try {
       final response = await _dio.get(
-        EmbyApiPaths.itemDetail(bookId),
+        EmbyApiPaths.userItemDetail(_userId!, bookId),
         queryParameters: {
           'Fields':
               'Overview,Genres,Studios,DateCreated,RunTimeTicks,'
@@ -247,7 +247,7 @@ class EmbyProvider implements ServerProvider {
 
     try {
       final response = await _dio.get(
-        EmbyApiPaths.itemDetail(bookId),
+        EmbyApiPaths.userItemDetail(_userId!, bookId),
         queryParameters: {'Fields': 'Chapters,MediaSources,RunTimeTicks'},
       );
 
