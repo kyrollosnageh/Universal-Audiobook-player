@@ -198,8 +198,21 @@ class _AddServerSheetState extends ConsumerState<AddServerSheet> {
             serverName: _detectedServer!.serverName,
           );
 
-      if (mounted) Navigator.pop(context, true);
+      if (!mounted) return;
+
+      // AuthNotifier.login() catches errors internally without rethrowing,
+      // so check the auth state to determine if login actually succeeded.
+      final authState = ref.read(authNotifierProvider);
+      if (authState.isAuthenticated) {
+        Navigator.pop(context, true);
+      } else {
+        setState(() {
+          _error = authState.error ?? 'Login failed. Please check your credentials.';
+          _isConnecting = false;
+        });
+      }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isConnecting = false;
