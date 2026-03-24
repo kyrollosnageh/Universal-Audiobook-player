@@ -179,9 +179,9 @@ jobs:
           IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
         run: flutter build ios --release
 
-      - name: Build iOS (unsigned fallback)
+      - name: Skip iOS build (no signing credentials)
         if: env.IOS_CERTIFICATE_BASE64 == ''
-        run: flutter build ios --no-codesign --release
+        run: echo "No iOS signing credentials configured — skipping IPA build"
 
       - name: Package IPA
         run: |

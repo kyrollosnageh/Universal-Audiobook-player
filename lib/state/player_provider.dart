@@ -8,6 +8,7 @@ import '../data/models/book.dart';
 import '../data/models/unified_chapter.dart';
 import '../data/server_providers/server_provider.dart';
 import '../services/playback_service.dart';
+import '../services/sync_service.dart';
 import 'auth_provider.dart';
 import 'library_provider.dart';
 
