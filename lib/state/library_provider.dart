@@ -166,47 +166,20 @@ class LibraryNotifier extends Notifier<LibraryState> {
         );
       }
 
-      // Fetch ALL books from server (paginated)
-      final allBooks = <Book>[];
-      var offset = 0;
-      const pageSize = 10000;
-      int totalCount = 0;
-
-      while (true) {
-        final result = await _libraryService.fetchLibrary(
-          provider,
-          offset: offset,
-          limit: pageSize,
-          sort: state.sort,
-          genre: state.filterGenre,
-          author: state.filterAuthor,
-        );
-
-        debugPrint(
-          'Library fetch: got ${result.items.length} items, '
-          'total=${result.totalCount}, offset=$offset, '
-          'hasMore=${result.hasMore}',
-        );
-
-        allBooks.addAll(result.items);
-        totalCount = result.totalCount;
-
-        // Update UI progressively
-        state = state.copyWith(
-          books: allBooks,
-          totalCount: totalCount,
-          isLoading: allBooks.isEmpty,
-        );
-
-        // Stop if: got fewer than requested, or no items, or we have them all
-        if (result.items.length < pageSize || result.items.isEmpty) break;
-        offset += pageSize;
-      }
+      // Fetch first page from server
+      final result = await _libraryService.fetchLibrary(
+        provider,
+        offset: 0,
+        limit: 100,
+        sort: state.sort,
+        genre: state.filterGenre,
+        author: state.filterAuthor,
+      );
 
       state = state.copyWith(
-        books: allBooks,
-        totalCount: allBooks.length > totalCount ? allBooks.length : totalCount,
-        hasMore: false,
+        books: result.items,
+        totalCount: result.totalCount,
+        hasMore: result.hasMore,
         isLoading: false,
       );
 
@@ -217,7 +190,7 @@ class LibraryNotifier extends Notifier<LibraryState> {
           final db = ref.read(databaseProvider);
           await db.serverDao.updateServerMeta(
             activeServer.id,
-            bookCount: totalCount,
+            bookCount: result.totalCount,
             lastConnectedAt: DateTime.now(),
           );
           // Invalidate so hub re-reads from DB next time
@@ -445,93 +418,40 @@ class LibraryNotifier extends Notifier<LibraryState> {
     }
   }
 
-  /// Sync all books from the server by fetching every page.
+  /// Refresh library metadata from the server.
+  /// Re-fetches the current page and refreshes shelves (favorites, etc.).
   Future<void> syncAll() async {
     final provider = ref.read(activeServerProvider);
     if (provider == null) return;
-    if (state.isSyncing) return; // Prevent double-sync
+    if (state.isSyncing) return;
 
-    // Use smaller batches so progress is visible
-    const batchSize = 10000;
-
-    // Show syncing state immediately with indeterminate progress
     state = state.copyWith(
       error: null,
-      hasMore: true,
       isSyncing: true,
       syncProgress: 0.0,
       syncedCount: 0,
     );
 
     try {
-      final allBooks = <Book>[];
-      var offset = 0;
-
-      // First fetch to get totalCount
-      final firstResult = await _libraryService.fetchLibrary(
+      // Fetch first page to get accurate totalCount
+      final result = await _libraryService.fetchLibrary(
         provider,
         offset: 0,
-        limit: batchSize,
+        limit: 100,
         sort: state.sort,
-      );
-      allBooks.addAll(firstResult.items);
-      // Use the larger of totalCount or what we'll accumulate
-      var total = firstResult.totalCount;
-      if (total == 0) total = firstResult.items.length;
-
-      debugPrint(
-        'Sync first batch: got ${firstResult.items.length}, '
-        'totalCount=$total',
+        genre: state.filterGenre,
+        author: state.filterAuthor,
       );
 
-      // Update with real numbers
       state = state.copyWith(
-        books: allBooks,
-        totalCount: total,
-        syncProgress: total > 0 ? allBooks.length / total : 0.0,
-        syncedCount: allBooks.length,
+        books: result.items,
+        totalCount: result.totalCount,
+        hasMore: result.hasMore,
+        syncProgress: 0.5,
+        syncedCount: result.items.length,
       );
 
-      // Fetch remaining pages — stop when we get fewer than requested
-      if (firstResult.items.length >= batchSize) {
-        offset += batchSize;
-
-        while (true) {
-          final result = await _libraryService.fetchLibrary(
-            provider,
-            offset: offset,
-            limit: batchSize,
-            sort: state.sort,
-          );
-
-          debugPrint('Sync batch: got ${result.items.length}, offset=$offset');
-
-          if (result.items.isEmpty) break;
-          allBooks.addAll(result.items);
-          if (result.totalCount > total) total = result.totalCount;
-
-          state = state.copyWith(
-            books: allBooks,
-            totalCount: total,
-            syncProgress: total > 0 ? allBooks.length / total : 1.0,
-            syncedCount: allBooks.length,
-          );
-
-          if (result.items.length < batchSize) break;
-          offset += batchSize;
-        }
-      }
-
-      // Show completed state briefly
-      state = state.copyWith(
-        books: allBooks,
-        hasMore: false,
-        syncProgress: 1.0,
-        syncedCount: allBooks.length,
-        totalCount: total,
-      );
-
-      // Refresh shelves
+      // Refresh shelves (favorites, continue listening, finished)
       final serverId = provider.serverUrl;
       final shelves = await Future.wait([
         _libraryService.getContinueListening(serverId),
@@ -542,16 +462,32 @@ class LibraryNotifier extends Notifier<LibraryState> {
         continueListening: shelves[0],
         favoriteBooks: shelves[1],
         finishedBooks: shelves[2],
+        syncProgress: 1.0,
+        syncedCount: result.totalCount,
       );
 
-      // Keep bar visible for 1.5s so user sees completion
+      // Save book count to server entry
+      final activeServer = ref.read(authNotifierProvider).activeServer;
+      if (activeServer != null) {
+        try {
+          final db = ref.read(databaseProvider);
+          await db.serverDao.updateServerMeta(
+            activeServer.id,
+            bookCount: result.totalCount,
+            lastConnectedAt: DateTime.now(),
+          );
+          ref.invalidate(savedServersProvider);
+        } catch (_) {}
+      }
+
+      // Keep bar visible briefly
       await Future.delayed(const Duration(milliseconds: 1500));
       state = state.copyWith(isSyncing: false);
     } catch (e) {
       state = state.copyWith(
         isSyncing: false,
         syncProgress: 0.0,
-        error: e.toString(),
+        error: 'Sync failed: $e',
       );
     }
   }

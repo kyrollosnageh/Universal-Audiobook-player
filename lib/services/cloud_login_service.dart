@@ -14,6 +14,8 @@ class CloudServer {
     required this.type,
     this.version,
     this.isOnline = false,
+    this.accessKey,
+    this.systemId,
   });
 
   final String name;
@@ -21,6 +23,8 @@ class CloudServer {
   final ServerType type;
   final String? version;
   final bool isOnline;
+  final String? accessKey;
+  final String? systemId;
 }
 
 /// Handles cloud account login for Plex and Emby Connect.
@@ -261,11 +265,20 @@ class CloudLoginService {
       queryParameters: {'userId': userId},
     );
 
-    if (response.statusCode != 200 || response.data is! List) {
-      return [];
-    }
+    if (response.statusCode != 200) return [];
 
-    final serverList = response.data as List<dynamic>;
+    // Emby Connect may return JSON as a raw string (non-JSON Content-Type)
+    dynamic data = response.data;
+    if (data is String) {
+      try {
+        data = jsonDecode(data);
+      } catch (_) {
+        return [];
+      }
+    }
+    if (data is! List) return [];
+
+    final serverList = data;
     final servers = <CloudServer>[];
 
     for (final entry in serverList) {
@@ -278,11 +291,54 @@ class CloudLoginService {
           name: entry['Name'] as String? ?? 'Emby Server',
           url: url,
           type: ServerType.emby,
+          accessKey: entry['AccessKey'] as String?,
+          systemId: entry['SystemId'] as String?,
         ),
       );
     }
 
     return servers;
+  }
+
+  /// Exchange an Emby Connect access key for a local server token.
+  Future<Map<String, String>?> exchangeConnectToken({
+    required String serverUrl,
+    required String accessKey,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '$serverUrl/emby/Connect/Exchange',
+        queryParameters: {'ConnectUserId': accessKey},
+        options: Options(
+          headers: {
+            'X-Emby-Authorization':
+                'MediaBrowser Client="Libretto", Device="Flutter", '
+                'DeviceId="libretto-connect", Version="1.0.0"',
+          },
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+
+      if (response.statusCode != 200) return null;
+
+      dynamic data = response.data;
+      if (data is String) {
+        try {
+          data = jsonDecode(data);
+        } catch (_) {
+          return null;
+        }
+      }
+      if (data is! Map) return null;
+
+      final token = data['AccessToken'] as String?;
+      final userId = data['LocalUserId'] as String?;
+      if (token == null || userId == null) return null;
+
+      return {'accessToken': token, 'userId': userId};
+    } catch (_) {
+      return null;
+    }
   }
 
   void dispose() {

@@ -207,7 +207,7 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
           _step = _CloudLoginStep.serverList;
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         setState(() {
           _error = 'Failed to fetch servers. Please try again.';
@@ -263,16 +263,35 @@ class _CloudLoginSheetState extends ConsumerState<CloudLoginSheet> {
     });
 
     try {
-      await ref
-          .read(authNotifierProvider.notifier)
-          .login(
-            url: server.url,
-            username:
-                '', // Cloud-authenticated — token is already set server-side.
-            password: '',
-            serverType: server.type,
-            serverName: server.name,
-          );
+      if (server.type == ServerType.emby && server.accessKey != null) {
+        // Emby Connect: exchange access key for local server token
+        final exchange = await _cloudLoginService.exchangeConnectToken(
+          serverUrl: server.url,
+          accessKey: server.accessKey!,
+        );
+        if (exchange == null) {
+          throw Exception('Could not authenticate with ${server.name}');
+        }
+        await ref
+            .read(authNotifierProvider.notifier)
+            .loginWithToken(
+              url: server.url,
+              token: exchange['accessToken']!,
+              userId: exchange['userId']!,
+              serverType: server.type,
+              serverName: server.name,
+            );
+      } else {
+        await ref
+            .read(authNotifierProvider.notifier)
+            .login(
+              url: server.url,
+              username: '',
+              password: '',
+              serverType: server.type,
+              serverName: server.name,
+            );
+      }
 
       if (mounted) {
         setState(() {
