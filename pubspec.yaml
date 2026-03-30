@@ -44,7 +44,7 @@ dependencies:
   firebase_crashlytics: ^5.0.8
 
   # Preferences
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.5.5
 
   # Utilities
   uuid: ^4.2.2
