@@ -40,8 +40,8 @@ dependencies:
   local_auth: ^3.0.1
 
   # Firebase Crashlytics
-  firebase_core: ^4.5.0
-  firebase_crashlytics: ^5.0.8
+  firebase_core: ^4.7.0
+  firebase_crashlytics: ^5.2.0
 
   # Preferences
   shared_preferences: ^2.5.5
