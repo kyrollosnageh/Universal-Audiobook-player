@@ -28,7 +28,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.6.0+eol
 
   # Secure Storage
-  flutter_secure_storage: ^10.0.0
+  flutter_secure_storage: ^10.1.0
 
   # Image Caching
   cached_network_image: ^3.3.1
