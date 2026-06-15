@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
 
   # State Management
-  flutter_riverpod: ^3.3.1
+  flutter_riverpod: ^3.3.2
   riverpod_annotation: ^4.0.2
 
   # Audio Engine
