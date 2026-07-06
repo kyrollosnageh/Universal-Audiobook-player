@@ -16,9 +16,9 @@ dependencies:
   riverpod_annotation: ^4.0.2
 
   # Audio Engine
-  just_audio: ^0.10.5
-  audio_service: ^0.18.12
-  audio_session: ^0.2.3
+  just_audio: ^0.10.6
+  audio_service: ^0.18.19
+  audio_session: ^0.2.4
 
   # Networking
   dio: ^5.4.0
