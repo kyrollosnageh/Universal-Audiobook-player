@@ -21,7 +21,7 @@ dependencies:
   audio_session: ^0.2.4
 
   # Networking
-  dio: ^5.4.0
+  dio: ^5.10.0
 
   # Local Database
   drift: ^2.14.1
@@ -34,7 +34,7 @@ dependencies:
   cached_network_image: ^3.3.1
 
   # Connectivity
-  connectivity_plus: ^7.0.0
+  connectivity_plus: ^7.2.0
 
   # Local Auth (biometric)
   local_auth: ^3.0.2
