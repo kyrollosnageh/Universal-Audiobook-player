@@ -12,8 +12,8 @@ dependencies:
     sdk: flutter
 
   # State Management
-  flutter_riverpod: ^3.3.2
-  riverpod_annotation: ^4.0.2
+  flutter_riverpod: ^3.4.3
+  riverpod_annotation: ^4.0.7
 
   # Audio Engine
   just_audio: ^0.10.6
@@ -24,11 +24,11 @@ dependencies:
   dio: ^5.4.0
 
   # Local Database
-  drift: ^2.34.4
+  drift: ^2.35.0
   sqlite3_flutter_libs: ^0.6.0+eol
 
   # Secure Storage
-  flutter_secure_storage: ^10.0.0
+  flutter_secure_storage: ^11.2.0
 
   # Image Caching
   cached_network_image: ^3.3.1
@@ -64,12 +64,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  build_runner: ^2.4.8
-  drift_dev: ^2.14.1
-  freezed: ^3.0.0
+  build_runner: ^2.15.2
+  drift_dev: ^2.35.0
+  freezed: ^4.0.1
   json_serializable: ^6.7.1
-  riverpod_generator: ^4.0.4
-  mockito: ^5.4.4
+  riverpod_generator: ^4.0.9
+  mockito: ^5.8.1
   http_mock_adapter: ^0.6.1
 
 flutter:
