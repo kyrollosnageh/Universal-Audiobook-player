@@ -31,7 +31,7 @@ dependencies:
   flutter_secure_storage: ^10.0.0
 
   # Image Caching
-  cached_network_image: ^3.3.1
+  cached_network_image: ^4.0.0
 
   # Connectivity
   connectivity_plus: ^7.0.0
